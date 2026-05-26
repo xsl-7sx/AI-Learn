@@ -1,0 +1,397 @@
+/* ═══════════════════════════════════════════════════════════
+   UX 增强层 · 对齐 ui-ux-pro-max 检查清单
+   在 graphic-note.css 之后引入
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 可读性 / 对比度 ── */
+body.theme-graphic-note {
+  --ink-muted: #454545;
+  --focus-ring: 0 0 0 3px rgba(168, 212, 245, 0.95);
+  --focus-ring-offset: 0 0 0 2px #fff;
+}
+
+body.theme-graphic-note .phone-screen:not(.phone-screen--act) {
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-tap-highlight-color: rgba(255, 143, 171, 0.25);
+}
+
+/* 六幕屏内：16px 正文基准（ui-ux-pro-max readable-font-size） */
+body.theme-graphic-note .phone-screen--act {
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-tap-highlight-color: rgba(255, 143, 171, 0.25);
+}
+
+body.theme-graphic-note .phone-screen--dense {
+  font-size: 15px;
+}
+
+body.theme-graphic-note .hint-text,
+body.theme-graphic-note .note-screen-footer {
+  color: #454545;
+}
+
+/* ── 触控目标 ≥44px ── */
+body.theme-graphic-note .option-card {
+  min-height: 52px;
+  align-items: center;
+}
+
+body.theme-graphic-note .option-letter {
+  width: 32px;
+  height: 32px;
+}
+
+body.theme-graphic-note .judge-btn {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.theme-graphic-note .comic-btn,
+body.theme-graphic-note .comic-btn-secondary,
+body.theme-graphic-note .comic-btn-green,
+body.theme-graphic-note .comic-btn-yellow {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.theme-graphic-note .gallery-nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+}
+
+body.theme-graphic-note .toggle {
+  min-width: 48px;
+  min-height: 28px;
+}
+
+body.theme-graphic-note .note-list-item {
+  min-height: 48px;
+}
+
+/* ── 焦点可见（键盘 / 可访问性）── */
+body.theme-graphic-note a:focus-visible,
+body.theme-graphic-note button:focus-visible,
+body.theme-graphic-note .ui-btn-teal:focus-visible,
+body.theme-graphic-note .ui-btn-ghost:focus-visible,
+body.theme-graphic-note .ui-btn-outline:focus-visible,
+body.theme-graphic-note .option-card:focus-visible,
+body.theme-graphic-note .judge-btn:focus-visible,
+body.theme-graphic-note .comic-textarea:focus-visible,
+body.theme-graphic-note .file-card:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-offset), var(--focus-ring);
+}
+
+body.theme-graphic-note .comic-textarea:focus-visible {
+  border-color: var(--ink-black);
+}
+
+/* ── 禁用态（语义清晰）── */
+body.theme-graphic-note .comic-btn-disabled,
+body.theme-graphic-note .comic-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #e8e4dc !important;
+  color: #6a6a6a !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ── 对错态：颜色 + 符号（色盲友好）── */
+body.theme-graphic-note .option-card.correct {
+  border-left-width: 4px;
+  border-left-color: var(--correct-comic);
+  padding-left: 12px;
+}
+
+body.theme-graphic-note .option-card.wrong::after {
+  content: '✗';
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--wrong-comic);
+}
+
+/* ── 页脚：不用 emoji 当图标，改色点 ── */
+body.theme-graphic-note .footer-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-black);
+  flex-shrink: 0;
+}
+
+body.theme-graphic-note .footer-pip--yellow { background: var(--pastel-yellow-hd); }
+body.theme-graphic-note .footer-pip--blue { background: var(--pastel-blue-hd); }
+body.theme-graphic-note .footer-pip--pink { background: var(--pastel-pink-hd); }
+body.theme-graphic-note .footer-pip--green { background: var(--pastel-green-hd); }
+
+body.theme-graphic-note .note-screen-footer .footer-ico {
+  display: none;
+}
+
+/* ── 跳过导航（画廊）── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 12px;
+  z-index: 9999;
+  padding: 10px 16px;
+  background: var(--ink-black);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 12px;
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── 加载态可读 ── */
+body.theme-graphic-note .loading-scene[role="status"] .progress-fill.animated {
+  animation-duration: 2.2s;
+}
+
+/* ── 减少动效 ── */
+@media (prefers-reduced-motion: reduce) {
+  body.theme-graphic-note *,
+  body.theme-graphic-note *::before,
+  body.theme-graphic-note *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body.theme-graphic-note .phone-screen.screen-shake {
+    animation: none;
+  }
+
+  body.theme-graphic-note .screen-item {
+    animation: none;
+  }
+
+  body.theme-graphic-note .file-card {
+    animation: none;
+  }
+
+  body.theme-graphic-note .mascot-chip {
+    animation: none;
+  }
+
+  body.theme-graphic-note .progress-fill.animated {
+    animation: none;
+  }
+
+  body.theme-graphic-note .sfx {
+    animation: none;
+  }
+}
+
+@media (max-width: 420px) {
+  body.theme-graphic-note .screen-grid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ── 六幕屏内字号阶梯（ui-ux-pro-max：正文 ≥16px，辅助 ≥12px）── */
+body.theme-graphic-note .phone-screen--act .act-badge {
+  font-size: 12px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-h1 {
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-coach-label {
+  font-size: 15px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-coach-text,
+body.theme-graphic-note .phone-screen--act .nb-sub {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-input-box,
+body.theme-graphic-note .phone-screen--act .nb-bubble {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-quiz-bar {
+  font-size: 16px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-quiz-bar span,
+body.theme-graphic-note .phone-screen--act .nb-link,
+body.theme-graphic-note .phone-screen--act .nb-arrow-down {
+  font-size: 13px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-q-text {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-card-hd {
+  font-size: 15px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-card,
+body.theme-graphic-note .phone-screen--act .nb-wrong-item,
+body.theme-graphic-note .phone-screen--act .nb-folder,
+body.theme-graphic-note .phone-screen--act .nb-rank-row,
+body.theme-graphic-note .phone-screen--act .nb-timeline-item {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-hash,
+body.theme-graphic-note .phone-screen--act .nb-pill,
+body.theme-graphic-note .phone-screen--act .nb-tag-chip,
+body.theme-graphic-note .phone-screen--act .nb-cell-ico,
+body.theme-graphic-note .phone-screen--act .note-screen-footer,
+body.theme-graphic-note .phone-screen--act .nb-motto,
+body.theme-graphic-note .phone-screen--act .nb-loop-mini {
+  font-size: 12px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-btn-main,
+body.theme-graphic-note .phone-screen--act .comic-btn,
+body.theme-graphic-note .phone-screen--act .comic-btn-secondary {
+  font-size: 17px;
+  min-height: 48px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-stat {
+  font-size: 12px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-stat b {
+  font-size: 20px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-opt {
+  font-size: 15px;
+  min-height: 48px;
+  padding: 10px 10px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-opt-letter {
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .judge-btn {
+  font-size: 16px;
+  min-height: 48px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-bento-cell {
+  font-size: 13px;
+  min-height: 52px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-bento-cell b {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-metric b {
+  font-size: 22px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-metric span {
+  font-size: 12px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-ring b {
+  font-size: 18px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-stamp {
+  font-size: 16px;
+}
+
+body.theme-graphic-note .phone-screen--act .sfx-line {
+  font-size: 20px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-teacher-note {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-teacher-note::before {
+  font-size: 13px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-tip-dashed {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-prow .nb-plabel {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-stars {
+  font-size: 12px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-gen-step__num {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-gen-step__label {
+  font-size: 13px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-gen-step__label b {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-gen-step.is-done .nb-gen-step__num::before {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .ui-bullet-list,
+body.theme-graphic-note .phone-screen--act .review-table {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .nb-pk,
+body.theme-graphic-note .phone-screen--act .nb-pk-vs {
+  font-size: 15px;
+}
+
+body.theme-graphic-note .phone-screen--act .pk-room-code {
+  font-size: 1.75rem;
+}
+
+body.theme-graphic-note .phone-screen--act .note-vip-tier {
+  font-size: 14px;
+}
+
+body.theme-graphic-note .phone-screen--act .note-vip-tier .font-display {
+  font-size: 16px !important;
+}

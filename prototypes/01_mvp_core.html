@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01 MVP 核心闭环 — AI 闯关学习</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="bento-theme.css" />
+</head>
+<body class="theme-bento">
+
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+
+<header class="gallery-header">
+  <span class="tagline">第 1–3 幕 · MVP 闭环</span>
+  <h1>01 · 核心闭环</h1>
+  <p>Bento 暖橙风 · 首页 / 生成 / 答题 / 反馈 / 通关报告 · Mock：TCP</p>
+  <nav class="gallery-nav">
+    <a href="index.html">总览</a>
+    <a href="01_mvp_core.html" class="active">01 MVP</a>
+    <a href="02_extended_features.html">02 扩展</a>
+    <a href="03_reports_social.html">03 报告</a>
+  </nav>
+</header>
+
+<main id="main-content" class="screen-grid">
+
+  <!-- ① 首页 -->
+  <article class="screen-item">
+    <h2 class="screen-label">① 首页 · 输入</h2>
+    <code class="screen-route">pages/index/index</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar">
+            <div class="bt-greeting">你好，<strong>小皮</strong></div>
+          </header>
+          <div class="bt-scroll">
+            <h1 class="bt-title">今天想闯哪一关？</h1>
+            <div class="bt-card bt-input-card">
+              <div class="bt-input-field">输入你想学的内容
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </div>
+              <p class="bt-input-hint">用武侠小说的口吻通俗解释 TCP 三次握手；或试试：RAG 和传统搜索有什么区别？向量数据库解决什么问题？</p>
+            </div>
+            <button type="button" class="bt-btn bt-btn-primary">→ 开始生成题目</button>
+            <div class="bt-topic-grid">
+              <div class="bt-topic-card"><strong>TCP 三次握手</strong><span>网络基础 · 面试考点</span></div>
+              <div class="bt-topic-card"><strong>提示词工程</strong><span>Prompt · 结构化输出</span></div>
+            </div>
+            <h2 class="bt-section-title">未完成关卡</h2>
+            <div class="bt-level-item">
+              <div class="bt-level-icon bt-level-icon--net">网</div>
+              <div class="bt-level-info"><strong>TCP 三次握手</strong><span>20 题 · 进行中</span></div>
+              <div class="bt-ring" aria-label="进度 60%"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E8E2D9" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#F06A2A" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="37.7" stroke-linecap="round"/></svg><b>60%</b></div>
+            </div>
+            <div class="bt-level-item">
+              <div class="bt-level-icon bt-level-icon--sci">RAG</div>
+              <div class="bt-level-info"><strong>RAG 入门</strong><span>15 题 · 待续</span></div>
+              <div class="bt-ring" aria-label="进度 40%"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E8E2D9" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#3B82F6" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="56.5" stroke-linecap="round"/></svg><b>40%</b></div>
+            </div>
+          </div>
+          <nav class="bt-tabbar" aria-label="主导航">
+            <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>勋章</button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ② 生成中 -->
+  <article class="screen-item">
+    <h2 class="screen-label">② AI 生成中</h2>
+    <code class="screen-route">pages/loading/loading</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen" role="status" aria-live="polite">
+          <header class="bt-topbar">
+            <div class="bt-greeting">AI 正在出题…</div>
+          </header>
+          <div class="bt-scroll" data-gen-stepper data-loading-mode="demo">
+            <h1 class="bt-title-lg">等等，我去翻翻笔记…</h1>
+            <div class="bt-card" style="text-align:center;">
+              <div class="bt-book-flip" role="img" aria-label="正在翻阅笔记">
+                <div class="bt-book-flip__book">
+                  <div class="bt-book-flip__left" aria-hidden="true"></div>
+                  <div class="bt-book-flip__right" aria-hidden="true"></div>
+                  <div class="bt-book-flip__turn" aria-hidden="true">
+                    <div class="bt-book-flip__face bt-book-flip__face--front"></div>
+                    <div class="bt-book-flip__face bt-book-flip__face--back"></div>
+                  </div>
+                  <div class="bt-book-flip__spine" aria-hidden="true"></div>
+                </div>
+              </div>
+              <div class="bt-progress-line" data-gen-progress-fill role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span style="width:0%"></span></div>
+              <p class="bt-caption" data-gen-sub style="margin-top:12px;font-size:15px;color:var(--bt-text);">① 正在检索考点…</p>
+            </div>
+            <div class="bt-stepper" aria-label="生成步骤">
+              <div class="bt-step is-active"><div class="bt-step-num">1</div><div class="bt-step-label">检索考点</div></div>
+              <div class="bt-step is-pending"><div class="bt-step-num">2</div><div class="bt-step-label">出题校验</div></div>
+              <div class="bt-step is-pending"><div class="bt-step-num">3</div><div class="bt-step-label">排版选项</div></div>
+              <div class="bt-step is-pending"><div class="bt-step-num">4</div><div class="bt-step-label">准备闯关</div></div>
+            </div>
+            <p class="bt-subtitle" style="text-align:center;">AI 自动搭配单选、多选、判断三种题型</p>
+            <button type="button" class="bt-btn bt-btn-secondary">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ③ 单选 -->
+  <article class="screen-item">
+    <h2 class="screen-label">③ 答题 · 单选</h2>
+    <code class="screen-route">pages/quiz/quiz · single</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar bt-topbar--quiz">
+            <div class="bt-quiz-header">
+              <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <div class="bt-progress-pill">第 3 / 10 题</div>
+            </div>
+          </header>
+          <div class="bt-scroll">
+            <div class="bt-meta-row"><span>TCP 三次握手</span><span class="bt-pill">单选</span></div>
+            <div class="bt-progress-line"><span style="width:30%"></span></div>
+            <p class="bt-q-stem">TCP 建立连接需要几次握手？</p>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">A</span><span>两次</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">B</span><span>三次</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">C</span><span>四次</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">D</span><span>五次</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ④ 多选 -->
+  <article class="screen-item">
+    <h2 class="screen-label">④ 答题 · 多选</h2>
+    <code class="screen-route">pages/quiz/quiz · multiple</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar bt-topbar--quiz">
+            <div class="bt-quiz-header">
+              <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <div class="bt-progress-pill">第 5 / 10 题</div>
+            </div>
+          </header>
+          <div class="bt-scroll">
+            <div class="bt-meta-row"><span>TCP 三次握手</span><span class="bt-pill">多选</span></div>
+            <div class="bt-progress-line"><span style="width:50%"></span></div>
+            <p class="bt-q-stem">三次握手中，哪些 TCP 标志位会出现？</p>
+            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">A</span><span>SYN</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">B</span><span>ACK</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">C</span><span>FIN</span><span class="bt-opt-check" aria-hidden="true"></span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">D</span><span>RST</span><span class="bt-opt-check" aria-hidden="true"></span></div>
+            <button type="button" class="bt-btn bt-btn-primary">确认提交</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ⑤ 判断 -->
+  <article class="screen-item">
+    <h2 class="screen-label">⑤ 答题 · 判断</h2>
+    <code class="screen-route">pages/quiz/quiz · judge</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar bt-topbar--quiz">
+            <div class="bt-quiz-header">
+              <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <div class="bt-progress-pill">第 7 / 10 题</div>
+            </div>
+          </header>
+          <div class="bt-scroll">
+            <div class="bt-meta-row"><span>TCP 三次握手</span><span class="bt-pill">判断</span></div>
+            <div class="bt-progress-line"><span style="width:70%"></span></div>
+            <p class="bt-q-stem">TCP 使用四次握手来建立连接。</p>
+            <div class="bt-judge-row">
+              <div class="bt-judge-btn bt-judge-btn--yes" role="button" tabindex="0">正确</div>
+              <div class="bt-judge-btn bt-judge-btn--no is-selected" role="button" tabindex="0">错误</div>
+            </div>
+            <div class="bt-card bt-card--flat">
+              <div class="bt-card-hd">提示</div>
+              <p class="bt-caption">建立用三次；断开才四次。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ⑥ 答对反馈 -->
+  <article class="screen-item">
+    <h2 class="screen-label">⑥ 即时反馈 · 答对</h2>
+    <code class="screen-route">pages/quiz/quiz · correct</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar bt-topbar--quiz">
+            <div class="bt-quiz-header">
+              <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <div class="bt-progress-pill">第 3 / 10 题</div>
+            </div>
+          </header>
+          <div class="bt-scroll">
+            <div class="bt-meta-row"><span>第 1 关 / 共 2 关</span><span>答对 3 题</span></div>
+            <p class="bt-q-stem">TCP 建立连接需要几次握手？</p>
+            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-feedback-bar" role="status"><span>答对啦</span><span>+10 金币</span></div>
+            <div class="bt-teacher-note">
+              <p>第三次握手是客户端发 ACK，确认服务端 SYN+ACK 已收到；两次握手无法防止旧连接干扰。</p>
+            </div>
+            <div class="bt-btn-row">
+              <button type="button" class="bt-btn bt-btn-secondary">上一题</button>
+              <button type="button" class="bt-btn bt-btn-primary">继续 →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ⑦ 答错反馈 -->
+  <article class="screen-item">
+    <h2 class="screen-label">⑦ 即时反馈 · 答错</h2>
+    <code class="screen-route">pages/quiz/quiz · wrong</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-topbar bt-topbar--quiz">
+            <div class="bt-quiz-header">
+              <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <div class="bt-progress-pill">第 3 / 10 题</div>
+            </div>
+          </header>
+          <div class="bt-scroll">
+            <p class="bt-q-stem">TCP 建立连接需要几次握手？</p>
+            <div class="bt-opt is-wrong"><span class="bt-opt-letter">A</span><span>两次</span></div>
+            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-feedback-bar is-wrong" role="alert"><span>答错了</span><span>已记入错题本</span></div>
+            <div class="bt-teacher-note">
+              <p>建立连接是三次握手，四次那是断开连接。建议明天再练一次。</p>
+            </div>
+            <button type="button" class="bt-btn bt-btn-primary">继续下一题</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ⑧ 结算报告 -->
+  <article class="screen-item">
+    <h2 class="screen-label">⑧ 结算 · 通关报告</h2>
+    <code class="screen-route">pages/result/result · ready</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-report-top">
+            <div><h2>通关报告</h2><div class="bt-title-sm">TCP 三次握手</div></div>
+            <span class="bt-xp-badge">+20 XP</span>
+          </header>
+          <div class="bt-scroll">
+            <h1 class="bt-title">你这局学得很稳</h1>
+            <p class="bt-subtitle">报告分三块：结果、错题、下一步。先看掌握度，再补薄弱点。</p>
+            <div class="bt-stat-badges">
+              <span class="bt-badge bt-badge--up">掌握度 +1</span>
+              <span class="bt-badge">错题 -2</span>
+            </div>
+            <div class="bt-card">
+              <div class="bt-score-card">
+                <div class="bt-score-ring" aria-label="掌握度 78%">
+                  <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E8E2D9" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#22C55E" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="20.7" stroke-linecap="round"/></svg>
+                  <b>78%</b>
+                </div>
+                <div class="bt-score-text"><strong>握手流程理解不错</strong><p>标志位组合还需巩固；断开握手次数易混淆。</p></div>
+              </div>
+            </div>
+            <div class="bt-card">
+              <div class="bt-card-hd">最该补的 2 点</div>
+              <ol class="bt-list-num">
+                <li data-n="1">SYN / SYN+ACK / ACK 各在哪一步出现</li>
+                <li data-n="2">建立三次 vs 断开四次的区别</li>
+              </ol>
+            </div>
+            <div class="bt-card bt-share-card">
+              <div class="bt-share-text"><em>分享海报</em>今天我把 TCP 三次握手的关键点都搞清楚了，来挑战？</div>
+              <div class="bt-qr" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span class="empty"></span><span></span><span class="empty"></span><span></span><span></span><span></span><span class="empty"></span><span></span><span></span><span></span><span class="empty"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class="bt-btn-row">
+              <button type="button" class="bt-btn bt-btn-primary">再来一组</button>
+              <button type="button" class="bt-btn bt-btn-secondary">生成海报</button>
+            </div>
+          </div>
+          <nav class="bt-tabbar" aria-label="主导航">
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+            <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>我的</button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ⑨ 复盘生成中 -->
+  <article class="screen-item">
+    <h2 class="screen-label">⑨ 结算 · 复盘生成中</h2>
+    <code class="screen-route">pages/result/result · skeleton</code>
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen bt-screen">
+          <header class="bt-report-top">
+            <div><h2>生成复盘</h2><div class="bt-title-sm">闯关完成 7/10</div></div>
+          </header>
+          <div class="bt-scroll">
+            <div class="bt-bento-4">
+              <div class="bt-bento-cell"><b>分析</b>错题</div>
+              <div class="bt-bento-cell"><b>归纳</b>知识点</div>
+              <div class="bt-bento-cell"><b>生成</b>建议</div>
+              <div class="bt-bento-cell"><b>排版</b>报告</div>
+            </div>
+            <div class="bt-card">
+              <div class="bt-card-hd">AI 复盘报告</div>
+              <div class="bt-skeleton" style="width:95%"></div>
+              <div class="bt-skeleton" style="width:72%"></div>
+              <div class="bt-skeleton" style="width:85%"></div>
+              <p class="bt-caption" style="text-align:center;margin-top:12px;font-size:15px;color:var(--bt-text);">正在生成复盘…</p>
+            </div>
+            <button type="button" class="bt-btn bt-btn-secondary" disabled style="opacity:0.5;">请稍候</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  MVP 9 屏 · Bento 暖橙风 · <a href="index.html">返回总览</a>
+</footer>
+
+<script src="loading-steps.js"></script>
+</body>
+</html>

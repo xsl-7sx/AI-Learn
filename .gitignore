@@ -1,0 +1,27 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE / agent
+.cursor/
+.vscode/
+.idea/
+*.local.json
+prototypes/.claude/
+
+# Test / automation artifacts
+.playwright-mcp/
+
+# Secrets
+.env
+.env.*
+*.pem
+credentials.json
+
+# Dependencies (future)
+node_modules/
+dist/
+unpackage/

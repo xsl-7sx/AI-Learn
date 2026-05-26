@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 闯关学习 — UI 原型总览</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="bento-theme.css" />
+</head>
+<body class="theme-bento">
+
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+
+<header class="gallery-header">
+  <span class="tagline">Bento 暖橙 · 高保真参考稿</span>
+  <h1>AI 闯关学习 · UI 原型</h1>
+  <p>首页输入 → 闯关判题 → 通关报告；扩展资料导入、错题后台、PK 与会员。</p>
+  <nav class="gallery-nav">
+    <a href="index.html" class="active">总览</a>
+    <a href="01_mvp_core.html">01 MVP</a>
+    <a href="02_extended_features.html">02 扩展</a>
+    <a href="03_reports_social.html">03 报告</a>
+  </nav>
+</header>
+
+<main id="main-content">
+
+  <section class="poster-board poster-showcase" aria-labelledby="showcase-title">
+    <header class="poster-showcase-hd">
+      <p class="poster-eyebrow">产品主路径 · 六幕结构</p>
+      <h2 id="showcase-title">交互式 AI 闯关学习</h2>
+      <p>把知识做成关卡：输入开练 → 即时判题 → 图文复盘；扩展资料导入、错题周期、PK 与会员。</p>
+    </header>
+
+    <h3 class="poster-showcase-phase">Phase 1 · MVP 核心闭环 <span>01_mvp_core · 9 屏</span></h3>
+    <div class="poster-phones-row">
+
+      <!-- 首页 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-topbar">
+                <div class="bt-greeting">你好，<strong>小皮</strong></div>
+              </header>
+              <div class="bt-scroll">
+                <h1 class="bt-title">今天想闯哪一关？</h1>
+                <div class="bt-card bt-input-card">
+                  <div class="bt-input-field is-placeholder">输入你想学的内容
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  </div>
+                  <p class="bt-input-hint">我想搞懂 RAG：检索、增强、生成各解决什么问题，和微调怎么选。</p>
+                </div>
+                <button type="button" class="bt-btn bt-btn-primary">→ 开始生成题目</button>
+                <div class="bt-topic-grid">
+                  <div class="bt-topic-card"><strong>RAG 基础概念</strong><span>检索 · 增强 · 生成</span></div>
+                  <div class="bt-topic-card"><strong>提示词工程</strong><span>Prompt · 结构化</span></div>
+                </div>
+                <h2 class="bt-section-title">未完成关卡</h2>
+                <div class="bt-level-item">
+                  <div class="bt-level-icon bt-level-icon--sci">RAG</div>
+                  <div class="bt-level-info"><strong>RAG 入门</strong><span>20 题</span></div>
+                  <div class="bt-ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E8E2D9" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#F06A2A" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="37.7" stroke-linecap="round"/></svg><b>60%</b></div>
+                </div>
+              </div>
+              <nav class="bt-tabbar" aria-label="主导航">
+                <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>勋章</button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 答题反馈 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-topbar bt-topbar--quiz">
+                <div class="bt-quiz-header">
+                  <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                  <div class="bt-progress-pill">第 5 / 5 题</div>
+                </div>
+              </header>
+              <div class="bt-scroll">
+                <div class="bt-meta-row"><span>第 1 关 / 共 1 关</span><span>答对 4 题</span></div>
+                <p class="bt-q-stem">RAG 最核心的优势是什么？</p>
+                <div class="bt-opt is-correct"><span class="bt-opt-letter">A</span><span>减少幻觉，答案可溯源</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+                <div class="bt-opt"><span class="bt-opt-letter">B</span><span>训练成本一定更低</span></div>
+                <div class="bt-opt is-correct"><span class="bt-opt-letter">C</span><span>可接入最新私有知识</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+                <div class="bt-feedback-bar" role="status"><span>答对啦</span><span>+10 金币</span></div>
+                <div class="bt-teacher-note"><p>RAG 通过检索外部知识增强生成，让回答有依据、可更新，适合企业知识库场景。</p></div>
+                <div class="bt-btn-row">
+                  <button type="button" class="bt-btn bt-btn-secondary">上一题</button>
+                  <button type="button" class="bt-btn bt-btn-primary">继续 →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通关报告 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-report-top">
+                <div><h2>通关报告</h2><div class="bt-title-sm">RAG 入门</div></div>
+                <span class="bt-xp-badge">+20 XP</span>
+              </header>
+              <div class="bt-scroll">
+                <h1 class="bt-title">你这局学得很稳</h1>
+                <p class="bt-subtitle">检索流程理解不错，边界场景还需多练。</p>
+                <div class="bt-stat-badges">
+                  <span class="bt-badge bt-badge--up">掌握度 +1</span>
+                  <span class="bt-badge">错题 -2</span>
+                </div>
+                <div class="bt-card">
+                  <div class="bt-score-card">
+                    <div class="bt-score-ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E8E2D9" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#22C55E" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="22.6" stroke-linecap="round"/></svg><b>76%</b></div>
+                    <div class="bt-score-text"><strong>RAG 入门</strong><p>基础概念已掌握，检索增强流程还需巩固。</p></div>
+                  </div>
+                </div>
+                <div class="bt-card">
+                  <div class="bt-card-hd">最该补的 2 点</div>
+                  <ol class="bt-list-num">
+                    <li data-n="1">检索结果如何校验与重排</li>
+                    <li data-n="2">微调 vs RAG 的选型边界</li>
+                  </ol>
+                </div>
+                <div class="bt-btn-row">
+                  <button type="button" class="bt-btn bt-btn-primary">再来一组</button>
+                  <button type="button" class="bt-btn bt-btn-secondary">生成海报</button>
+                </div>
+              </div>
+              <nav class="bt-tabbar" aria-label="主导航">
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+                <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>我的</button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="poster-showcase-phase">Phase 2 · 扩展与增长 <span>02 + 03 gallery · 11 屏</span></h3>
+    <div class="poster-phones-row">
+
+      <!-- 多源导入 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-topbar">
+                <div class="bt-greeting">资料导入</div>
+              </header>
+              <div class="bt-scroll">
+                <h1 class="bt-title">把资料全丢进来</h1>
+                <div class="bt-card"><div class="bt-card-hd">新建闯关集</div><p class="bt-caption">粘贴文本或链接，AI 提炼考点并出题。</p></div>
+                <div class="bt-bento-4">
+                  <div class="bt-bento-cell"><b>文本</b>摘要 / 笔记</div>
+                  <div class="bt-bento-cell"><b>网页</b>自动解析</div>
+                  <div class="bt-bento-cell"><b>PDF</b>章节要点</div>
+                  <div class="bt-bento-cell"><b>视频</b>字幕要点</div>
+                </div>
+                <div class="bt-card">
+                  <div class="bt-card-hd">前端工程化文档.pdf</div>
+                  <div class="bt-progress-line"><span style="width:72%"></span></div>
+                  <p class="bt-caption">解析中 72%</p>
+                </div>
+                <button type="button" class="bt-btn bt-btn-primary">从知识库出题</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 错题后台 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-topbar">
+                <div class="bt-greeting">学习后台</div>
+              </header>
+              <div class="bt-scroll">
+                <h1 class="bt-title">你的学习后台</h1>
+                <div class="bt-metrics">
+                  <div class="bt-metric"><b>18</b><span>本周闯关</span></div>
+                  <div class="bt-metric"><b>84%</b><span>正确率</span></div>
+                  <div class="bt-metric"><b>6</b><span>待复习</span></div>
+                </div>
+                <div class="bt-card">
+                  <div class="bt-card-hd">新知识复习计划</div>
+                  <div class="bt-row-item"><span>今天 20:00 · RAG 可靠性</span></div>
+                  <div class="bt-row-item"><span>明天 · 快刷错题 5 题</span></div>
+                </div>
+                <div class="bt-wrong-item">
+                  <strong>检索结果如何校验？</strong>
+                  <span class="bt-tag bt-tag--weak">错因：夸大检索能力</span>
+                </div>
+              </div>
+              <nav class="bt-tabbar" aria-label="主导航">
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+                <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+                <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>我的</button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PK / 会员 -->
+      <div class="poster-phone-col">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen bt-screen">
+              <header class="bt-topbar">
+                <div class="bt-greeting">让学习更热闹</div>
+              </header>
+              <div class="bt-scroll">
+                <h1 class="bt-title">双人对战</h1>
+                <div class="bt-card">
+                  <div class="bt-card-hd">房间 VS</div>
+                  <div class="bt-meta-row" style="justify-content:center;gap:16px;font-size:16px;font-weight:600;"><span>你 LV.12</span><span style="color:var(--bt-primary)">VS</span><span>好友 LV.10</span></div>
+                  <p class="bt-caption" style="text-align:center;">状态：已准备</p>
+                </div>
+                <div class="bt-card">
+                  <div class="bt-card-hd">本周学霸榜</div>
+                  <div class="bt-row-item"><span>#12 你</span><span>1280 XP</span></div>
+                  <div class="bt-row-item"><span>#1 课豆王</span><span>2100 XP</span></div>
+                  <p class="bt-caption">距 Top10 还差 120 分</p>
+                </div>
+                <div class="bt-card bt-card--tint">
+                  <div class="bt-card-hd">会员权益</div>
+                  <p class="bt-caption">高阶 AI 解析 · 无限导入 · 专属复盘模板</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="poster-showcase-foot">
+      <a href="01_mvp_core.html" class="comic-btn" style="display:inline-block;text-decoration:none;text-align:center;padding:14px 28px;border-radius:16px;">进入完整原型画廊 →</a>
+      <div class="poster-showcase-links">
+        <a href="01_mvp_core.html">01 MVP 九屏</a>
+        <a href="02_extended_features.html">02 扩展六屏</a>
+        <a href="03_reports_social.html">03 报告五屏</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="biz-flow-map" aria-labelledby="biz-flow-title">
+    <div class="note-card note-card--blue">
+      <h3 id="biz-flow-title">业务流程地图 · 六幕</h3>
+      <div class="biz-lanes">
+        <div class="biz-lane">
+          <span class="biz-lane-label">Phase 1 · 学练闭环（MVP）</span>
+          <div class="biz-acts">
+            <span class="biz-act biz-act--y">① 输入主题</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--y">AI 生成题集</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--g">闯关答题</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--g">即时判分</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--p">复盘报告</span>
+          </div>
+        </div>
+        <div class="biz-lane">
+          <span class="biz-lane-label">Phase 2 · 留存与增长</span>
+          <div class="biz-acts">
+            <span class="biz-act biz-act--y">④ 多源导入</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--y">建闯关集</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--g">⑤ 错题本</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--g">周期复习</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--p">⑥ PK / 榜</span>
+            <span class="biz-arrow" aria-hidden="true">→</span>
+            <span class="biz-act biz-act--p">会员</span>
+          </div>
+        </div>
+      </div>
+      <p class="biz-note"><strong>数据流：</strong>用户输入 → <code>POST /quiz/generate</code> → 本地判分 ×N → <code>POST /quiz/report</code> 复盘</p>
+    </div>
+  </section>
+
+  <section class="file-cards">
+    <a href="01_mvp_core.html" class="file-card">
+      <span class="count">9 屏 · MVP</span>
+      <h2>01 核心闭环</h2>
+      <p>首页、加载、三题型、反馈、结算 — Bento 暖橙完整屏。</p>
+      <div class="arrow">查看原型 →</div>
+    </a>
+    <a href="02_extended_features.html" class="file-card">
+      <span class="count">6 屏 · 扩展</span>
+      <h2>02 扩展功能</h2>
+      <p>资料导入、VIP、PK、排行、语音等。</p>
+      <div class="arrow">查看原型 →</div>
+    </a>
+    <a href="03_reports_social.html" class="file-card">
+      <span class="count">5 屏 · 报告</span>
+      <h2>03 报告社交</h2>
+      <p>复盘详情、雷达图、分享海报、错题清单。</p>
+      <div class="arrow">查看原型 →</div>
+    </a>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  Bento 暖橙高保真 · <strong>prototypes/index.html</strong>
+</footer>
+
+</body>
+</html>

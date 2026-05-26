@@ -1,0 +1,126 @@
+/* AI 生成页 · 四步进度（①②③④ 随总进度推进） */
+.nb-gen-stepper {
+  margin: 6px 0 4px;
+}
+
+.nb-gen-stepper__track {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  position: relative;
+}
+
+.nb-gen-stepper__track::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 12%;
+  right: 12%;
+  height: 3px;
+  background: #f0ede8;
+  border-radius: 3px;
+  z-index: 0;
+}
+
+.nb-gen-stepper__fill {
+  position: absolute;
+  top: 14px;
+  left: 12%;
+  height: 3px;
+  width: 0;
+  max-width: 76%;
+  background: linear-gradient(90deg, var(--mint-d), var(--peach-d));
+  border-radius: 3px;
+  z-index: 1;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nb-gen-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.nb-gen-step__num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: var(--border-note);
+  background: #fff;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 rgba(42, 42, 42, 0.08);
+  transition: background 0.3s, border-color 0.3s, transform 0.3s;
+}
+
+.nb-gen-step__label {
+  font-size: 0.5rem;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+}
+
+.nb-gen-step__label b {
+  display: block;
+  font-size: 0.54rem;
+  color: var(--ink-black);
+}
+
+.nb-gen-step.is-pending .nb-gen-step__num {
+  opacity: 0.55;
+  background: #faf8f4;
+}
+
+.nb-gen-step.is-active .nb-gen-step__num {
+  background: var(--mint);
+  border-color: var(--mint-d);
+  transform: scale(1.08);
+  animation: nbStepPulse 1.2s ease-in-out infinite;
+}
+
+.nb-gen-step.is-active .nb-gen-step__label {
+  color: var(--ink-black);
+  font-weight: 600;
+}
+
+.nb-gen-step.is-done .nb-gen-step__num {
+  background: var(--pastel-green);
+  border-color: var(--correct-green-dark);
+  color: var(--correct-green-dark);
+}
+
+.nb-gen-step.is-done .nb-gen-step__num::after {
+  content: none;
+}
+
+.nb-gen-step.is-done .nb-gen-step__num {
+  font-size: 0;
+}
+
+.nb-gen-step.is-done .nb-gen-step__num::before {
+  content: '✓';
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+@keyframes nbStepPulse {
+  0%, 100% { box-shadow: 2px 2px 0 rgba(42, 42, 42, 0.08), 0 0 0 0 rgba(126, 200, 164, 0.35); }
+  50% { box-shadow: 2px 2px 0 rgba(42, 42, 42, 0.08), 0 0 0 4px rgba(126, 200, 164, 0.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nb-gen-step.is-active .nb-gen-step__num {
+    animation: none;
+  }
+  .nb-gen-stepper__fill {
+    transition: none;
+  }
+}
