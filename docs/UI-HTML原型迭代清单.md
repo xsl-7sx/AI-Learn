@@ -11,10 +11,11 @@
 
 **设计依据：** [UI设计风格与DesignSystem.md](./UI设计风格与DesignSystem.md) · [UI页面原型说明.md](./UI页面原型说明.md)
 
-**主预览：** [`prototypes/index.html`](../prototypes/index.html) → `01` / `02` / `03`  
+**主预览：** [`prototypes/index.html`](../prototypes/index.html) → `01`（MVP 9 屏）/ `02` / `03`（报告 7 屏，含 Tab ⑥⑦）  
 **网页展示稿：** [`prototypes/ui.html`](../prototypes/ui.html)（与 `01` 屏① 同步维护）
 
-**备选：** [`manga-heavy-mvp.html`](../prototypes/manga-heavy-mvp.html)（4 屏重度漫画风，未随 Bento 更新）
+**Tab 子页：** 已并入 [`03_reports_social.html`](../prototypes/03_reports_social.html)（`#tab-bank` / `#tab-medal`）；[`04_tab_pages.html`](../prototypes/04_tab_pages.html) 仅跳转  
+**归档备选：** [`manga-heavy-mvp.html`](../prototypes/manga-heavy-mvp.html)（未随 Bento v1.6 维护）
 
 ---
 
@@ -24,7 +25,8 @@
 | ---- | ------------------ | ------------ |
 | 主主题 | `theme-bento` + `bento-theme.css` | ✅ v1.3 |
 | 样式链 | `shared.css` → `bento-theme.css` | ✅ |
-| MVP 屏数 | **9** | ✅ |
+| MVP 屏数 | **9**（仅 `01`） | ✅ |
+| Tab 子页 | `03` 屏⑥⑦（题库 / 勋章）；非 MVP；`04` 重定向 | ✅ v1.7.3 |
 | 扩展屏 | **11** | ✅ |
 | 顶栏 | 问候语 / 题号 pill；**无金币·无 XP 徽章** | ✅ |
 | 布局 | `bt-notch-safe`；列表/答题顶对齐；生成中居中 | ✅ v1.4 |
@@ -67,7 +69,7 @@
 
 | # | 屏 | 要点 | 状态 |
 | --- | -- | ---- | ---- |
-| 1 | 首页 | `ref-home`：纯文案标题、compose 输入+示例、热门主题横滑、连胜、未完成关卡「继续」；`index` 总览待对齐 | ✅ / ⚠️ |
+| 1 | 首页 | `ref-home`：纯文案标题、compose 输入+示例、热门主题横滑、连胜、未完成关卡「继续」；`index` 总览已对齐 | ✅ |
 | 2 | 生成中 | `bt-book-flip`、小皮 IP 气泡、`loading-steps.js`、四步 stepper 高亮/对勾动效 | ✅ |
 | 3 | 单选 | `bt-opt`、题号 pill、顶栏 `.bt-spirit` 五段条（原型） | ✅ |
 | 4 | 多选 | 确认提交、顶栏灵韵条 | ✅ |
@@ -87,6 +89,7 @@
 | `bento-theme.css` | ★ 主主题 `theme-bento`、`bt-*` 组件、翻书/反馈/灵韵/ stepper 动效 |
 | `loading-steps.js` | 生成页进度 demo + IP 气泡文案同步 |
 | `quiz-feedback-demo.js` | 屏 6/7 反馈动效循环 demo（进入视口播放） |
+| `ref-home-topics.js` | 参考首页「换一批」热门主题三组轮换 demo |
 | `paper-lines-page.svg` | 画廊横纹 |
 | `paper-lines-screen.svg` | 屏内横纹 |
 | `mascots.svg` | Loading 屏 `mascot-think`；其余屏待评估 |
@@ -98,16 +101,17 @@
 
 | 优先级 | 任务 | 说明 |
 | ------ | ---- | ---- |
-| P1 | `index.html` 首页与 `ui.html` 对齐 | 总览 showcase 仍用旧 `bt-topic-grid` 布局 |
+| ~~P1~~ | ~~`index.html` 首页与 `ui.html` 对齐~~ | ✅ v1.6.1：总览 showcase 已换 `.ref-home` |
+| ~~P1~~ | ~~Tab 子页高保真~~ | ✅ v1.7.3：并入 `03` 报告页 ⑥⑦；`04` 跳转；IA §1.3 / §四 |
 | P1 | uni-app 映射 `bt-*` | 组件化与 Token 变量 |
-| P2 | 答题反馈 demo 节奏 | 可调慢以贴近真实判题（当前为展示用循环） |
+| ~~P2~~ | ~~答题反馈 demo 节奏~~ | ✅ v1.6.2：各阶段延时约 +40%，循环间隔加长 |
 | P2 | 灵韵机制产品定稿 | 原型有 `.bt-spirit`；PRD 倾向 MVP 不做惩罚式红心 |
 | P2 | 金币 gamification | 若产品保留，重新设计角标（非原型回滚） |
-| P2 | 小课豆回归 | 可选：加载页副角标或结算页 |
-| P2 | 「换一批」热门主题 | 首页仅文案，无切换 demo |
+| P2 | 小课豆回归 | 可选：加载页副角标或结算页（gallery 不展示） |
+| ~~P2~~ | ~~「换一批」热门主题~~ | ✅ v1.6.3：`ref-home-topics.js` 三组轮换 + 淡入动效 |
 | P3 | 深色模式 | 当前仅浅色 Bento |
 | P3 | 翻书动画 Lottie | 小程序性能评估 |
-| P3 | `02` / `03` 扩展屏视觉复查 | 与 MVP v1.6 标准统一 |
+| ~~P3~~ | ~~`02` / `03` 扩展屏视觉复查~~ | ✅ v1.6.2：底栏旗帜/勋章、去 XP 徽章、画廊导航补 `ui.html` |
 
 ---
 
@@ -125,6 +129,12 @@ Checklist 详见 [UI-HTML原型实施指引.md §八](./UI-HTML原型实施指�
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.2 | 2026-05-27 | Tab 移回独立 `04`；`01` 恢复纯 MVP 9 屏 |
+| v1.7.1 | 2026-05-27 | Tab 曾并入 `01`（已回退） |
+| v1.7.0 | 2026-05-27 | Tab 题库/勋章屏；MVP↔Tab IA；总览 Tab 区；`manga-heavy` 归档标注 |
+| v1.6.3 | 2026-05-27 | 首页「换一批」热门主题 demo（`ref-home-topics.js`） |
+| v1.6.2 | 2026-05-27 | 反馈 demo 节奏调慢；02/03/01/index 底栏与报告顶栏统一 |
+| v1.6.1 | 2026-05-27 | `index.html` 总览首页与 `ui.html` 对齐（`.ref-home`） |
 | v1.6.0 | 2026-05-27 | 参考首页增强；Loading IP；stepper/反馈动效；灵韵条原型；资源清单更新 |
 | v1.4.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；布局/图标/进度条 |
 | v1.3.0 | 2026-05-26 | Bento 暖橙；翻书 Loading；无金币；得意黑解析区 |

@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.7.0 | 2026-05-27 | Tab 子页 `04`（题库⑩、勋章⑪）；§1.3 MVP↔Tab IA |
 | v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条原型与 MVP 不做项脚注 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；无金币/XP；图标与克制进度条 |
@@ -66,7 +67,17 @@
 
 不在 MVP `pages.json` 中；本文档以 **中保真** 描述，供路线图评审。
 
-### 1.3 核心用户流程
+### 1.3 底栏 Tab 与 MVP 四页栈（v1.7）
+
+| 底栏 Tab | HTML gallery | uni-app（示意） | 与 MVP 关系 |
+| -------- | ------------ | --------------- | ----------- |
+| **闯关** | `01` 屏①–⑨、`ui.html` | `pages/index` → `loading` → `quiz` → `result` | **MVP 主路径**；默认选中 |
+| **题库** | [03 屏⑥ 题库 Tab](../prototypes/03_reports_social.html#tab-bank)、[03 屏⑤ 错题本](../prototypes/03_reports_social.html#screen-wrongbook) | `pages/bank/index`（Phase 2） | 聚合进行中关卡、历史、**错题消消乐**入口；MVP 不实现 Tab 切换 |
+| **勋章** | [03 屏⑦ 勋章 Tab](../prototypes/03_reports_social.html#tab-medal) | `pages/medal/index`（Phase 2） | 成就墙、连胜、解锁进度；可串联「战绩海报」（`03` 屏④） |
+
+**实现建议（uni-app）：** MVP 在 `pages.json` 仅注册四页 + 自定义底栏；Tab 点击「题库/勋章」用 `switchTab` 或 Phase 2 路由。高保真在 [`03_reports_social.html`](../prototypes/03_reports_social.html) 屏⑥⑦，**不计入** [`01`](../prototypes/01_mvp_core.html) MVP 9 屏。
+
+### 1.4 核心用户流程
 
 ```mermaid
 flowchart TD
@@ -91,8 +102,8 @@ flowchart TD
 | ---- | ---- | --------- |
 | MVP 核心 | **9** | [`01_mvp_core.html`](../prototypes/01_mvp_core.html) |
 | 扩展功能 | **6** | [`02_extended_features.html`](../prototypes/02_extended_features.html) |
-| 报告与社交 | **5** | [`03_reports_social.html`](../prototypes/03_reports_social.html) |
-| **合计** | **20** | + [`index.html`](../prototypes/index.html) 总览 |
+| 报告与社交 | **7** | [`03_reports_social.html`](../prototypes/03_reports_social.html)（含 Tab ⑥⑦） |
+| **合计** | **22** | + [`index.html`](../prototypes/index.html) 总览 |
 
 ### 1.5 六幕业务流程（总览 showcase）
 
@@ -429,6 +440,32 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 ---
 
+## 二点五、Tab 子页（2 屏 · 高保真）
+
+> Gallery：已并入 [`03_reports_social.html`](../prototypes/03_reports_social.html) 屏⑥⑦（`#tab-bank` / `#tab-medal`）。**不计入** MVP 9 屏；底栏默认 MVP 仅跑通「闯关」栈（§1.3）。旧链接 [`04_tab_pages.html`](../prototypes/04_tab_pages.html) 自动跳转。
+
+### 题库 · Tab
+
+| 项 | 内容 |
+| -- | ---- |
+| 路由（示意） | `pages/bank/index` |
+| 目的 | 聚合进行中闯关、历史与错题/报告入口 |
+| 底栏 | **题库** 选中 |
+
+**核心模块：** 指标三列（进行中 / 已完成 / 总正确率）· `ref-level-card` 继续练 · 快捷入口（错题消消乐 → `03` 屏⑤、学习报告 → 复盘屏）。
+
+### 勋章 · Tab
+
+| 项 | 内容 |
+| -- | ---- |
+| 路由（示意） | `pages/medal/index` |
+| 目的 | 成就墙、连胜、下一枚进度；可接「勋章秀」分享 |
+| 底栏 | **勋章** 选中 |
+
+**核心模块：** 连胜 banner · `bt-medal-grid`（已解锁 / 锁定）· 下一枚进度条 · 「生成勋章秀海报」次按钮（Phase 2）。
+
+---
+
 ## 三、扩展功能（6 屏 · 中保真）
 
 > 优先级见需求分析 P1–P3；**均非 MVP**。
@@ -490,7 +527,7 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 ---
 
-## 四、报告与社交（5 屏 · 中保真）
+## 四、报告与社交（7 屏 · 中保真）
 
 | # | 屏名 | Phase | 目的 |
 | --- | ---- | ----- | ---- |
@@ -499,12 +536,15 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 | R3 | 薄弱点分析 | 2b | 五维雷达 / 条形图 |
 | R4 | 战绩海报 | 3 | 9:16 分享图预览 |
 | R5 | 错题本 | 2b | 错题列表 + 详情 |
+| R6 | 题库 · Tab | 2 | 底栏「题库」；进行中关卡、错题/报告入口（`#tab-bank`） |
+| R7 | 勋章 · Tab | 2 | 底栏「勋章」；成就墙、连胜（`#tab-medal`） |
 
 **说明：**
 
 - MVP 仅在屏 8 内嵌短复盘；R1 为独立「历史报告」深化
 - R4 分享按钮在 MVP 置灰；海报屏标 Phase 3
 - R5 对应需求「复盘中心」— 方案 MVP 不做持久化
+- R6 快捷入口可链至 R5（`#screen-wrongbook`）；R7 可串联 R4 战绩海报
 
 ---
 

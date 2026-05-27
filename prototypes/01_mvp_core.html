@@ -15,7 +15,7 @@
 <header class="gallery-header">
   <span class="tagline">第 1–3 幕 · MVP 闭环</span>
   <h1>01 · 核心闭环</h1>
-  <p>Bento 暖橙风 · 首页 / 生成 / 答题 / 退出确认 / 反馈 / 通关报告 · Mock：RAG</p>
+  <p>Bento 暖橙风 · MVP 9 屏 · 首页 / 生成 / 答题 / 反馈 / 通关报告 · Mock：RAG / TCP</p>
   <nav class="gallery-nav">
     <a href="ui.html" class="nav-web-ui">★ 网页 UI 稿</a>
     <a href="index.html">总览</a>
@@ -35,24 +35,24 @@
       <div class="phone-frame">
         <div class="phone-notch"></div>
         <div class="phone-screen bt-screen">
-          <div class="ref-home-scroll">
-            <div class="ref-topbar">
-              <div class="ref-user">
-                <span class="ref-avatar" aria-hidden="true">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-                </span>
-                <span>你好，<strong>小皮</strong> <span class="ref-chevron" aria-hidden="true">›</span></span>
-              </div>
-              <div class="ref-topbar-actions">
-                <span class="ref-streak" aria-label="连续学习 7 天">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 22c4-2.5 7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 3 8.5 7 11z" fill="#fb923c" stroke="#ea580c" stroke-width="1.5"/><path d="M12 22V10" stroke="#fff7ed" stroke-width="1.5" stroke-linecap="round"/></svg>
-                  <b>7</b>
-                </span>
-                <button type="button" class="ref-icon-btn" tabindex="-1" aria-label="日历">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </button>
-              </div>
+          <header class="ref-topbar">
+            <div class="ref-user">
+              <span class="ref-avatar" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+              </span>
+              <span>你好，<strong>小皮</strong> <span class="ref-chevron" aria-hidden="true">›</span></span>
             </div>
+            <div class="ref-topbar-actions">
+              <span class="ref-streak" aria-label="连续学习 7 天">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 22c4-2.5 7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 3 8.5 7 11z" fill="#fb923c" stroke="#ea580c" stroke-width="1.5"/><path d="M12 22V10" stroke="#fff7ed" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <b>7</b>
+              </span>
+              <button type="button" class="ref-icon-btn" tabindex="-1" aria-label="日历">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+            </div>
+          </header>
+          <div class="ref-home-scroll">
             <h2 class="ref-home-title">今天想闯哪一关？</h2>
             <div class="ref-input-card">
               <label class="ref-input-label">输入你想学的内容</label>
@@ -67,9 +67,9 @@
             </div>
             <div class="ref-section-hd ref-section-hd--compact">
               <span>热门主题</span>
-              <span class="link">换一批 ›</span>
+              <button type="button" class="ref-topic-shuffle" data-ref-topic-shuffle tabindex="-1">换一批 ›</button>
             </div>
-            <div class="ref-topic-row" role="list" aria-label="热门主题">
+            <div class="ref-topic-row" role="list" aria-label="热门主题" data-ref-topic-row>
               <div class="ref-topic" role="listitem">
                 <div class="ref-topic-icon ref-topic-icon--orange" aria-hidden="true">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -97,6 +97,13 @@
                 </div>
                 <strong>Transformer</strong>
                 <span class="heat">热度 81%</span>
+              </div>
+              <div class="ref-topic" role="listitem">
+                <div class="ref-topic-icon ref-topic-icon--blue" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+                </div>
+                <strong>Embedding 入门</strong>
+                <span class="heat">热度 78%</span>
               </div>
             </div>
             <div class="ref-section-hd">
@@ -466,9 +473,9 @@
           </div>
         </div>
             <nav class="bt-tabbar bt-tabbar-float" aria-label="主导航">
-            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>闯关</button>
-            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
-            <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>我的</button>
+            <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+            <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>勋章</button>
           </nav>
       </div>
     </div>
@@ -510,10 +517,11 @@
 </main>
 
 <footer class="site-footer">
-  MVP 9 屏 · Bento 暖橙风 · <a href="index.html">返回总览</a>
+  MVP 9 屏 · Tab 见 <a href="03_reports_social.html#tab-bank">03</a> · <a href="index.html">返回总览</a>
 </footer>
 
 <script src="loading-steps.js"></script>
 <script src="quiz-feedback-demo.js"></script>
+<script src="ref-home-topics.js"></script>
 </body>
 </html>

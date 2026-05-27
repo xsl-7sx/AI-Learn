@@ -506,7 +506,7 @@ prototypes/
 ├── index.html                  # 总览 · 六幕 showcase
 ├── 01_mvp_core.html            # MVP 9 屏（Bento 暖橙）
 ├── 02_extended_features.html   # 扩展 6 屏
-├── 03_reports_social.html      # 报告 5 屏
+├── 03_reports_social.html      # 报告 7 屏（含 Tab ⑥⑦）
 ├── shared.css                  # 画廊 / 手机框
 ├── bento-theme.css             # ★ 主主题 theme-bento · bt-* 组件
 ├── loading-steps.js            # 生成页四步进度 demo

@@ -60,8 +60,10 @@ AI-Learn/prototypes/
 ├── paper-lines-screen.svg        # 屏内浅色不规则横纹
 ├── 01_mvp_core.html              # MVP 9 屏
 ├── 02_extended_features.html     # 扩展 6 屏
-├── 03_reports_social.html        # 报告 5 屏
-├── manga-heavy-mvp.html          # 备选：4 屏重度漫画风（单文件）
+├── 03_reports_social.html        # 报告 7 屏（含 Tab ⑥题库 / ⑦勋章）
+├── 04_tab_pages.html             # 跳转 → 03#tab-bank（兼容旧链接）
+├── ref-home-topics.js            # 首页「换一批」热门主题 demo
+├── manga-heavy-mvp.html          # 归档：4 屏漫画风（未随 Bento v1.6 维护）
 ├── mascots.svg                   # Loading：mascot-think；其余屏待评估
 ├── graphic-note.css              # 归档：旧笔记本主题（gallery 未引用）
 ├── ux-enhancements.css           # 归档：旧 a11y 层（gallery 未引用）
@@ -71,10 +73,10 @@ AI-Learn/prototypes/
 
 | 文件 | 屏数 | 说明 |
 | ---- | ---- | ---- |
-| `01_mvp_core.html` | 9 | [页面说明 §二](./UI页面原型说明.md#二mvp-核心闭环9-屏) |
+| `01_mvp_core.html` | 9 | [§二](./UI页面原型说明.md#二mvp-核心闭环9-屏) |
 | `02_extended_features.html` | 6 | [§三](./UI页面原型说明.md#三扩展功能6-屏--中保真) |
-| `03_reports_social.html` | 5 | [§四](./UI页面原型说明.md#四报告与社交5-屏--中保真) |
-| **合计** | **20** | + `index.html` 总览 |
+| `03_reports_social.html` | 7 | [§四](./UI页面原型说明.md#四报告与社交7-屏--中保真)（含 Tab ⑥⑦） |
+| **合计** | **22** | MVP 9 + 扩展 6 + 报告 7 |
 
 **HTML 引用顺序（`01` / `ui.html` 等 MVP 页）：**
 
@@ -87,7 +89,7 @@ AI-Learn/prototypes/
 <body class="theme-bento">
 ```
 
-`index.html` 总览 showcase 仍用旧首页栅格，待与 `ui.html` 对齐（见 [迭代清单 §六](./UI-HTML原型迭代清单.md#六待办与风险)）。
+`index.html` 总览 showcase 首页已与 `ui.html` / `01` 屏① 对齐（`.ref-home`，见 [迭代清单 §五](./UI-HTML原型迭代清单.md#五后续可选迭代非阻塞)）。
 
 ---
 
@@ -268,8 +270,12 @@ npx serve d:\AI-Learn\prototypes
 - [x] **产品**无惩罚式生命值；gallery 可选 `.bt-spirit` 仅作视觉探索
 - [x] 分享按钮 MVP 置灰（屏 8）
 - [x] 扩展 11 屏 Phase 标注
+- [x] Tab 子页独立 `04`：题库 / 勋章（非 MVP，导航在 01 与 02 之间）
+- [x] 页面说明 §1.3：底栏 Tab 与 MVP 四页栈映射
+- [x] `index` 总览：Tab 双屏区 + Phase 2 错题本与 `03` 对齐
+- [x] `manga-heavy-mvp.html` 标注归档、非主预览
 - [x] `prefers-reduced-motion` 翻书降级
-- [ ] 本地浏览器逐屏目视（请评审人勾选）
+- [ ] 本地浏览器逐屏目视（请评审人勾选：`01`×9 · `04`×2 · `02`×6 · `03`×5 · `index` · `ui.html`）
 
 ---
 

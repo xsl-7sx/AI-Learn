@@ -6,6 +6,7 @@
   <title>02 扩展功能 — 知练</title>
   <link rel="stylesheet" href="shared.css" />
   <link rel="stylesheet" href="bento-theme.css" />
+  <link rel="stylesheet" href="ui-ref-home.css" />
 </head>
 <body class="theme-bento">
 
@@ -16,6 +17,7 @@
   <h1>02 · 扩展功能</h1>
   <p>多源导入 · VIP · 生图题 · PK · 排行 · 语音 — Bento 暖橙风</p>
   <nav class="gallery-nav">
+    <a href="ui.html" class="nav-web-ui">★ 网页 UI 稿</a>
     <a href="index.html">总览</a>
     <a href="01_mvp_core.html">01 MVP</a>
     <a href="02_extended_features.html" class="active">02 扩展</a>
@@ -25,6 +27,7 @@
 
 <main id="main-content" class="screen-grid">
 
+  <!-- ① RAG -->
   <article class="screen-item">
     <h2 class="screen-label">① 多源导入 / RAG</h2>
     <code class="screen-route">第 4 幕 · 资料入库</code>
@@ -36,26 +39,37 @@
           <div class="bt-notch-safe" aria-hidden="true"></div>
           <div class="bt-scroll">
             <div class="bt-greeting">资料导入</div>
-            <h1 class="bt-title">把资料全丢进来</h1>
-            <div class="bt-card"><div class="bt-card-hd">新建闯关集</div><p class="bt-caption">粘贴文本或链接，AI 提炼考点并出题。</p></div>
-            <div class="bt-bento-4">
-              <div class="bt-bento-cell"><b>文本</b>摘要</div>
-              <div class="bt-bento-cell"><b>网页</b>解析</div>
-              <div class="bt-bento-cell"><b>PDF</b>要点</div>
-              <div class="bt-bento-cell"><b>视频</b>字幕</div>
+            <h1 class="bt-title">把资料丢进来</h1>
+            <p class="bt-subtitle">粘贴文本或链接，也可上传 PDF · AI 提炼考点后出题</p>
+            <div class="ref-input-card">
+              <label class="ref-input-label">粘贴文本或链接</label>
+              <div class="ref-input-compose">
+                <p class="ref-input-example">https://docs.example.com/rag 或粘贴章节原文、面试笔记…</p>
+                <svg class="ref-input-compose__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <div class="bt-import-row">
+                <button type="button" class="bt-import-file" tabindex="-1">选择 PDF</button>
+                <span class="bt-import-divider" aria-hidden="true">·</span>
+                <button type="button" class="bt-import-file" tabindex="-1">我的知识库 ›</button>
+              </div>
+              <button type="button" class="ref-btn-generate" tabindex="-1">
+                <span>开始解析并入库</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
             </div>
             <div class="bt-card">
               <div class="bt-card-hd">驾考科目一速记.pdf</div>
-              <div class="bt-progress-line"><span style="width:72%"></span></div>
-              <p class="bt-caption">解析中 72%</p>
+              <div class="bt-progress-line" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="解析进度 72%"><span style="width:72%"></span></div>
+              <p class="bt-caption">解析中 72% · 预计还需 30 秒</p>
             </div>
-            <div class="bt-level-item" style="box-shadow:var(--bt-shadow-sm);">
+            <div class="bt-section-title">我的闯关集</div>
+            <div class="bt-level-item">
               <div class="bt-level-icon bt-level-icon--math">集</div>
-              <div class="bt-level-info"><strong>面试冲刺集</strong><span>12 份资料</span></div>
+              <div class="bt-level-info"><strong>面试冲刺集</strong><span>12 份资料 · 2 天前</span></div>
             </div>
-            <div class="bt-level-item" style="box-shadow:var(--bt-shadow-sm);">
+            <div class="bt-level-item">
               <div class="bt-level-icon bt-level-icon--sci">集</div>
-              <div class="bt-level-info"><strong>公考行测笔记</strong><span>42 切片</span></div>
+              <div class="bt-level-info"><strong>公考行测笔记</strong><span>42 切片 · 可直接出题</span></div>
             </div>
             <button type="button" class="bt-btn bt-btn-primary">从知识库出题</button>
           </div>
@@ -64,6 +78,7 @@
     </div>
   </article>
 
+  <!-- ② VIP -->
   <article class="screen-item">
     <h2 class="screen-label">② VIP 充值</h2>
     <code class="screen-route">第 6 幕 · 会员</code>
@@ -76,24 +91,49 @@
           <div class="bt-scroll">
             <div class="bt-greeting">会员中心</div>
             <h1 class="bt-title">升级 VIP</h1>
-            <div class="bt-bento-4" style="grid-template-columns:1fr 1fr;">
-              <div class="bt-bento-cell"><b>无限</b>生成</div>
-              <div class="bt-bento-cell"><b>优先</b>队列</div>
+            <p class="bt-subtitle">无限生成、优先队列、生图题与数字人讲解</p>
+            <div class="bt-stat-badges">
+              <span class="bt-badge bt-badge--up">无限生成</span>
+              <span class="bt-badge">优先队列</span>
+              <span class="bt-badge bt-badge--bean">生图题</span>
             </div>
-            <div class="bt-card bt-card--flat"><div class="bt-card-hd">体验版 · ¥0</div><p class="bt-caption">每日 3 次生成</p></div>
-            <div class="bt-card" style="border:2px solid var(--bt-primary);">
-              <span class="bt-badge" style="background:var(--bt-primary);color:#fff;margin-bottom:8px;">最划算</span>
-              <div class="bt-card-hd">月度 VIP · ¥19.9</div>
-              <p class="bt-caption">无限 · 优先 · 生图题</p>
+            <div class="bt-card bt-card--flat bt-vip-card">
+              <div class="bt-vip-card__row">
+                <div>
+                  <div class="bt-card-hd">体验版</div>
+                  <p class="bt-caption">每日 3 次生成 · 基础题型</p>
+                </div>
+                <div class="bt-vip-price"><b>¥0</b><span>永久</span></div>
+              </div>
             </div>
-            <div class="bt-card bt-card--flat"><div class="bt-card-hd">年度 VIP · ¥99</div><p class="bt-caption">约 ¥8.25/月</p></div>
-            <button type="button" class="bt-btn bt-btn-primary">立即开通</button>
+            <div class="bt-card bt-vip-card is-selected">
+              <span class="bt-badge bt-badge--rec">最划算</span>
+              <div class="bt-vip-card__row">
+                <div>
+                  <div class="bt-card-hd">月度 VIP</div>
+                  <p class="bt-caption">全部权益 · 可随时取消</p>
+                </div>
+                <div class="bt-vip-price"><b>¥19.9</b><span>/月</span></div>
+              </div>
+            </div>
+            <div class="bt-card bt-card--flat bt-vip-card">
+              <div class="bt-vip-card__row">
+                <div>
+                  <div class="bt-card-hd">年度 VIP</div>
+                  <p class="bt-caption">约 ¥8.25/月 · 全部权益</p>
+                </div>
+                <div class="bt-vip-price"><b>¥99</b><span>/年</span></div>
+              </div>
+            </div>
+            <button type="button" class="bt-btn bt-btn-primary">立即开通 ¥19.9/月</button>
+            <p class="bt-caption" style="text-align:center;margin-top:8px;">订阅可随时取消 · 合规支付文案</p>
           </div>
         </div>
       </div>
     </div>
   </article>
 
+  <!-- ③ 生图题 -->
   <article class="screen-item">
     <h2 class="screen-label">③ AI 生图题目</h2>
     <code class="screen-route">扩展 · 视觉记忆题</code>
@@ -109,18 +149,29 @@
             </div>
           </header>
           <div class="bt-scroll">
-            <div class="bt-meta-row"><span>单词闯关</span><span class="bt-pill">配图单选</span></div>
+            <div class="bt-meta-row"><span>单词闯关</span><span class="bt-pill">配图单选 · VIP</span></div>
+            <div class="bt-progress-line" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" aria-label="关卡进度"><span style="width:20%"></span></div>
             <p class="bt-q-stem">下面哪张图是 apple？</p>
-            <div class="bt-card" style="text-align:center;padding:24px;">
-              <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style="margin:0 auto 8px;display:block;"><circle cx="32" cy="34" r="22" fill="#FECACA" stroke="#EF4444" stroke-width="2"/><path d="M32 14 Q36 8 42 12" fill="none" stroke="#22C55E" stroke-width="2"/></svg>
-              <p class="bt-caption">AI 配图占位</p>
-            </div>
-            <div class="bt-opt"><span class="bt-opt-letter">A</span><span>香蕉</span></div>
-            <div class="bt-opt"><span class="bt-opt-letter">B</span><span>苹果</span></div>
-            <div class="bt-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span>为单词配漫画图</span>
-                <div class="bt-toggle is-on" role="switch" aria-checked="true" aria-label="开启生图"></div>
+            <div class="bt-img-opt-grid bt-img-opt-grid--quad">
+              <div class="bt-img-opt" role="button" tabindex="0">
+                <span class="bt-opt-letter">A</span>
+                <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 38 Q32 52 44 38 Q48 28 38 22 Q32 18 26 22 Q16 28 20 38" fill="#FEF08A" stroke="#EAB308" stroke-width="2"/><path d="M38 22 Q42 14 48 16" fill="none" stroke="#78716C" stroke-width="2"/></svg>
+                <span>香蕉</span>
+              </div>
+              <div class="bt-img-opt" role="button" tabindex="0">
+                <span class="bt-opt-letter">B</span>
+                <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="34" r="22" fill="#FECACA" stroke="#EF4444" stroke-width="2"/><path d="M32 14 Q36 8 42 12" fill="none" stroke="#22C55E" stroke-width="2"/></svg>
+                <span>苹果</span>
+              </div>
+              <div class="bt-img-opt" role="button" tabindex="0">
+                <span class="bt-opt-letter">C</span>
+                <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="36" r="18" fill="#FFEDD5" stroke="#FB923C" stroke-width="2"/><ellipse cx="32" cy="38" rx="10" ry="14" fill="#FDBA74"/></svg>
+                <span>橘子</span>
+              </div>
+              <div class="bt-img-opt" role="button" tabindex="0">
+                <span class="bt-opt-letter">D</span>
+                <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="38" rx="20" ry="14" fill="#D9F99D" stroke="#84CC16" stroke-width="2"/></svg>
+                <span>梨</span>
               </div>
             </div>
           </div>
@@ -129,6 +180,7 @@
     </div>
   </article>
 
+  <!-- ④ PK -->
   <article class="screen-item">
     <h2 class="screen-label">④ 多人 PK</h2>
     <code class="screen-route">第 6 幕 · 对战</code>
@@ -140,28 +192,48 @@
           <div class="bt-notch-safe" aria-hidden="true"></div>
           <div class="bt-scroll">
             <div class="bt-greeting">智力挑战赛</div>
-            <div class="bt-card" style="text-align:center;">
-              <div class="bt-card-hd">房间号</div>
-              <p style="font-size:28px;font-weight:700;letter-spacing:0.2em;margin:8px 0;">8 2 4 6</p>
+            <h1 class="bt-title">同步答题中</h1>
+            <p class="bt-subtitle">第 6 题 · 先答对得分更高 · 邀请好友输入房间号加入</p>
+            <div class="bt-card">
+              <div class="bt-pk-scoreboard">
+                <div class="bt-card-hd">房间号</div>
+                <div class="bt-pk-scoreboard__code">8246</div>
+              </div>
+              <div class="bt-vs-duel">
+                <div class="bt-vs-player">
+                  <div class="bt-podium-avatar bt-podium-avatar--gold" aria-hidden="true">皮</div>
+                  <b>小皮</b>
+                  <span>5 / 10</span>
+                </div>
+                <div class="bt-vs-badge">VS</div>
+                <div class="bt-vs-player">
+                  <div class="bt-podium-avatar bt-podium-avatar--silver" aria-hidden="true">卷</div>
+                  <b>卷王本王</b>
+                  <span>4 / 10</span>
+                </div>
+              </div>
             </div>
             <div class="bt-card">
-              <div class="bt-meta-row" style="justify-content:center;gap:16px;font-size:17px;font-weight:600;"><span>我 5/10</span><span style="color:var(--bt-primary)">VS</span><span>对手 4/10</span></div>
-              <p class="bt-caption" style="text-align:center;">第 6 题 · 同步答题中</p>
+              <div class="bt-skill-row">
+                <div class="bt-skill-row__hd"><strong>小皮</strong><span>50%</span></div>
+                <div class="bt-progress-line"><span style="width:50%"></span></div>
+              </div>
+              <div class="bt-skill-row">
+                <div class="bt-skill-row__hd"><strong>卷王本王</strong><span>40%</span></div>
+                <div class="bt-progress-line bt-progress-line--rival"><span style="width:40%"></span></div>
+              </div>
             </div>
-            <div class="bt-card">
-              <div class="bt-card-hd">进度</div>
-              <p class="bt-caption">我</p>
-              <div class="bt-progress-line"><span style="width:50%"></span></div>
-              <p class="bt-caption" style="margin-top:8px;">对手</p>
-              <div class="bt-progress-line bt-progress-line--rival"><span style="width:40%"></span></div>
+            <div class="bt-btn-row">
+              <button type="button" class="bt-btn bt-btn-primary">继续对战</button>
+              <button type="button" class="bt-btn bt-btn-secondary">复制房间号</button>
             </div>
-            <button type="button" class="bt-btn bt-btn-secondary">邀请好友</button>
           </div>
         </div>
       </div>
     </div>
   </article>
 
+  <!-- ⑤ 排行榜 -->
   <article class="screen-item">
     <h2 class="screen-label">⑤ 排行榜</h2>
     <code class="screen-route">第 6 幕 · 学霸榜</code>
@@ -172,24 +244,69 @@
         <div class="phone-screen bt-screen">
           <div class="bt-notch-safe" aria-hidden="true"></div>
           <div class="bt-scroll">
-            <div class="bt-greeting">本周学霸榜</div>
-            <h1 class="bt-title">冲榜中</h1>
-            <div class="bt-card">
-              <div class="bt-row-item"><span>#1 卷王本王</span><span>980</span></div>
-              <div class="bt-row-item"><span>#2 学习使我快乐</span><span>876</span></div>
-              <div class="bt-row-item"><span>#3 深夜刷题人</span><span>754</span></div>
-              <div class="bt-row-item" style="background:var(--bt-success-bg);margin:0 -16px;padding:14px 16px;border-radius:12px;"><span>#42 我</span><span style="font-weight:600;">320</span></div>
+            <div class="bt-greeting">学霸榜</div>
+            <h1 class="bt-title">本周冲榜中</h1>
+            <p class="bt-subtitle">5.21 – 5.27 · 每周一 0 点重置</p>
+            <div class="bt-rank-tabs" role="tablist" aria-label="榜单周期">
+              <button type="button" class="is-active" role="tab" aria-selected="true" tabindex="-1">本周</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1">本月</button>
+              <button type="button" role="tab" aria-selected="false" tabindex="-1">好友</button>
             </div>
-            <div class="bt-card bt-card--tint">
-              <div class="bt-card-hd">冲榜提示</div>
-              <p class="bt-caption">完成今日错题复习</p>
+            <div class="bt-podium-wrap">
+              <div class="bt-podium" aria-label="前三名">
+                <div class="bt-podium-slot is-second">
+                  <div class="bt-podium-card">
+                    <div class="bt-podium-rank">NO.2</div>
+                    <div class="bt-podium-avatar bt-podium-avatar--silver" aria-hidden="true">学</div>
+                    <div class="bt-podium-name">学习使我快乐</div>
+                    <div class="bt-podium-score">876<small> 分</small></div>
+                  </div>
+                </div>
+                <div class="bt-podium-slot is-first">
+                  <div class="bt-podium-card">
+                    <div class="bt-podium-crown" aria-hidden="true">👑</div>
+                    <div class="bt-podium-rank">NO.1</div>
+                    <div class="bt-podium-avatar bt-podium-avatar--gold" aria-hidden="true">卷</div>
+                    <div class="bt-podium-name">卷王本王</div>
+                    <div class="bt-podium-score">980<small> 分</small></div>
+                  </div>
+                </div>
+                <div class="bt-podium-slot is-third">
+                  <div class="bt-podium-card">
+                    <div class="bt-podium-rank">NO.3</div>
+                    <div class="bt-podium-avatar bt-podium-avatar--bronze" aria-hidden="true">深</div>
+                    <div class="bt-podium-name">深夜刷题人</div>
+                    <div class="bt-podium-score">754<small> 分</small></div>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="bt-section-title">第 4 – 8 名</div>
+            <div class="bt-card" style="padding-top:4px;padding-bottom:4px;">
+              <div class="bt-rank-row"><span class="bt-rank-row__num">4</span><span class="bt-rank-row__avatar" aria-hidden="true">早</span><div class="bt-rank-row__body"><strong>早八战神</strong><span>连闯 6 关</span></div><span class="bt-rank-row__score">698</span></div>
+              <div class="bt-rank-row"><span class="bt-rank-row__num">5</span><span class="bt-rank-row__avatar" aria-hidden="true">知</span><div class="bt-rank-row__body"><strong>知识搬运工</strong><span>连闯 5 关</span></div><span class="bt-rank-row__score">612</span></div>
+              <div class="bt-rank-row"><span class="bt-rank-row__num">6</span><span class="bt-rank-row__avatar" aria-hidden="true">刷</span><div class="bt-rank-row__body"><strong>刷题小能手</strong><span>连闯 4 关</span></div><span class="bt-rank-row__score">588</span></div>
+            </div>
+            <div class="bt-rank-me-card" aria-label="我的排名">
+              <div class="bt-rank-me-card__left">
+                <span class="bt-rank-me-card__num">#42</span>
+                <div><strong>小皮（我）</strong><p class="bt-caption">距 #41 还差 12 分</p></div>
+              </div>
+              <b>320</b>
+            </div>
+            <button type="button" class="bt-btn bt-btn-primary">去做题冲榜</button>
           </div>
         </div>
+        <nav class="bt-tabbar bt-tabbar-float" aria-label="主导航">
+          <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>闯关</button>
+          <button type="button" class="bt-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>题库</button>
+          <button type="button" class="bt-tab is-active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>勋章</button>
+        </nav>
       </div>
     </div>
   </article>
 
+  <!-- ⑥ 语音 -->
   <article class="screen-item">
     <h2 class="screen-label">⑥ 语音 / 数字人</h2>
     <code class="screen-route">扩展 · 无障碍</code>
@@ -200,29 +317,28 @@
         <div class="phone-screen bt-screen">
           <header class="bt-topbar bt-topbar--quiz">
             <div class="bt-quiz-header">
-              <div class="bt-progress-pill">语音模式</div>
+              <div class="bt-progress-pill">第 3 / 10 题</div>
               <button type="button" class="bt-icon-btn" aria-label="关闭"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
           </header>
           <div class="bt-scroll">
-            <div class="bt-card bt-card--success">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span>正在朗读题目…</span>
-                <button type="button" class="bt-btn-ghost" style="width:auto;min-height:auto;padding:0;font-size:14px;color:var(--bt-primary);">播放</button>
-              </div>
+            <div class="bt-meta-row"><span>生物 · 光合作用</span><span class="bt-pill">语音模式</span></div>
+            <div class="bt-progress-line" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"><span style="width:30%"></span></div>
+            <div class="bt-voice-bar">
+              <span class="bt-voice-bar__lead">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                正在朗读题目…
+              </span>
+              <button type="button" class="bt-voice-bar__action" tabindex="-1">暂停</button>
             </div>
             <p class="bt-q-stem">光合作用的主要场所是？</p>
-            <div class="bt-opt"><span class="bt-opt-letter">A</span><span>线粒体</span></div>
-            <div class="bt-opt"><span class="bt-opt-letter">B</span><span>叶绿体</span></div>
-            <div class="bt-card bt-card--tint" style="text-align:center;">
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">A</span><span>线粒体</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">B</span><span>叶绿体</span></div>
+            <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">C</span><span>细胞核</span></div>
+            <div class="bt-card bt-card--flat bt-digital-human">
               <div class="bt-card-hd">数字人讲解</div>
-              <p class="bt-caption">视频占位 · VIP 专享</p>
-            </div>
-            <div class="bt-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span>自动语音读题</span>
-                <div class="bt-toggle is-on" role="switch" aria-checked="true" aria-label="自动读题"></div>
-              </div>
+              <svg class="bt-digital-human__art" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="10" fill="var(--bt-primary-soft)" stroke="var(--bt-primary)" stroke-width="2"/><path d="M10 42 Q24 32 38 42" fill="none" stroke="var(--bt-border)" stroke-width="2"/></svg>
+              <p class="bt-caption">答错后自动播放 · VIP 专享</p>
             </div>
           </div>
         </div>

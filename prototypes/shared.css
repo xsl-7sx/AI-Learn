@@ -242,6 +242,21 @@ body > * { position: relative; z-index: 1; }
   transform: rotate(-0.6deg);
 }
 
+.screen-note {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  margin: -0.25rem 0 0.75rem;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.screen-note code {
+  font-size: 0.75rem;
+}
+
 .screen-route {
   font-size: 0.72rem;
   color: var(--ink-muted);

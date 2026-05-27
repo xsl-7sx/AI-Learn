@@ -2,6 +2,9 @@
 
 /* ── 网页画布：点阵光晕（非画廊 beige 纸纹） ── */
 body.web-ui-page.theme-bento {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background-color: #f3f1ed !important;
   background-image:
     radial-gradient(ellipse 50% 42% at 14% 16%, rgba(240, 106, 42, 0.14) 0%, transparent 58%),
@@ -23,6 +26,12 @@ body.web-ui-page.theme-bento::before {
 
 body.web-ui-page.theme-bento::after {
   display: none;
+}
+
+body.web-ui-page.theme-bento::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 body.web-ui-page .web-ui-shell {
@@ -99,22 +108,46 @@ body.web-ui-page .web-ui-shell {
   --bt-screen-paper-bg-pos: center, center, center, -4px 11px, center;
 }
 
+/* 首页壳：顶栏固定 + 仅内容区滚动（底栏在机框内独立一层） */
+.ref-home .phone-screen.bt-screen {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .ref-home-scroll {
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 8px 18px 32px;
+  padding: 4px 18px 20px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* 顶栏：与 --bt-notch-safe 对齐并略增顶距 */
+.ref-home-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 顶栏：与 --bt-notch-safe 对齐；不参与 ref-home-scroll 滚动 */
 .ref-topbar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(var(--bt-notch-safe, 52px) + 10px) 2px 18px;
+  padding: calc(var(--bt-notch-safe, 52px) + 10px) 18px 14px;
   gap: 12px;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    var(--bt-screen-paper-bg-color, #f8fcff) 0%,
+    var(--bt-screen-paper-bg-color, #f8fcff) 72%,
+    rgba(248, 252, 255, 0) 100%
+  );
 }
 
 .ref-user {
@@ -291,18 +324,61 @@ body.web-ui-page .web-ui-shell {
   font-size: 15px;
 }
 
-/* 热门主题 · 横向滑动 */
+/* 热门主题 · 横向滑动（外层渐变提示可滑） */
+.ref-topic-strip {
+  position: relative;
+  margin: 0 -18px 28px;
+  --ref-topic-fade: var(--bt-screen-paper-bg-color, #f8fcff);
+}
+
+.ref-topic-strip::before,
+.ref-topic-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 10px;
+  width: 32px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.ref-topic-strip::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--ref-topic-fade) 15%, transparent);
+}
+
+.ref-topic-strip::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--ref-topic-fade) 15%, transparent);
+}
+
+.ref-topic-strip.is-at-start::before,
+.ref-topic-strip.is-at-end::after {
+  opacity: 0;
+}
+
 .ref-topic-row {
   display: flex;
   gap: 12px;
-  margin: 0 -18px 28px;
+  margin: 0;
   padding: 2px 18px 10px;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 18px;
   scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.ref-topic-row.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
 }
 
 .ref-topic-row::-webkit-scrollbar {
@@ -312,6 +388,7 @@ body.web-ui-page .web-ui-shell {
 .ref-topic {
   flex: 0 0 148px;
   scroll-snap-align: start;
+  user-select: none;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 16px;
   padding: 16px 14px 18px;
@@ -387,10 +464,40 @@ body.web-ui-page .web-ui-shell {
   color: #1c1917;
 }
 
-.ref-section-hd .link {
+.ref-section-hd .link,
+.ref-topic-shuffle {
   font-size: 13px;
   font-weight: 500;
   color: #a8a29e;
+}
+
+.ref-topic-shuffle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  cursor: pointer;
+  line-height: inherit;
+  transition: color 0.15s ease;
+}
+
+.ref-topic-shuffle:hover {
+  color: #78716c;
+}
+
+.ref-topic-shuffle:active {
+  color: #ea580c;
+}
+
+.ref-topic-row.is-swapping {
+  opacity: 0.35;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ref-topic-row:not(.is-swapping) {
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .ref-level-card {

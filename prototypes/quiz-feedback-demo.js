@@ -3,9 +3,10 @@
  * 仅作用于 [data-feedback-demo]，进入视口时播放，离开视口暂停
  */
 (function () {
+  /* 略慢于初版，贴近真实判题节奏（展示用循环） */
   var TIMING = {
-    correct: { select: 450, result: 750, bar: 1050, note: 1450, hold: 4200 },
-    wrong: { wrong: 450, answer: 850, bar: 1150, note: 1550, hold: 4500 }
+    correct: { select: 650, result: 1100, bar: 1500, note: 2000, hold: 5600 },
+    wrong: { wrong: 650, answer: 1200, bar: 1650, note: 2150, hold: 6000 }
   };
 
   function replayAnimation(el) {
