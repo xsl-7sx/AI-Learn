@@ -2,6 +2,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.5.0 | 2026-05-26 | 布局/图标/进度条；移除反馈金币与报告 XP |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；翻书 Loading；移除金币角标 |
 | v1.3.0 | 2026-05-26 | §1.0 文档阶段说明；链到 UI 文档索引 |
 | v1.2.3 | 2026-05-26 | 总览六幕业务流 + `phone-screen--act` 笔记本组件 |
@@ -155,13 +156,30 @@ AI-Learn/prototypes/
 - 进度：`[data-gen-progress-fill]` + `loading-steps.js` 驱动 ①–④ 文案与 `.bt-step` 状态
 - **已移除：** 笑脸 SVG / 小课豆主视觉
 
-### 4.5 顶栏与金币
+### 4.5 顶栏与奖励示意
 
-- 首页 / 生成 / 答题：`bt-topbar` 或 `bt-quiz-header`（关闭 + 进度 pill）
-- **无** `bt-coin-pill` 金币数字角标
-- 答对反馈条可保留「+10 金币」文字示意（非顶栏）
+- 首页 / 生成 / 答题：`bt-notch-safe` + 滚动区；问候语在 `.bt-scroll` 内
+- 答题顶栏：`bt-topbar--quiz`（关闭 + `bt-progress-pill`）
+- **无** `bt-coin-pill`、反馈条「+N 金币」、报告 `+20 XP` 徽章（原型阶段均不展示）
 
-### 4.6 解析区
+### 4.6 屏内布局
+
+- 默认 `.bt-scroll` **顶对齐**（`padding-top: 12px`），内容多时可滚动
+- 仅生成中：`.bt-scroll--center` 垂直居中（翻书 + 步骤条）
+- 通关报告：`bt-report-top` 在滚动区外；`bt-notch-safe` 统一避刘海
+- 无 Tab 的答题反馈：`.bt-btn-row` 贴底（`margin-top: auto`）
+
+### 4.7 图标与进度
+
+| 元素 | 类名 | 说明 |
+| ---- | ---- | ---- |
+| 输入框尾标 | `.bt-input-icon` | 暖橙铅笔 SVG（非笑脸） |
+| 答对标记 | `.bt-opt-check` | 绿圆章 + 白勾（CSS/SVG 背景） |
+| 横向进度 | `.bt-progress-line` | 8px · `#F06A2A → #FFB380` · `width` 过渡 |
+| 对手进度 | `.bt-progress-line--rival` | 蓝渐变 |
+| 生成步骤 | `.bt-step` | 橙/绿描边圆点，无脉冲动画 |
+
+### 4.8 解析区
 
 - 组件：`.bt-teacher-note`（左侧桃色边条 + 铅笔 SVG +「老师笔记」标签）
 - 正文：得意黑；选项/题干：文楷
@@ -213,7 +231,9 @@ npx serve d:\AI-Learn\prototypes
 - [x] MVP 9 屏与页面说明对应
 - [x] `theme-bento` + `bento-theme.css` 四页统一引用
 - [x] 加载页翻书动画 + 四步 stepper
-- [x] 顶栏无金币角标
+- [x] 顶栏无金币角标；无反馈金币 / 报告 XP 文案
+- [x] 生成页 `.bt-scroll--center`；其余屏顶对齐
+- [x] 输入铅笔图标 + 答对圆章勾 + 克制进度条
 - [x] 老师笔记区得意黑 + 全局文楷
 - [x] 选项马卡龙渐变 + 对错绿/红渐变
 - [x] 屏 8 / 9 结算分屏
@@ -258,6 +278,7 @@ npx serve d:\AI-Learn\prototypes
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.5.0 | 2026-05-26 | 布局顶对齐；移除 +10 金币 / +20 XP；图标与克制进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；`bento-theme.css`；翻书动画；无金币角标；字体文楷+得意黑 |
 | v1.2.3 | 2026-05-26 | 总览六幕业务流程 showcase + biz-flow-map |
 | v1.2.0 | 2026-05-26 | 笔记本风、SVG 横纹 |

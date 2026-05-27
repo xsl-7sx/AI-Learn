@@ -33,14 +33,13 @@
       <div class="phone-frame">
         <div class="phone-notch"></div>
         <div class="phone-screen bt-screen">
-          <header class="bt-topbar">
-            <div class="bt-greeting">你好，<strong>小皮</strong></div>
-          </header>
+          <div class="bt-notch-safe" aria-hidden="true"></div>
           <div class="bt-scroll">
+            <div class="bt-greeting">你好，<strong>小皮</strong></div>
             <h1 class="bt-title">今天想闯哪一关？</h1>
             <div class="bt-card bt-input-card">
               <div class="bt-input-field">输入你想学的内容
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                <svg class="bt-input-icon" width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
               </div>
               <p class="bt-input-hint">用武侠小说的口吻通俗解释 TCP 三次握手；或试试：RAG 和传统搜索有什么区别？向量数据库解决什么问题？</p>
             </div>
@@ -79,10 +78,9 @@
       <div class="phone-frame">
         <div class="phone-notch"></div>
         <div class="phone-screen bt-screen" role="status" aria-live="polite">
-          <header class="bt-topbar">
+          <div class="bt-notch-safe" aria-hidden="true"></div>
+          <div class="bt-scroll bt-scroll--center" data-gen-stepper data-loading-mode="demo">
             <div class="bt-greeting">AI 正在出题…</div>
-          </header>
-          <div class="bt-scroll" data-gen-stepper data-loading-mode="demo">
             <h1 class="bt-title-lg">等等，我去翻翻笔记…</h1>
             <div class="bt-card" style="text-align:center;">
               <div class="bt-book-flip" role="img" aria-label="正在翻阅笔记">
@@ -159,8 +157,8 @@
             <div class="bt-meta-row"><span>TCP 三次握手</span><span class="bt-pill">多选</span></div>
             <div class="bt-progress-line"><span style="width:50%"></span></div>
             <p class="bt-q-stem">三次握手中，哪些 TCP 标志位会出现？</p>
-            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">A</span><span>SYN</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
-            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">B</span><span>ACK</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">A</span><span>SYN</span><span class="bt-opt-check" aria-hidden="true"></span></div>
+            <div class="bt-opt is-correct" role="button" tabindex="0"><span class="bt-opt-letter">B</span><span>ACK</span><span class="bt-opt-check" aria-hidden="true"></span></div>
             <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">C</span><span>FIN</span><span class="bt-opt-check" aria-hidden="true"></span></div>
             <div class="bt-opt" role="button" tabindex="0"><span class="bt-opt-letter">D</span><span>RST</span><span class="bt-opt-check" aria-hidden="true"></span></div>
             <button type="button" class="bt-btn bt-btn-primary">确认提交</button>
@@ -219,8 +217,8 @@
           <div class="bt-scroll">
             <div class="bt-meta-row"><span>第 1 关 / 共 2 关</span><span>答对 3 题</span></div>
             <p class="bt-q-stem">TCP 建立连接需要几次握手？</p>
-            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
-            <div class="bt-feedback-bar" role="status"><span>答对啦</span><span>+10 金币</span></div>
+            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true"></span></div>
+            <div class="bt-feedback-bar" role="status"><span>答对啦</span></div>
             <div class="bt-teacher-note">
               <p>第三次握手是客户端发 ACK，确认服务端 SYN+ACK 已收到；两次握手无法防止旧连接干扰。</p>
             </div>
@@ -251,7 +249,7 @@
           <div class="bt-scroll">
             <p class="bt-q-stem">TCP 建立连接需要几次握手？</p>
             <div class="bt-opt is-wrong"><span class="bt-opt-letter">A</span><span>两次</span></div>
-            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true">✓</span></div>
+            <div class="bt-opt is-correct"><span class="bt-opt-letter">B</span><span>三次</span><span class="bt-opt-check" aria-hidden="true"></span></div>
             <div class="bt-feedback-bar is-wrong" role="alert"><span>答错了</span><span>已记入错题本</span></div>
             <div class="bt-teacher-note">
               <p>建立连接是三次握手，四次那是断开连接。建议明天再练一次。</p>
@@ -271,9 +269,9 @@
       <div class="phone-frame">
         <div class="phone-notch"></div>
         <div class="phone-screen bt-screen">
+          <div class="bt-notch-safe" aria-hidden="true"></div>
           <header class="bt-report-top">
             <div><h2>通关报告</h2><div class="bt-title-sm">TCP 三次握手</div></div>
-            <span class="bt-xp-badge">+20 XP</span>
           </header>
           <div class="bt-scroll">
             <h1 class="bt-title">你这局学得很稳</h1>
@@ -325,6 +323,7 @@
       <div class="phone-frame">
         <div class="phone-notch"></div>
         <div class="phone-screen bt-screen">
+          <div class="bt-notch-safe" aria-hidden="true"></div>
           <header class="bt-report-top">
             <div><h2>生成复盘</h2><div class="bt-title-sm">闯关完成 7/10</div></div>
           </header>

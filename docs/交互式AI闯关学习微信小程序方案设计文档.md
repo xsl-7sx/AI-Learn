@@ -825,7 +825,7 @@ uniapp/dist/
 | [UI-HTML原型迭代清单.md](./UI-HTML原型迭代清单.md) | 迭代里程碑与资源清单 |
 | [`prototypes/index.html`](../prototypes/index.html) | **预览入口**（推荐 `npx serve prototypes`） |
 
-§6 页面结构以方案为准；UI 文档在屏数上补充 **结算 skeleton 独立态（第 9 屏）** 及扩展/报告示意屏。视觉层以 **`bento-theme.css`（Bento 暖橙）+ `paper-lines-*.svg`** 为准；保留水彩横纹，**无方格格纹、无顶栏金币、无书本外壳**。
+§6 页面结构以方案为准；UI 文档在屏数上补充 **结算 skeleton 独立态（第 9 屏）** 及扩展/报告示意屏。视觉层以 **`bento-theme.css`（Bento 暖橙）+ `paper-lines-*.svg`** 为准；保留水彩横纹，**无方格格纹、无顶栏金币/反馈金币/报告 XP 示意、无书本外壳**；屏内默认顶对齐，仅生成中页垂直居中。
 
 ---
 
