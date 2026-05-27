@@ -4,7 +4,8 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
-| v1.7.0 | 2026-05-27 | Tab 子页 `04`（题库⑩、勋章⑪）；§1.3 MVP↔Tab IA |
+| v1.7.3 | 2026-05-27 | Tab 在 `03` 屏⑥⑦；首页滚动区与热门主题横滑；gallery 22 屏 |
+| v1.7.0 | 2026-05-27 | Tab 子页高保真；§1.3 MVP↔Tab IA（`04` 独立文件，v1.7.3 已并入 `03`） |
 | v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条原型与 MVP 不做项脚注 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；无金币/XP；图标与克制进度条 |
@@ -26,14 +27,14 @@
 
 ---
 
-## 〇、HTML 原型视觉层（v1.6 · Bento 暖橙）
+## 〇、HTML 原型视觉层（v1.7.3 · Bento 暖橙）
 
 静态 gallery 当前实现（见 [Design System §1.0.1](./UI设计风格与DesignSystem.md#101-当前-html-原型v14--bento-暖橙)）：
 
 | 元素 | HTML 实现 |
 | ---- | --------- |
 | 主题 | `body.theme-bento` + `bento-theme.css` |
-| 参考首页 | `ui.html` + `ui-ref-home.css`（`.ref-home`、热门横滑、compose 示例） |
+| 参考首页 | `ui.html` + `ui-ref-home.css`：顶栏固定、`ref-home-scroll`、`.ref-topic-strip` 横滑、`ref-home-topics.js` |
 | 横纹纸面 | `paper-lines-page.svg` / `paper-lines-screen.svg`（保留） |
 | 组件 | `bt-*`（`bt-card`、`bt-opt`、`bt-tabbar` 等） |
 | 解析 | `.bt-teacher-note`（得意黑；铅笔 SVG 标签） |
@@ -44,7 +45,7 @@
 | 底栏 | `bt-tabbar bt-tabbar-float`：机框内、`.phone-screen` 外；圆角胶囊；左右下留白；选中项蜜桃底 |
 | 底区背景 | 有悬浮底栏时 `--bt-screen-paper-bg` 铺至整列 `phone-frame`，避免机框 `#FFFBF0` 条带 |
 
-**CSS 引用顺序：** `shared.css` → `bento-theme.css`（屏① 另引 `ui-ref-home.css`）；生成页 `loading-steps.js`；屏 6/7 `quiz-feedback-demo.js`。
+**CSS / JS 引用：** `shared.css` → `bento-theme.css`（屏① 另引 `ui-ref-home.css`）；`loading-steps.js`；屏 6/7 `quiz-feedback-demo.js`；屏① `ref-home-topics.js`。
 
 **归档（gallery 未引用）：** `graphic-note.css`、`ux-enhancements.css`。
 
@@ -67,7 +68,7 @@
 
 不在 MVP `pages.json` 中；本文档以 **中保真** 描述，供路线图评审。
 
-### 1.3 底栏 Tab 与 MVP 四页栈（v1.7）
+### 1.3 底栏 Tab 与 MVP 四页栈（v1.7.3）
 
 | 底栏 Tab | HTML gallery | uni-app（示意） | 与 MVP 关系 |
 | -------- | ------------ | --------------- | ----------- |
@@ -150,25 +151,28 @@ flowchart LR
 | 目的 | 收集用户一句话学习主题 |
 | 顶栏 | `bt-greeting`（连胜可选）；无金币 |
 
-**布局线框（HTML v1.6 · `ref-home`）：**
+**布局线框（HTML v1.7.3 · `ref-home`）：**
 
 ```
 ┌─────────────────────────────────┐
-│ 🔥连胜  你好，小皮                │  ref-top
-│ 今天想闯哪一关？                  │  纯文案标题
+│ 🔥连胜  你好，小皮                │  ref-topbar（固定，不随内容滚）
+├─────────────────────────────────┤
+│ ↕ ref-home-scroll               │
+│ 今天想闯哪一关？                  │
 │  ┌───────────────────────────┐  │
-│  │ 占位 + 示例主题（compose）   │  │  ref-compose
+│  │ 占位 + 示例主题（compose）   │  │
 │  └───────────────────────────┘  │
-│  → 开始生成题目                  │  主 CTA + 箭头
-│  热门主题 ←→ 横滑卡片 ×4         │  ref-topic-row
-│  未完成关卡 · [继续]             │  ref-level-item
+│  → 开始生成题目                  │
+│  热门主题 ←→ 横滑 ×5/组         │  ref-topic-strip + snap
+│  [换一批]                        │  ref-home-topics.js
+│  未完成关卡 · [继续]             │
 └─────────────────────────────────┘
   ┌───────────────────────────────┐
-  │ 🏠闯关  题库  勋章            │  bt-tabbar-float
+  │ 🏠闯关  题库  勋章            │  bt-tabbar-float（机框底，常显）
   └───────────────────────────────┘
 ```
 
-> 线框类名 `bt-input-card` / `bt-topic-grid` 仍可用于 uni-app 组件命名；当前 gallery 屏① 以 `ref-*` 实现为准，并与 [`ui.html`](../prototypes/ui.html) 同步。
+> 线框类名 `bt-input-card` / `bt-topic-grid` 仍可用于 uni-app 组件命名；当前 gallery 屏① 以 `ref-*` 实现为准，并与 [`ui.html`](../prototypes/ui.html) 同步。横滑支持触控、`pointer` 拖拽、滚轮与方向键；屏内滚动条在 `ui-ref-home.css` 中隐藏。
 
 | 元素 | 规格 |
 | ---- | ---- |
@@ -599,6 +603,9 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.3 | 2026-05-27 | Tab 在 `03` ⑥⑦；首页顶栏/滚动区/底栏；热门主题横滑与 `ref-home-topics.js` |
+| v1.7.0 | 2026-05-27 | Tab IA §1.3；独立 `04`（v1.7.3 并入 `03`） |
+| v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条脚注 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关 Tab 首页图标 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；无金币/XP；图标与克制进度条 |
 | v1.3.0 | 2026-05-26 | 对齐 Bento 暖橙 HTML：`bt-*`、翻书 Loading、无金币角标 |

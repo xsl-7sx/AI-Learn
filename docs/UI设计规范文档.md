@@ -504,19 +504,24 @@ CDN：jsDelivr `lxgw-wenkai-screen-web`；unpkg `@fontpkg/smiley-sans`。
 ```
 prototypes/
 ├── index.html                  # 总览 · 六幕 showcase
+├── ui.html                     # ★ 网页展示稿（与 01 屏① 同步）
 ├── 01_mvp_core.html            # MVP 9 屏（Bento 暖橙）
 ├── 02_extended_features.html   # 扩展 6 屏
-├── 03_reports_social.html      # 报告 7 屏（含 Tab ⑥⑦）
+├── 03_reports_social.html      # 报告 7 屏（含 Tab ⑥题库 / ⑦勋章）
+├── 04_tab_pages.html           # 跳转 → 03#tab-bank（兼容旧链接）
 ├── shared.css                  # 画廊 / 手机框
 ├── bento-theme.css             # ★ 主主题 theme-bento · bt-* 组件
+├── ui-ref-home.css             # 参考首页 · 顶栏固定 / 热门横滑
+├── ref-home-topics.js          # 热门主题换一批 + 横滑交互
 ├── loading-steps.js            # 生成页四步进度 demo
+├── quiz-feedback-demo.js       # 屏 6/7 反馈动效 demo
 ├── paper-lines-page.svg        # 画廊横纹
 ├── paper-lines-screen.svg      # 屏内横纹
 ├── graphic-note.css            # 归档：旧笔记本主题
 ├── ux-enhancements.css         # 归档
 ├── spec-highlights.css         # 归档
-├── mascots.svg                 # 归档：小课豆
-├── manga-heavy-mvp.html        # 备选：4 屏漫画风（未随 Bento 更新）
+├── mascots.svg                 # Loading：mascot-think
+├── manga-heavy-mvp.html        # 归档：4 屏漫画风（未随 Bento v1.7 维护）
 └── UI设计规范文档.md           # 本文档
 ```
 

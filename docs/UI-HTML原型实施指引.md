@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.7.3 | 2026-05-27 | Tab 并入 `03`；首页滚动区；热门主题横滑；gallery 22 屏 |
 | v1.6.0 | 2026-05-27 | 参考首页 `ui.html`；Loading IP；反馈 demo；灵韵条（原型探索） |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；布局/图标/进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；翻书 Loading；移除金币角标 |
@@ -45,7 +46,7 @@ UI 设计文档集（Design System + 页面说明 + 本指引）先于 HTML 原�
 
 ---
 
-## 二、文件结构（当前 v1.6）
+## 二、文件结构（当前 v1.7.3）
 
 ```
 AI-Learn/prototypes/
@@ -62,7 +63,7 @@ AI-Learn/prototypes/
 ├── 02_extended_features.html     # 扩展 6 屏
 ├── 03_reports_social.html        # 报告 7 屏（含 Tab ⑥题库 / ⑦勋章）
 ├── 04_tab_pages.html             # 跳转 → 03#tab-bank（兼容旧链接）
-├── ref-home-topics.js            # 首页「换一批」热门主题 demo
+├── ref-home-topics.js            # 首页热门主题：换一批 + 横滑拖拽/滚轮
 ├── manga-heavy-mvp.html          # 归档：4 屏漫画风（未随 Bento v1.6 维护）
 ├── mascots.svg                   # Loading：mascot-think；其余屏待评估
 ├── graphic-note.css              # 归档：旧笔记本主题（gallery 未引用）
@@ -86,10 +87,13 @@ AI-Learn/prototypes/
 <link rel="stylesheet" href="ui-ref-home.css" />  <!-- 仅屏① / ui.html -->
 <script src="loading-steps.js" defer></script>
 <script src="quiz-feedback-demo.js" defer></script>  <!-- 屏 6/7 -->
+<script src="ref-home-topics.js"></script>           <!-- 屏① / index showcase -->
 <body class="theme-bento">
 ```
 
-`index.html` 总览 showcase 首页已与 `ui.html` / `01` 屏① 对齐（`.ref-home`，见 [迭代清单 §五](./UI-HTML原型迭代清单.md#五后续可选迭代非阻塞)）。
+**屏① 布局约定（v1.7.3）：** `ref-topbar` 在 `phone-screen` 内固定不滚；仅 `ref-home-scroll` 纵向滚动；`bt-tabbar-float` 与 `phone-screen` 并列于 `phone-frame`（`flex` 分配高度，避免 `height:100%` 裁切底栏）。热门主题为 `ref-topic-strip` > `ref-topic-row` 横向 `scroll-snap`。
+
+`index.html` 总览 showcase 首页已与 `ui.html` / `01` 屏① 对齐（`.ref-home`，见 [迭代清单](./UI-HTML原型迭代清单.md)）。
 
 ---
 
@@ -225,7 +229,7 @@ AI-Learn/prototypes/
 
 | 序号 | 屏 | Bento 必含 |
 | ---- | -- | ---------- |
-| 1 | 首页 | `.ref-home`：`ref-compose` 输入+示例、热门主题横滑 `ref-topic-row`、连胜、未完成「继续」；与 [`ui.html`](../prototypes/ui.html) 同步 |
+| 1 | 首页 | `.ref-home`：顶栏固定 + `ref-home-scroll`；compose 输入；`ref-topic-strip` 横滑（5 卡/组）；`ref-home-topics.js`；与 [`ui.html`](../prototypes/ui.html) 同步 |
 | 2 | 生成中 | `bt-book-flip`、`bt-progress-line`、`data-gen-stepper`、`bt-stepper`、IP 气泡 |
 | 3–5 | 三题型 | `bt-q-stem`、`bt-opt`、可选 `.bt-spirit`、`bt-progress-line` |
 | 6–7 | 对错反馈 | `bt-meta-row` + `bt-progress-line`；`bt-feedback-bar`、`bt-teacher-note`；`data-feedback-demo` + `quiz-feedback-demo.js` |
@@ -300,9 +304,10 @@ npx serve d:\AI-Learn\prototypes
 | ---- | ---- |
 | 设计文档 trio | ✅ |
 | Bento 暖橙 `bento-theme.css` | ✅ v1.4 |
-| 20 屏 gallery 重写 | ✅ |
+| 22 屏 gallery | ✅ v1.7.3 |
 | 翻书 Loading 动画 | ✅ |
 | 参考首页 / Loading IP / 反馈 demo | ✅ v1.6 |
+| Tab 并入 `03` / 首页滚动与热门横滑 | ✅ v1.7.3 |
 | 移除金币角标 | ✅ |
 | 旧 `graphic-note` 主题 | 📦 归档未引用 |
 | 浏览器验收 | 待评审人本地确认 |
@@ -313,6 +318,7 @@ npx serve d:\AI-Learn\prototypes
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.3 | 2026-05-27 | `03` 报告 7 屏含 Tab；`04` 跳转；首页顶栏/底栏滚动；`ref-home-topics.js` 横滑 |
 | v1.6.0 | 2026-05-27 | `ui.html` / `ui-ref-home.css`；IP + stepper；`quiz-feedback-demo.js`；灵韵条原型说明 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；§4.8 底栏约定 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；移除 +10 金币 / +20 XP；图标与克制进度条 |
