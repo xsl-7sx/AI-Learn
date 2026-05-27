@@ -2,6 +2,7 @@
 
 | 版本 | 日期 | 状态 |
 | ---- | ---- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` 与 MVP 视觉对齐；扩展/报告组件库；领奖台与语音条修复 |
 | v1.7.3 | 2026-05-27 | Tab 并入 03 报告；首页顶栏/底栏滚动修复；热门主题横滑增强 |
 | v1.6.0 | 2026-05-27 | 参考首页增强、Loading IP、答题反馈 demo、灵韵条（原型探索） |
 | v1.5.0 | 2026-05-26 | 产品品牌：知练（KnowPractice） |
@@ -28,7 +29,8 @@
 | 样式链 | `shared.css` → `bento-theme.css` | ✅ |
 | MVP 屏数 | **9**（仅 `01`） | ✅ |
 | Tab 子页 | `03` 屏⑥⑦（题库 / 勋章）；非 MVP；`04` 重定向 | ✅ v1.7.3 |
-| 扩展屏 | **11** | ✅ |
+| 扩展/报告 | `02`×6 + `03`×7（含 Tab）；与 MVP 三分页面层级 | ✅ v1.7.4 |
+| 扩展屏（合计） | **13**（gallery 标注非 MVP） | ✅ |
 | 顶栏 | 问候语 / 题号 pill；**无金币·无 XP 徽章** | ✅ |
 | 布局 | `bt-notch-safe`；列表/答题顶对齐；生成中居中 | ✅ v1.4 |
 | 图标 | 输入铅笔；答对圆章勾 | ✅ v1.4 |
@@ -67,6 +69,7 @@
 | **N** | **答题反馈动效 + `quiz-feedback-demo.js`** | ✅ v1.6 |
 | **O** | **Tab 并入 `03` 报告 gallery**（⑥⑦；`04` 跳转） | ✅ v1.7.3 |
 | **P** | **首页滚动区 + 热门主题横滑交互** | ✅ v1.7.3 |
+| **Q** | **`02`/`03` 与 MVP 视觉对齐 + 扩展组件库** | ✅ v1.7.4 |
 
 ---
 
@@ -90,8 +93,8 @@
 
 | 文件 | 用途 |
 | ---- | ---- |
-| `ui-ref-home.css` | ★ `ui.html` / `01` 屏① 参考首页（点阵页外 + 屏内 `.ref-home`） |
-| `bento-theme.css` | ★ 主主题 `theme-bento`、`bt-*` 组件、翻书/反馈/灵韵/ stepper 动效 |
+| `ui-ref-home.css` | ★ `ui.html` / `01` 屏①；`02` 屏① RAG 复用 `ref-input-card` / `ref-btn-generate` |
+| `bento-theme.css` | ★ 主主题 `theme-bento`、`bt-*`；v1.7.4 增：`bt-podium-wrap`、`bt-rank-*`、`bt-vip-card__row`、`bt-voice-bar__action`、`bt-skill-row` 等 |
 | `loading-steps.js` | 生成页进度 demo + IP 气泡文案同步 |
 | `quiz-feedback-demo.js` | 屏 6/7 反馈动效循环 demo（进入视口播放） |
 | `ref-home-topics.js` | 热门主题：换一批三组轮换 + 横滑拖拽/滚轮 + 边缘渐变状态 |
@@ -118,6 +121,28 @@
 | P3 | 深色模式 | 当前仅浅色 Bento |
 | P3 | 翻书动画 Lottie | 小程序性能评估 |
 | ~~P3~~ | ~~`02` / `03` 扩展屏视觉复查~~ | ✅ v1.6.2：底栏旗帜/勋章、去 XP 徽章、画廊导航补 `ui.html` |
+| ~~P3~~ | ~~`02`/`03` 页面层级与 MVP 对齐~~ | ✅ v1.7.4：功能页/答题页/报告页三分法；领奖台 `bt-podium-wrap`；语音「暂停」无边框 |
+
+---
+
+## 五点五、`02` / `03` 屏 — 验收对照（v1.7.4）
+
+| 文件 | # | 屏 | 要点 |
+| ---- | - | -- | ---- |
+| `02` | ① | RAG | `ref-input-card` + `ref-btn-generate`；`bt-level-item` 闯关集列表 |
+| `02` | ② | VIP | `bt-greeting` + `bt-vip-card__row` 价签；无报告双标题 |
+| `02` | ③ | 生图题 | `bt-topbar--quiz` + 四宫格 `bt-img-opt`（A–D） |
+| `02` | ④ | PK | 房间号 + `bt-vs-duel` + 双进度条 |
+| `02` | ⑤ | 排行 | `bt-rank-tabs` + `bt-podium-wrap` 前三 + `bt-rank-row` + `bt-rank-me-card` |
+| `02` | ⑥ | 语音 | `bt-voice-bar` + `bt-voice-bar__action`（无边框暂停） |
+| `03` | ① | 复盘详情 | 对齐 MVP 屏⑧：`bt-report-top` + `bt-score-ring` + `bt-list-num` |
+| `03` | ② | 知识图谱 | SVG 概念图 + `bt-concept-row` 掌握列表 |
+| `03` | ③ | 薄弱分析 | 雷达 + `bt-skill-row` 条形 + 错题项 |
+| `03` | ④ | 战绩海报 | `bt-poster-card` + `bt-share-card` 文案 |
+| `03` | ⑤ | 错题本 | 功能页结构 + `bt-metrics` + 复习节奏 |
+| `03` | ⑥⑦ | Tab | 题库 / 勋章（v1.7.3，底栏高亮对应 Tab） |
+
+**页面层级约定：** 功能页 = `bt-greeting` + `bt-title`；答题页 = `bt-topbar--quiz`；报告页 = `bt-report-top` + 滚动区一条主叙事（避免报告顶栏与大标题叠两层）。
 
 ---
 
@@ -135,6 +160,7 @@ Checklist 详见 [UI-HTML原型实施指引.md §八](./UI-HTML原型实施指�
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` 与 MVP 对齐；`bento-theme` 扩展组件；领奖台/语音条修复；§5.5 验收表 |
 | v1.7.3 | 2026-05-27 | Tab 并入 `03` ⑦屏；首页顶栏固定/底栏裁切修复；热门主题横滑增强；文档同步 |
 | v1.7.2 | 2026-05-27 | Tab 移回独立 `04`（已被 v1.7.3 取代） |
 | v1.7.1 | 2026-05-27 | Tab 曾并入 `01`（已回退） |

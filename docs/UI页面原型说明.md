@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` gallery 与 MVP 对齐；扩展/报告 HTML 组件表 |
 | v1.7.3 | 2026-05-27 | Tab 在 `03` 屏⑥⑦；首页滚动区与热门主题横滑；gallery 22 屏 |
 | v1.7.0 | 2026-05-27 | Tab 子页高保真；§1.3 MVP↔Tab IA（`04` 独立文件，v1.7.3 已并入 `03`） |
 | v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条原型与 MVP 不做项脚注 |
@@ -485,9 +486,20 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 **统一要求：**
 
-- 角落 `mascot-chip` 情绪匹配场景
-- 角标水印「非 MVP」或 Phase 标签
-- 不出现惩罚式生命值/灵韵（产品已确认 MVP 不做）；扩展屏亦勿暗示扣心
+- 角标水印「非 MVP」
+- 不出现惩罚式生命值/灵韵（产品已确认 MVP 不做）
+- **页面层级（v1.7.4）：** 功能页用 `bt-greeting`；答题页用 `bt-topbar--quiz`；勿在扩展功能页误用 `bt-report-top`
+
+**Gallery 实现要点（[`02`](../prototypes/02_extended_features.html)）：**
+
+| 屏 | 关键组件 |
+| -- | -------- |
+| E1 | `ref-input-card`、解析进度、`bt-level-item` |
+| E2 | `bt-vip-card__row` + 价签 |
+| E3 | 四宫格 `bt-img-opt`（A–D） |
+| E4 | 房间号 + `bt-vs-duel` |
+| E5 | `bt-podium-wrap`（前三完整可见）+ `bt-rank-tabs` |
+| E6 | `bt-voice-bar` + `bt-voice-bar__action`（暂停无边框） |
 
 ---
 
@@ -545,10 +557,12 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 **说明：**
 
-- MVP 仅在屏 8 内嵌短复盘；R1 为独立「历史报告」深化
+- MVP 仅在屏 8 内嵌短复盘；R1 对齐 MVP 屏⑧结构（`bt-score-ring` + `bt-list-num`，非长文堆叠）
 - R4 分享按钮在 MVP 置灰；海报屏标 Phase 3
-- R5 对应需求「复盘中心」— 方案 MVP 不做持久化
+- R5 功能页结构（`bt-greeting`），底栏「题库」高亮
 - R6 快捷入口可链至 R5（`#screen-wrongbook`）；R7 可串联 R4 战绩海报
+
+**Gallery 实现要点（[`03`](../prototypes/03_reports_social.html)）：** R1 报告顶栏 + 分数环；R2 `bt-concept-row`；R3 雷达 + `bt-skill-row`；R4 `bt-poster-card`；R5 错题列表 + 指标三列。
 
 ---
 
@@ -603,6 +617,7 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` 三分页面层级；E1–E6 / R1–R5 gallery 组件要点 |
 | v1.7.3 | 2026-05-27 | Tab 在 `03` ⑥⑦；首页顶栏/滚动区/底栏；热门主题横滑与 `ref-home-topics.js` |
 | v1.7.0 | 2026-05-27 | Tab IA §1.3；独立 `04`（v1.7.3 并入 `03`） |
 | v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条脚注 |

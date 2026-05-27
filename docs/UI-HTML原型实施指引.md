@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` 与 MVP 对齐；扩展组件库；§6.2 分屏验收表 |
 | v1.7.3 | 2026-05-27 | Tab 并入 `03`；首页滚动区；热门主题横滑；gallery 22 屏 |
 | v1.6.0 | 2026-05-27 | 参考首页 `ui.html`；Loading IP；反馈 demo；灵韵条（原型探索） |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；布局/图标/进度条 |
@@ -236,11 +237,38 @@ AI-Learn/prototypes/
 | 8 | 通关报告 | `bt-report-top`、`bt-metrics`、Bento 四格 |
 | 9 | skeleton | 步骤条 + skeleton 占位 |
 
-### 6.2 `02` / `03`
+### 6.2 `02_extended_features.html`（6 屏）
 
-- `nmvp-badge`（非 MVP）
-- `bt-card` / `bt-bento-4` / 报告顶栏
-- 底部 `bt-tabbar bt-tabbar-float`（≤5 项，图标+文案；DOM 在 `phone-screen` 外）
+| # | 屏 | 页面类型 | Bento 必含 |
+| - | -- | -------- | ---------- |
+| ① | RAG | 功能页 | `bt-greeting` + `ref-input-card` + `bt-level-item` 闯关集 |
+| ② | VIP | 功能页 | `bt-vip-card__row` 价签；`bt-stat-badges` 权益 |
+| ③ | 生图题 | 答题页 | `bt-topbar--quiz` + `bt-img-opt-grid`（A–D） |
+| ④ | PK | 功能页 | `bt-pk-scoreboard` + `bt-vs-duel` + 双 `bt-progress-line` |
+| ⑤ | 排行 | 功能页 | `bt-rank-tabs` + `bt-podium-wrap` + `bt-rank-me-card` |
+| ⑥ | 语音 | 答题页 | `bt-voice-bar` + `bt-voice-bar__action`（暂停无边框） |
+
+### 6.3 `03_reports_social.html`（7 屏）
+
+| # | 屏 | 页面类型 | Bento 必含 |
+| - | -- | -------- | ---------- |
+| ① | 复盘详情 | 报告页 | 对齐 MVP 屏⑧：`bt-report-top` + `bt-score-ring` + `bt-list-num` |
+| ② | 知识图谱 | 报告页 | SVG + `bt-concept-row` |
+| ③ | 薄弱分析 | 报告页 | 雷达 + `bt-skill-row` |
+| ④ | 战绩海报 | 报告页 | `bt-poster-card` + `bt-share-card` |
+| ⑤ | 错题本 | 功能页 | `bt-metrics` + `bt-wrong-item`；底栏「题库」高亮 |
+| ⑥ | 题库 Tab | Tab 页 | `ref-level-card`；`#tab-bank` |
+| ⑦ | 勋章 Tab | Tab 页 | `bt-medal-grid`；`#tab-medal` |
+
+**三分页面层级（v1.7.4）：**
+
+| 类型 | 顶栏 | 勿用 |
+| ---- | ---- | ---- |
+| 功能页 | `bt-greeting` + `bt-title` + `bt-subtitle` | `bt-report-top` 叠大标题 |
+| 答题页 | `bt-topbar--quiz` + `bt-meta-row` | 答题中开关/解析长文 |
+| 报告页 | `bt-report-top` + 滚动区单条主叙事 | 重复 bento 四格 + 长文复盘 |
+
+**通用：** `nmvp-badge`；需要底栏时用 `bt-tabbar-float`（DOM 在 `phone-screen` 外）。
 
 ---
 
@@ -274,7 +302,9 @@ npx serve d:\AI-Learn\prototypes
 - [x] **产品**无惩罚式生命值；gallery 可选 `.bt-spirit` 仅作视觉探索
 - [x] 分享按钮 MVP 置灰（屏 8）
 - [x] 扩展 11 屏 Phase 标注
-- [x] Tab 子页独立 `04`：题库 / 勋章（非 MVP，导航在 01 与 02 之间）
+- [x] Tab 子页在 `03` 屏⑥⑦：`#tab-bank` / `#tab-medal`（`04` 仅跳转）
+- [x] `02`/`03` 三分页面层级；领奖台 `bt-podium-wrap` 不裁切前三
+- [x] 语音条「暂停」使用 `bt-voice-bar__action`（无按钮边框）
 - [x] 页面说明 §1.3：底栏 Tab 与 MVP 四页栈映射
 - [x] `index` 总览：Tab 双屏区 + Phase 2 错题本与 `03` 对齐
 - [x] `manga-heavy-mvp.html` 标注归档、非主预览
@@ -308,6 +338,7 @@ npx serve d:\AI-Learn\prototypes
 | 翻书 Loading 动画 | ✅ |
 | 参考首页 / Loading IP / 反馈 demo | ✅ v1.6 |
 | Tab 并入 `03` / 首页滚动与热门横滑 | ✅ v1.7.3 |
+| `02`/`03` 与 MVP 视觉对齐 | ✅ v1.7.4 |
 | 移除金币角标 | ✅ |
 | 旧 `graphic-note` 主题 | 📦 归档未引用 |
 | 浏览器验收 | 待评审人本地确认 |
@@ -318,6 +349,7 @@ npx serve d:\AI-Learn\prototypes
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.7.4 | 2026-05-27 | `02`/`03` 分屏验收；三分页面层级；扩展 `bt-*` 组件 |
 | v1.7.3 | 2026-05-27 | `03` 报告 7 屏含 Tab；`04` 跳转；首页顶栏/底栏滚动；`ref-home-topics.js` 横滑 |
 | v1.6.0 | 2026-05-27 | `ui.html` / `ui-ref-home.css`；IP + stepper；`quiz-feedback-demo.js`；灵韵条原型说明 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；§4.8 底栏约定 |
