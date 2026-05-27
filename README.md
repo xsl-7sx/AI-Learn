@@ -9,8 +9,7 @@
 | 产品名 | **知练**（英文 **KnowPractice**） |
 | 交互形态 | 关卡式练测（导航仍可用「闯关」等功能文案，非对外品牌名） |
 | 静态原型 | [`prototypes/index.html`](prototypes/index.html)（Bento 暖橙 · `bento-theme.css`） |
-| **网页 UI 展示稿** | [`prototypes/zhilian-web-home-showcase.html`](prototypes/zhilian-web-home-showcase.html)（参考稿首页 · 新背景） |
-| | [`prototypes/zhilian-web-ui-poster.html`](prototypes/zhilian-web-ui-poster.html)（四屏主路径） |
+| **网页 UI 展示稿** | [`prototypes/ui.html`](prototypes/ui.html)（点阵光晕 + 参考首页布局） |
 | 设计文档 | [`docs/UI设计文档索引.md`](docs/UI设计文档索引.md) |
 
 ## 本地预览原型

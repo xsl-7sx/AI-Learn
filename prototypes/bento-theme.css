@@ -352,10 +352,33 @@ body.theme-bento {
 }
 
 .bt-quiz-header {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   width: 100%;
+  min-height: 44px;
+}
+
+.bt-quiz-header .bt-icon-btn {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* 相对整栏居中（关闭钮在右上角，不占居中计算） */
+.bt-quiz-header .bt-progress-pill {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex: none;
+  width: max-content;
+  max-width: calc(100% - 96px);
+  padding: 0 4px;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .bt-icon-btn {
@@ -768,6 +791,136 @@ body.theme-bento {
 
 .bt-btn-row .bt-btn-primary {
   margin-bottom: 0;
+}
+
+/* ── 答题退出确认 Sheet ── */
+.theme-bento .phone-screen > .bt-exit-layer {
+  z-index: 200;
+}
+
+.bt-exit-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+.bt-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.48);
+}
+
+.bt-sheet {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 8px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  background: #fffdf9;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 32px rgba(28, 25, 23, 0.14);
+  border-top: 1px solid rgba(232, 226, 217, 0.65);
+  animation: bt-sheet-enter 0.26s ease-out;
+}
+
+@keyframes bt-sheet-enter {
+  from {
+    transform: translateY(100%);
+    opacity: 0.65;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bt-sheet__handle {
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: #d6d3d1;
+}
+
+.bt-sheet__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bt-text);
+  text-align: center;
+}
+
+.bt-sheet__desc {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--bt-text-secondary);
+  text-align: center;
+}
+
+.bt-sheet__progress {
+  margin-bottom: 20px;
+}
+
+.bt-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bt-sheet__actions .bt-btn-primary,
+.bt-sheet__actions .bt-btn-secondary {
+  margin-bottom: 0;
+  min-height: 48px;
+  border-radius: 999px;
+}
+
+.bt-link-danger {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-family: var(--bt-font);
+  font-size: 14px;
+  font-weight: 500;
+  color: #dc2626;
+  cursor: pointer;
+  text-align: center;
+}
+
+.bt-link-danger:active {
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-sheet {
+    animation: bt-sheet-fade 0.2s ease-out;
+  }
+
+  @keyframes bt-sheet-enter {
+    from,
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes bt-sheet-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 /* ── Topic chips ── */
