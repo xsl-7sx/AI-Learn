@@ -1,4 +1,6 @@
-# 交互式AI闯关学习微信小程序需求分析文档 
+# 知练（KnowPractice）— 微信小程序需求分析文档
+
+> **产品品牌：** 知练（KnowPractice）。文件名保留历史称谓。
 
 **UI 设计文档（2026-05-26）：** [UI设计文档索引.md](./UI设计文档索引.md) · [UI设计风格与DesignSystem.md](./UI设计风格与DesignSystem.md) · [UI页面原型说明.md](./UI页面原型说明.md) · [UI-HTML原型实施指引.md](./UI-HTML原型实施指引.md)
 
