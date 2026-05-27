@@ -10,6 +10,13 @@
     '④ 准备进入闯关…'
   ];
 
+  var STEP_BUBBLE = [
+    '嗯…在这页',
+    '核对一下…',
+    '排排版…',
+    '马上好！'
+  ];
+
   function activeStepIndex(p) {
     if (p >= 100) return -1;
     if (p >= 75) return 3;
@@ -24,6 +31,7 @@
     var fillBar = root.querySelector('[data-gen-progress-fill]');
     var lineFill = root.querySelector('.nb-gen-stepper__fill');
     var sub = root.querySelector('[data-gen-sub]');
+    var bubble = root.querySelector('.bt-loading-mascot__bubble');
     var pencil = root.querySelector('.nb-pencil-bar > span')
       || root.querySelector('[data-gen-progress-fill] > span')
       || root.querySelector('.bt-progress-line > span');
@@ -39,6 +47,9 @@
     }
     if (sub) {
       sub.textContent = p >= 100 ? '生成完成，即将进入闯关…' : STEP_TEXT[idx];
+    }
+    if (bubble) {
+      bubble.textContent = p >= 100 ? '出发！' : STEP_BUBBLE[idx];
     }
 
     steps.forEach(function (el, i) {

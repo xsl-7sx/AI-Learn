@@ -93,18 +93,10 @@ body.web-ui-page .web-ui-shell {
   font-weight: 600;
 }
 
-/* ── 屏内：参考首页 .ref-home ── */
-.ref-home .phone-frame:has(.bt-tabbar-float) {
-  background: #fffdf9;
-}
-
-.ref-home .phone-screen {
-  background: #fffdf9 !important;
-}
-
-.ref-home .phone-screen::before,
-.ref-home .phone-screen::after {
-  display: none;
+/* ── 屏内：参考首页 .ref-home（背景与 loading 页一致） ── */
+.ref-home {
+  --bt-screen-paper-bg-color: #F8FCFF;
+  --bt-screen-paper-bg-pos: center, center, center, -4px 11px, center;
 }
 
 .ref-home-scroll {
@@ -177,107 +169,163 @@ body.web-ui-page .web-ui-shell {
   font-family: inherit;
 }
 
-/* 柔光标题区 */
-.ref-hero {
-  position: relative;
-  margin: 0 0 22px;
-  padding: 26px 20px 28px;
-  min-height: 140px;
-  border-radius: 22px;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 85% 70% at 92% 8%, rgba(255, 191, 36, 0.35) 0%, transparent 58%),
-    radial-gradient(ellipse 70% 55% at 8% 95%, rgba(147, 197, 253, 0.32) 0%, transparent 52%),
-    linear-gradient(135deg, #fff7ed 0%, #fef3c7 42%, #eff6ff 100%);
-  border: 1px solid rgba(255, 220, 190, 0.35);
+.ref-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.ref-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.32) 100%);
+.ref-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  color: #c2410c;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.ref-hero h2 {
-  position: relative;
-  z-index: 1;
-  margin: 0;
+.ref-streak svg {
+  display: block;
+}
+
+/* 首页主标题：大字号层级 */
+.ref-home-title {
+  margin: 0 0 20px;
   max-width: 11em;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
-  line-height: 1.32;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
   color: #1c1917;
 }
 
-/* 白卡片输入 */
+/* 输入区：对话式 compose 卡片 */
 .ref-input-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
   border-radius: 20px;
-  padding: 18px 18px 20px;
-  margin-bottom: 22px;
-  box-shadow: 0 4px 22px rgba(28, 25, 23, 0.07);
-  border: 1px solid rgba(232, 226, 217, 0.6);
+  padding: 16px 16px 18px;
+  margin-bottom: 24px;
+  box-shadow:
+    0 4px 22px rgba(28, 25, 23, 0.07),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  border: 1px solid rgba(232, 226, 217, 0.65);
 }
 
-.ref-input-body {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 48px;
-  margin-bottom: 18px;
+.ref-input-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #78716c;
 }
 
-.ref-input-body .field {
-  flex: 1;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #a8a29e;
+.ref-input-compose {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 14px 40px 14px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fffbf7 0%, #fff7ed 100%);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
-.ref-input-body .bt-input-icon {
-  position: static;
-  flex-shrink: 0;
+.ref-input-compose__icon {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
   color: #f06a2a;
+  opacity: 0.75;
+}
+
+.ref-input-example {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #44403c;
+  letter-spacing: 0.01em;
 }
 
 .ref-btn-generate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  min-height: 48px;
+  min-height: 52px;
   border: none;
   border-radius: 999px;
-  padding: 14px 20px;
+  padding: 14px 22px;
   font-size: 17px;
   font-weight: 600;
   font-family: var(--bt-font);
   color: #fff;
   background: linear-gradient(180deg, #ff7f32 0%, #f06a2a 50%, #ea580c 100%);
-  box-shadow: 0 8px 22px rgba(240, 106, 42, 0.35);
+  box-shadow:
+    0 8px 22px rgba(240, 106, 42, 0.35),
+    0 0 0 0 rgba(240, 106, 42, 0.25);
   cursor: default;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.ref-btn-generate svg {
+  flex-shrink: 0;
+  opacity: 0.92;
+}
+
 .ref-btn-generate:active {
   transform: scale(0.98);
+  box-shadow: 0 4px 14px rgba(240, 106, 42, 0.28);
 }
 
 /* 话题卡 + 热度 */
+.ref-section-hd--compact {
+  margin-bottom: 12px;
+  min-height: auto;
+  font-size: 15px;
+}
+
+/* 热门主题 · 横向滑动 */
 .ref-topic-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 12px;
-  margin-bottom: 28px;
+  margin: 0 -18px 28px;
+  padding: 2px 18px 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 18px;
+  scrollbar-width: none;
+}
+
+.ref-topic-row::-webkit-scrollbar {
+  display: none;
 }
 
 .ref-topic {
-  background: #fff;
+  flex: 0 0 148px;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 16px;
   padding: 16px 14px 18px;
-  min-height: 44px;
+  min-height: 52px;
   border: 1px solid rgba(232, 226, 217, 0.6);
   box-shadow: 0 2px 12px rgba(28, 25, 23, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: default;
+}
+
+.ref-topic:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 6px rgba(28, 25, 23, 0.06);
+  border-color: rgba(240, 106, 42, 0.25);
 }
 
 .ref-topic-icon {
@@ -301,6 +349,16 @@ body.web-ui-page .web-ui-shell {
 .ref-topic-icon--blue {
   background: #eff6ff;
   color: #2563eb;
+}
+
+.ref-topic-icon--mint {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.ref-topic-icon--lavender {
+  background: #f5f3ff;
+  color: #7c3aed;
 }
 
 .ref-topic strong {
@@ -405,13 +463,28 @@ body.web-ui-page .web-ui-shell {
 
 .ref-level-go {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
   display: grid;
   place-items: center;
-  color: #d6d3d1;
-  font-size: 22px;
-  line-height: 1;
+}
+
+.ref-level-continue {
+  min-width: 52px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--bt-font);
+  color: #fff;
+  background: linear-gradient(180deg, #ff7f32 0%, #ea580c 100%);
+  box-shadow: 0 4px 12px rgba(240, 106, 42, 0.28);
+  cursor: default;
+  transition: transform 0.15s ease;
+}
+
+.ref-level-continue:active {
+  transform: scale(0.96);
 }
 
 .ref-home .bt-tabbar-float .bt-tab.is-active {
@@ -420,11 +493,15 @@ body.web-ui-page .web-ui-shell {
 
 @media (prefers-reduced-motion: reduce) {
   .ref-btn-generate,
+  .ref-topic,
+  .ref-level-continue,
   .bt-tabbar-float .bt-tab {
     transition: none;
   }
 
   .ref-btn-generate:active,
+  .ref-topic:active,
+  .ref-level-continue:active,
   .bt-tabbar-float .bt-tab:active {
     transform: none;
   }

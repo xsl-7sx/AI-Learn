@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.6.0 | 2026-05-27 | 参考首页 `ui.html`；Loading IP；反馈 demo；灵韵条（原型探索） |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；布局/图标/进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；翻书 Loading；移除金币角标 |
 | v1.3.0 | 2026-05-26 | §1.0 文档阶段说明；链到 UI 文档索引 |
@@ -44,24 +45,27 @@ UI 设计文档集（Design System + 页面说明 + 本指引）先于 HTML 原�
 
 ---
 
-## 二、文件结构（当前 v1.4）
+## 二、文件结构（当前 v1.6）
 
 ```
 AI-Learn/prototypes/
 ├── index.html                    # 总览：六幕 showcase + 业务流
+├── ui.html                       # ★ 网页展示稿（与 01 屏① 同步）
 ├── shared.css                    # 画廊布局、手机框、基础 Token
 ├── bento-theme.css               # ★ 主主题：Bento 暖橙 + bt-* 组件
-├── loading-steps.js              # 生成页四步进度 demo
+├── ui-ref-home.css               # ★ 参考首页（.ref-home）
+├── loading-steps.js              # 生成页四步进度 + IP 气泡 demo
+├── quiz-feedback-demo.js         # 屏 6/7 反馈动效循环 demo
 ├── paper-lines-page.svg          # 画廊不规则横纹
 ├── paper-lines-screen.svg        # 屏内浅色不规则横纹
 ├── 01_mvp_core.html              # MVP 9 屏
 ├── 02_extended_features.html     # 扩展 6 屏
 ├── 03_reports_social.html        # 报告 5 屏
 ├── manga-heavy-mvp.html          # 备选：4 屏重度漫画风（单文件）
+├── mascots.svg                   # Loading：mascot-think；其余屏待评估
 ├── graphic-note.css              # 归档：旧笔记本主题（gallery 未引用）
 ├── ux-enhancements.css           # 归档：旧 a11y 层（gallery 未引用）
 ├── spec-highlights.css           # 归档：旧亮点层（gallery 未引用）
-├── mascots.svg                   # 归档：小课豆（当前屏未引用）
 └── study-char.svg                # 归档：总览插画（当前屏未引用）
 ```
 
@@ -72,14 +76,18 @@ AI-Learn/prototypes/
 | `03_reports_social.html` | 5 | [§四](./UI页面原型说明.md#四报告与社交5-屏--中保真) |
 | **合计** | **20** | + `index.html` 总览 |
 
-**HTML 引用顺序（四页 gallery 统一）：**
+**HTML 引用顺序（`01` / `ui.html` 等 MVP 页）：**
 
 ```html
 <link rel="stylesheet" href="shared.css" />
 <link rel="stylesheet" href="bento-theme.css" />
+<link rel="stylesheet" href="ui-ref-home.css" />  <!-- 仅屏① / ui.html -->
 <script src="loading-steps.js" defer></script>
+<script src="quiz-feedback-demo.js" defer></script>  <!-- 屏 6/7 -->
 <body class="theme-bento">
 ```
+
+`index.html` 总览 showcase 仍用旧首页栅格，待与 `ui.html` 对齐（见 [迭代清单 §六](./UI-HTML原型迭代清单.md#六待办与风险)）。
 
 ---
 
@@ -156,13 +164,14 @@ AI-Learn/prototypes/
 ### 4.4 加载页翻书动画
 
 - 容器：`.bt-book-flip`（摊开本 + 单页 360° 循环翻页 + 轻微浮动）
-- 进度：`[data-gen-progress-fill]` + `loading-steps.js` 驱动 ①–④ 文案与 `.bt-step` 状态
-- **已移除：** 笑脸 SVG / 小课豆主视觉
+- 进度：`[data-gen-progress-fill]` + `loading-steps.js` 驱动 ①–④ 文案、`.bt-step` 状态（当前步高亮、完成步绿勾）
+- IP：`mascots.svg#mascot-think` + 气泡文案随步骤切换（gallery 无「小皮」署名行）
+- **已移除：** 笑脸 SVG 主视觉、顶栏金币
 
 ### 4.5 顶栏与奖励示意
 
 - 首页 / 生成 / 答题：`bt-notch-safe` + 滚动区；问候语在 `.bt-scroll` 内
-- 答题顶栏：`bt-topbar--quiz`（关闭 + `bt-progress-pill`）
+- 答题顶栏：`bt-topbar--quiz`（关闭 + `bt-progress-pill`）；屏 3–7 可选 **`.bt-spirit` 五段能量条**（仅 HTML 原型探索，**产品 MVP 仍不做惩罚式生命值**）
 - **无** `bt-coin-pill`、反馈条「+N 金币」、报告 `+20 XP` 徽章（原型阶段均不展示）
 
 ### 4.6 屏内布局
@@ -214,10 +223,10 @@ AI-Learn/prototypes/
 
 | 序号 | 屏 | Bento 必含 |
 | ---- | -- | ---------- |
-| 1 | 首页 | `bt-title`、`bt-input-card`、`bt-topic-grid`、`bt-tabbar` |
-| 2 | 生成中 | `bt-book-flip`、`bt-progress-line`、`data-gen-stepper`、`bt-stepper` |
-| 3–5 | 三题型 | `bt-q-stem`、`bt-opt`（渐变底）、`bt-judge-btn` |
-| 6–7 | 对错反馈 | `bt-feedback-bar`、`bt-teacher-note` |
+| 1 | 首页 | `.ref-home`：`ref-compose` 输入+示例、热门主题横滑 `ref-topic-row`、连胜、未完成「继续」；与 [`ui.html`](../prototypes/ui.html) 同步 |
+| 2 | 生成中 | `bt-book-flip`、`bt-progress-line`、`data-gen-stepper`、`bt-stepper`、IP 气泡 |
+| 3–5 | 三题型 | `bt-q-stem`、`bt-opt`、可选 `.bt-spirit`、`bt-progress-line` |
+| 6–7 | 对错反馈 | `bt-meta-row` + `bt-progress-line`；`bt-feedback-bar`、`bt-teacher-note`；`data-feedback-demo` + `quiz-feedback-demo.js` |
 | 8 | 通关报告 | `bt-report-top`、`bt-metrics`、Bento 四格 |
 | 9 | skeleton | 步骤条 + skeleton 占位 |
 
@@ -235,7 +244,7 @@ AI-Learn/prototypes/
 npx serve d:\AI-Learn\prototypes
 ```
 
-打开 `index.html` 或 `01_mvp_core.html`。生成页进度条由 `loading-steps.js` 自动 demo 循环。
+打开 `index.html`、`ui.html` 或 `01_mvp_core.html`。生成页由 `loading-steps.js` 循环 demo；屏 6/7 进入视口时由 `quiz-feedback-demo.js` 重播反馈动效。
 
 ---
 
@@ -244,7 +253,10 @@ npx serve d:\AI-Learn\prototypes
 - [x] 桌面三列 / 平板两列 / 手机单列
 - [x] MVP 9 屏与页面说明对应
 - [x] `theme-bento` + `bento-theme.css` 四页统一引用
-- [x] 加载页翻书动画 + 四步 stepper
+- [x] 加载页翻书动画 + 四步 stepper（高亮/完成勾）
+- [x] Loading IP（`mascot-think`）+ 步骤气泡
+- [x] 参考首页 `ui.html` / 屏①（横滑热门、compose 示例）
+- [x] 屏 6/7 反馈条与老师笔记入场动效（`quiz-feedback-demo.js`）
 - [x] 顶栏无金币角标；无反馈金币 / 报告 XP 文案
 - [x] 主导航屏：`bt-tabbar-float` 悬浮胶囊；底区纸纹与内容区连续
 - [x] 生成页 `.bt-scroll--center`；其余屏顶对齐
@@ -252,7 +264,8 @@ npx serve d:\AI-Learn\prototypes
 - [x] 老师笔记区得意黑 + 全局文楷
 - [x] 选项马卡龙渐变 + 对错绿/红渐变
 - [x] 屏 8 / 9 结算分屏
-- [x] 无计时、无生命值
+- [x] 无单题计时
+- [x] **产品**无惩罚式生命值；gallery 可选 `.bt-spirit` 仅作视觉探索
 - [x] 分享按钮 MVP 置灰（屏 8）
 - [x] 扩展 11 屏 Phase 标注
 - [x] `prefers-reduced-motion` 翻书降级
@@ -283,6 +296,7 @@ npx serve d:\AI-Learn\prototypes
 | Bento 暖橙 `bento-theme.css` | ✅ v1.4 |
 | 20 屏 gallery 重写 | ✅ |
 | 翻书 Loading 动画 | ✅ |
+| 参考首页 / Loading IP / 反馈 demo | ✅ v1.6 |
 | 移除金币角标 | ✅ |
 | 旧 `graphic-note` 主题 | 📦 归档未引用 |
 | 浏览器验收 | 待评审人本地确认 |
@@ -293,6 +307,7 @@ npx serve d:\AI-Learn\prototypes
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.6.0 | 2026-05-27 | `ui.html` / `ui-ref-home.css`；IP + stepper；`quiz-feedback-demo.js`；灵韵条原型说明 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；§4.8 底栏约定 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；移除 +10 金币 / +20 XP；图标与克制进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；`bento-theme.css`；翻书动画；无金币角标；字体文楷+得意黑 |

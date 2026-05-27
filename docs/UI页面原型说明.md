@@ -4,6 +4,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
+| v1.6.0 | 2026-05-27 | 参考首页、Loading IP、反馈 demo；灵韵条原型与 MVP 不做项脚注 |
 | v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标 |
 | v1.4.0 | 2026-05-26 | 布局顶对齐；无金币/XP；图标与克制进度条 |
 | v1.3.0 | 2026-05-26 | 对齐 Bento 暖橙 HTML：`bt-*`、翻书 Loading、无金币角标 |
@@ -24,24 +25,27 @@
 
 ---
 
-## 〇、HTML 原型视觉层（v1.5 · Bento 暖橙）
+## 〇、HTML 原型视觉层（v1.6 · Bento 暖橙）
 
 静态 gallery 当前实现（见 [Design System §1.0.1](./UI设计风格与DesignSystem.md#101-当前-html-原型v14--bento-暖橙)）：
 
 | 元素 | HTML 实现 |
 | ---- | --------- |
 | 主题 | `body.theme-bento` + `bento-theme.css` |
+| 参考首页 | `ui.html` + `ui-ref-home.css`（`.ref-home`、热门横滑、compose 示例） |
 | 横纹纸面 | `paper-lines-page.svg` / `paper-lines-screen.svg`（保留） |
 | 组件 | `bt-*`（`bt-card`、`bt-opt`、`bt-tabbar` 等） |
 | 解析 | `.bt-teacher-note`（得意黑；铅笔 SVG 标签） |
-| Loading | `.bt-book-flip` 翻书动画 + `loading-steps.js` |
+| Loading | `.bt-book-flip` + `loading-steps.js`；`mascots.svg#mascot-think` + 步骤气泡 |
+| 答题反馈 | 屏 6/7：`quiz-feedback-demo.js` 视口内循环播放入场动效 |
+| 灵韵（原型） | `.bt-spirit` 五段条（屏 3–7）；**产品 MVP 不做惩罚式生命值** |
 | 顶栏 | 问候语 / 关闭 + 题号 pill；**无金币角标** |
 | 底栏 | `bt-tabbar bt-tabbar-float`：机框内、`.phone-screen` 外；圆角胶囊；左右下留白；选中项蜜桃底 |
 | 底区背景 | 有悬浮底栏时 `--bt-screen-paper-bg` 铺至整列 `phone-frame`，避免机框 `#FFFBF0` 条带 |
 
-**CSS 引用顺序：** `shared.css` → `bento-theme.css`；生成页另引 `loading-steps.js`。
+**CSS 引用顺序：** `shared.css` → `bento-theme.css`（屏① 另引 `ui-ref-home.css`）；生成页 `loading-steps.js`；屏 6/7 `quiz-feedback-demo.js`。
 
-**归档（gallery 未引用）：** `graphic-note.css`、`ux-enhancements.css`、`mascots.svg`。
+**归档（gallery 未引用）：** `graphic-note.css`、`ux-enhancements.css`。
 
 **说明：** 线框结构仍以本章各屏「布局线框」为准；方格格纹、皮质书本外壳、顶栏金币 **不在** 当前原型范围内。
 
@@ -133,25 +137,27 @@ flowchart LR
 | -- | ---- |
 | 路由 | `pages/index/index` |
 | 目的 | 收集用户一句话学习主题 |
-| 顶栏 | `bt-greeting`（无吉祥物、无金币） |
+| 顶栏 | `bt-greeting`（连胜可选）；无金币 |
 
-**布局线框：**
+**布局线框（HTML v1.6 · `ref-home`）：**
 
 ```
 ┌─────────────────────────────────┐
-│ 你好，小皮                       │  bt-topbar
-│ 今天想闯哪一关？                  │  bt-title
+│ 🔥连胜  你好，小皮                │  ref-top
+│ 今天想闯哪一关？                  │  纯文案标题
 │  ┌───────────────────────────┐  │
-│  │ 输入你想学的内容      [表情] │  │  bt-input-card
+│  │ 占位 + 示例主题（compose）   │  │  ref-compose
 │  └───────────────────────────┘  │
-│  → 开始生成题目                  │  bt-btn-primary
-│  [话题卡] [话题卡]               │  bt-topic-grid
-│  未完成关卡 · 进度环             │  bt-level-item
+│  → 开始生成题目                  │  主 CTA + 箭头
+│  热门主题 ←→ 横滑卡片 ×4         │  ref-topic-row
+│  未完成关卡 · [继续]             │  ref-level-item
 └─────────────────────────────────┘
   ┌───────────────────────────────┐
-  │ 🏠闯关  题库  勋章            │  bt-tabbar-float（屏外悬浮）
+  │ 🏠闯关  题库  勋章            │  bt-tabbar-float
   └───────────────────────────────┘
 ```
+
+> 线框类名 `bt-input-card` / `bt-topic-grid` 仍可用于 uni-app 组件命名；当前 gallery 屏① 以 `ref-*` 实现为准，并与 [`ui.html`](../prototypes/ui.html) 同步。
 
 | 元素 | 规格 |
 | ---- | ---- |
@@ -169,20 +175,20 @@ flowchart LR
 | -- | ---- |
 | 路由 | `pages/loading/loading` |
 | API | `POST /api/v1/quiz/generate`，timeout 60s |
-| 主视觉 | `.bt-book-flip` 翻书动画 |
+| 主视觉 | `.bt-book-flip` + `mascots.svg#mascot-think`（步骤气泡由 `loading-steps.js` 驱动） |
 
 **布局线框：**
 
 ```
 ┌─────────────────────────────────┐
 │ AI 正在出题…                     │
-│ 等等，我去翻翻笔记…               │
+│  [IP 气泡]  等等，我去翻翻笔记…    │
 │  ┌───────────────────────────┐  │
 │  │      [翻书动画]            │  │
 │  │  ████████████░░░░          │  │  bt-progress-line
 │  │  ④ 准备进入闯关…           │  │  data-gen-sub
 │  └───────────────────────────┘  │
-│  ①检索 ②出题 ③排版 ④准备        │  bt-stepper
+│  ①检索 ②出题 ③排版 ④准备        │  bt-stepper（当前高亮/完成勾）
 │         [ 取消 ]                │
 └─────────────────────────────────┘
 ```
@@ -299,7 +305,8 @@ HTML 画廊：`01_mvp_core.html` 屏 **③′**。
 | 项 | 内容 |
 | -- | ---- |
 | 态 | `quiz` 页内状态，非新路由 |
-| 组件 | `bt-feedback-bar` + `bt-teacher-note` |
+| 组件 | `bt-meta-row`（题目标签 + 题型）+ `bt-progress-line`；`bt-feedback-bar` + `bt-teacher-note` |
+| 动效 | gallery：`data-feedback-demo` + `quiz-feedback-demo.js`（入场 + 视口内循环） |
 | 色 | `bt-opt.is-correct` / 实现 `#07c160` |
 | 音效 | 短促「叮」— MVP 必做 |
 
@@ -322,8 +329,9 @@ HTML 画廊：`01_mvp_core.html` 屏 **③′**。
 
 | 项 | 内容 |
 | -- | ---- |
-| 动效 | 容器 shake + `uni.vibrateShort()`（实现层） |
+| 动效 | 容器 shake + `uni.vibrateShort()`（实现层）；gallery 同屏 6 反馈 demo |
 | 色 | `bt-opt` 错态 / 实现 `#fa5151` |
+| 原型 | 顶栏 `.bt-spirit--2` 低余量脉冲（**非产品 MVP 必做**） |
 
 **布局线框：**
 
@@ -414,7 +422,7 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 | 绿/红+震动+音效 | 6–7 | 方案 §6.3 |
 | 即时解析 | 6–7 | `explanation` 气泡 |
 | 无计时 | 3–7 | 顶栏无倒计时 |
-| 无生命值 | 3–7 | 无 hearts/灵韵 |
+| 无生命值 | 3–7 | uni-app **不做** hearts/灵韵惩罚；gallery 可有 `.bt-spirit` 仅视觉探索 |
 | result 二次等待 | 9 | skeleton 独立描述 |
 | 再来一局清 3 key | 8 | 不 `clearStorage` |
 | 分享 MVP 不做 | 8 | 置灰 |
@@ -438,7 +446,7 @@ API 返回后：同页切换至屏 8 内容（或刷新 `report` 区域）。
 
 - 角落 `mascot-chip` 情绪匹配场景
 - 角标水印「非 MVP」或 Phase 标签
-- 不出现生命值/灵韵（已确认 MVP 不做）
+- 不出现惩罚式生命值/灵韵（产品已确认 MVP 不做）；扩展屏亦勿暗示扣心
 
 ---
 
