@@ -55,6 +55,16 @@
   --phone-radius: 47px;
   --phone-notch-w: 126px;
   --phone-notch-h: 37px;
+  --bt-screen-paper-bg:
+    radial-gradient(ellipse 90% 55% at 100% 0%, rgba(252, 228, 236, 0.7) 0%, transparent 58%),
+    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(212, 235, 250, 0.6) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 30% 15%, rgba(255, 244, 194, 0.45) 0%, transparent 50%),
+    var(--paper-lines-screen),
+    linear-gradient(175deg, #FFFDF8 0%, #F9F4EA 42%, #F3F8FF 100%);
+  --bt-screen-paper-bg-size: auto, auto, auto, 100% 88px, auto;
+  --bt-screen-paper-bg-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  --bt-screen-paper-bg-color: #FFFBF0;
+  --bt-screen-paper-bg-pos: center, center, center, 6px 4px, center;
 }
 
 .theme-bento,
@@ -143,6 +153,31 @@ body.theme-bento {
   border: 2.5px solid #2A2A2A;
   background: #FFFBF0;
   box-shadow: 0 8px 24px rgba(42, 42, 42, 0.1), 0 24px 48px rgba(42, 42, 42, 0.08);
+  overflow: hidden;
+}
+
+.theme-bento .phone-frame > .phone-screen {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 悬浮底栏屏：机框底区与内容区共用纸纹渐变（避免 #FFFBF0 条带） */
+.theme-bento .phone-frame:has(.bt-tabbar-float) {
+  background: var(--bt-screen-paper-bg);
+  background-size: var(--bt-screen-paper-bg-size);
+  background-repeat: var(--bt-screen-paper-bg-repeat);
+  background-color: var(--bt-screen-paper-bg-color);
+  background-position: var(--bt-screen-paper-bg-pos);
+}
+
+.theme-bento .phone-frame:has(.bt-tabbar-float) > .phone-screen {
+  background: transparent;
+}
+
+.theme-bento .phone-frame:has(.bt-tabbar-float) > .phone-screen,
+.theme-bento .phone-frame:has(.bt-tabbar-float) > .bt-tabbar-float {
+  position: relative;
+  z-index: 1;
 }
 
 .theme-bento .phone-wrap {
@@ -161,29 +196,21 @@ body.theme-bento {
   flex-direction: column;
   position: relative;
   isolation: isolate;
-  background:
-    radial-gradient(ellipse 90% 55% at 100% 0%, rgba(252, 228, 236, 0.7) 0%, transparent 58%),
-    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(212, 235, 250, 0.6) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 40% at 30% 15%, rgba(255, 244, 194, 0.45) 0%, transparent 50%),
-    var(--paper-lines-screen),
-    linear-gradient(175deg, #FFFDF8 0%, #F9F4EA 42%, #F3F8FF 100%);
-  background-size: auto, auto, auto, 100% 88px, auto;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background: var(--bt-screen-paper-bg);
+  background-size: var(--bt-screen-paper-bg-size);
+  background-repeat: var(--bt-screen-paper-bg-repeat);
+  background-color: var(--bt-screen-paper-bg-color);
+  background-position: var(--bt-screen-paper-bg-pos);
 }
 
-.theme-bento .screen-item:nth-child(3n+1) .phone-screen {
-  background-color: #FFFBF0;
-  background-position: center, center, center, 6px 4px, center;
+.theme-bento .screen-item:nth-child(3n+2) {
+  --bt-screen-paper-bg-color: #F8FCFF;
+  --bt-screen-paper-bg-pos: center, center, center, -4px 11px, center;
 }
 
-.theme-bento .screen-item:nth-child(3n+2) .phone-screen {
-  background-color: #F8FCFF;
-  background-position: center, center, center, -4px 11px, center;
-}
-
-.theme-bento .screen-item:nth-child(3n) .phone-screen {
-  background-color: #FFF8FA;
-  background-position: center, center, center, 9px -3px, center;
+.theme-bento .screen-item:nth-child(3n) {
+  --bt-screen-paper-bg-color: #FFF8FA;
+  --bt-screen-paper-bg-pos: center, center, center, 9px -3px, center;
 }
 
 .theme-bento .phone-screen::before {
@@ -263,7 +290,7 @@ body.theme-bento {
   max-height: 48px;
 }
 
-.bt-screen:not(:has(.bt-tabbar)) .bt-scroll:not(.bt-scroll--center) .bt-btn-row {
+.phone-frame:not(:has(.bt-tabbar-float)) .bt-scroll:not(.bt-scroll--center) .bt-btn-row {
   margin-top: auto;
   padding-top: 16px;
 }
@@ -277,8 +304,12 @@ body.theme-bento {
   border-radius: 3px;
 }
 
-.bt-screen:not(:has(.bt-tabbar)) .bt-scroll {
+.phone-frame:not(:has(.bt-tabbar-float)) .bt-scroll {
   padding-bottom: 20px;
+}
+
+.phone-frame:has(.bt-tabbar-float) .bt-scroll {
+  padding-bottom: 12px;
 }
 
 /* ── Top bars ── */
@@ -1347,7 +1378,7 @@ body.theme-bento {
   margin-bottom: 8px;
 }
 
-/* ── Tab bar ── */
+/* ── Tab bar（默认：贴底全宽，无浮动条时用） ── */
 .bt-tabbar {
   flex-shrink: 0;
   display: flex;
@@ -1356,6 +1387,27 @@ body.theme-bento {
   padding: 8px 12px 24px;
   background: var(--bt-surface);
   border-top: 1px solid var(--bt-border);
+}
+
+/* 悬浮胶囊底栏：机框内独立一层，与底边留白，不改 #FFFBF0 机框色 */
+.bt-tabbar-float {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+  margin: 6px 12px 16px;
+  padding: 4px;
+  min-height: 56px;
+  background: rgba(255, 253, 248, 0.97);
+  border: 1px solid rgba(232, 226, 217, 0.8);
+  border-radius: 999px;
+  box-shadow:
+    0 1px 2px rgba(42, 42, 42, 0.05),
+    0 10px 28px rgba(42, 42, 42, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .bt-tab {
@@ -1373,6 +1425,26 @@ body.theme-bento {
   background: none;
   cursor: pointer;
   font-family: var(--bt-font);
+  border-radius: 999px;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
+}
+
+.bt-tabbar-float .bt-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 7px 6px 8px;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: #a8a29e;
+  letter-spacing: 0.02em;
 }
 
 .bt-tab svg {
@@ -1380,9 +1452,38 @@ body.theme-bento {
   height: 22px;
 }
 
+.bt-tabbar-float .bt-tab svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
 .bt-tab.is-active {
   color: var(--bt-primary);
   font-weight: 600;
+}
+
+.bt-tabbar-float .bt-tab:not(.is-active):hover {
+  color: #78716c;
+  background: rgba(42, 42, 42, 0.045);
+}
+
+.bt-tabbar-float .bt-tab:active {
+  transform: scale(0.97);
+}
+
+.bt-tabbar-float .bt-tab.is-active {
+  background: linear-gradient(180deg, #fff7f0 0%, #ffede0 100%);
+  color: var(--bt-primary);
+  font-weight: 600;
+  box-shadow:
+    0 1px 4px rgba(240, 106, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.bt-tabbar-float .bt-tab:focus-visible {
+  outline: 2px solid var(--bt-primary);
+  outline-offset: 1px;
 }
 
 /* ── Skeleton ── */

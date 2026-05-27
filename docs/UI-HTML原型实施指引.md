@@ -2,7 +2,7 @@
 
 | 文档版本 | 撰写时间 | 状态 |
 | -------- | -------- | ---- |
-| v1.5.0 | 2026-05-26 | 布局/图标/进度条；移除反馈金币与报告 XP |
+| v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；布局/图标/进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；翻书 Loading；移除金币角标 |
 | v1.3.0 | 2026-05-26 | §1.0 文档阶段说明；链到 UI 文档索引 |
 | v1.2.3 | 2026-05-26 | 总览六幕业务流 + `phone-screen--act` 笔记本组件 |
@@ -101,10 +101,10 @@ AI-Learn/prototypes/
     <div class="phone-frame">
       <div class="phone-notch"></div>
       <div class="phone-screen bt-screen">
-        <header class="bt-topbar">…</header>
+        <div class="bt-notch-safe" aria-hidden="true"></div>
         <div class="bt-scroll">…</div>
-        <nav class="bt-tabbar">…</nav>
       </div>
+      <nav class="bt-tabbar bt-tabbar-float" aria-label="主导航">…</nav>
     </div>
   </div>
 </article>
@@ -121,14 +121,15 @@ AI-Learn/prototypes/
 
 ---
 
-## 四、Bento 暖橙实施要点（v1.4）
+## 四、Bento 暖橙实施要点（v1.5）
 
 ### 4.1 背景（保留水彩横纹）
 
 | 区域 | 实现 |
 | ---- | ---- |
 | 画廊 `body.theme-bento` | 马卡龙渐变 + `paper-lines-page.svg` + 噪点 + 柔光斑 |
-| 屏内 `.phone-screen` / `.bt-screen` | 暖纸底 + `paper-lines-screen.svg` + 轻噪点 |
+| 屏内 `.phone-screen` / `.bt-screen` | `--bt-screen-paper-bg`（水彩 radial + `paper-lines-screen.svg` + 暖纸渐变） |
+| 有悬浮底栏的 `.phone-frame` | 同上变量铺至整列；`.phone-screen` 背景透明，底栏留白区与内容区同色 |
 | 加载页卡片内 | 同屏内纸面；主视觉为 `.bt-book-flip` |
 
 **禁止：** 方格格纹 `linear-gradient` 网格；皮质书本手机外壳。
@@ -178,8 +179,19 @@ AI-Learn/prototypes/
 | 横向进度 | `.bt-progress-line` | 8px · `#F06A2A → #FFB380` · `width` 过渡 |
 | 对手进度 | `.bt-progress-line--rival` | 蓝渐变 |
 | 生成步骤 | `.bt-step` | 橙/绿描边圆点，无脉冲动画 |
+| 闯关 Tab | `.bt-tab` 内 SVG | 首页（房子）图标，非旗帜 |
 
-### 4.8 解析区
+### 4.8 悬浮底栏（`bt-tabbar-float`）
+
+| 项 | 约定 |
+| -- | ---- |
+| DOM | `<nav class="bt-tabbar bt-tabbar-float">` 为 `phone-frame` 直接子节点，**不在** `phone-screen` 内 |
+| 形态 | 圆角胶囊（`border-radius: 999px`）；`margin` 左右约 12px、底约 16px；轻阴影 + 可选 `backdrop-filter` |
+| 选中 | `.bt-tab.is-active`：蜜桃渐变底 + `--bt-primary` 字色 |
+| 备用 | 无悬浮条时仍可用贴底全宽 `.bt-tabbar`（`border-top`） |
+| 禁止 | 为托底改机框灰底、全宽贴边白条破坏胶囊感 |
+
+### 4.9 解析区
 
 - 组件：`.bt-teacher-note`（左侧桃色边条 + 铅笔 SVG +「老师笔记」标签）
 - 正文：得意黑；选项/题干：文楷
@@ -211,7 +223,7 @@ AI-Learn/prototypes/
 
 - `nmvp-badge`（非 MVP）
 - `bt-card` / `bt-bento-4` / 报告顶栏
-- 底部 `bt-tabbar`（≤5 项，图标+文案）
+- 底部 `bt-tabbar bt-tabbar-float`（≤5 项，图标+文案；DOM 在 `phone-screen` 外）
 
 ---
 
@@ -232,6 +244,7 @@ npx serve d:\AI-Learn\prototypes
 - [x] `theme-bento` + `bento-theme.css` 四页统一引用
 - [x] 加载页翻书动画 + 四步 stepper
 - [x] 顶栏无金币角标；无反馈金币 / 报告 XP 文案
+- [x] 主导航屏：`bt-tabbar-float` 悬浮胶囊；底区纸纹与内容区连续
 - [x] 生成页 `.bt-scroll--center`；其余屏顶对齐
 - [x] 输入铅笔图标 + 答对圆章勾 + 克制进度条
 - [x] 老师笔记区得意黑 + 全局文楷
@@ -278,7 +291,8 @@ npx serve d:\AI-Learn\prototypes
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
-| v1.5.0 | 2026-05-26 | 布局顶对齐；移除 +10 金币 / +20 XP；图标与克制进度条 |
+| v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；闯关首页图标；§4.8 底栏约定 |
+| v1.4.0 | 2026-05-26 | 布局顶对齐；移除 +10 金币 / +20 XP；图标与克制进度条 |
 | v1.4.0 | 2026-05-26 | Bento 暖橙主题；`bento-theme.css`；翻书动画；无金币角标；字体文楷+得意黑 |
 | v1.2.3 | 2026-05-26 | 总览六幕业务流程 showcase + biz-flow-map |
 | v1.2.0 | 2026-05-26 | 笔记本风、SVG 横纹 |

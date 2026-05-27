@@ -2,7 +2,7 @@
 
 | 文档版本 | 撰写时间 | 状态 | 依据 |
 | -------- | -------- | ---- | ---- |
-| v1.5.0 | 2026-05-26 | 布局顶对齐；克制进度条；无金币/XP 示意；输入/答对图标 | 同上 |
+| v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；底区纸纹连续；布局顶对齐；克制进度条；无金币/XP | 同上 |
 | v1.4.0 | 2026-05-26 | 当前 HTML：Bento 暖橙；翻书 Loading；无顶栏金币 | 同上 |
 | v1.3.0 | 2026-05-26 | 扩充市面参考、阿衰意境转译、混合文案对照表（文档计划 doc-market-ref） |
 | v1.2.1 | 2026-05-26 | `ux-enhancements.css`：焦点可见、触控 48px、减少动效、色盲友好对错态 | 同上 |
@@ -24,9 +24,9 @@
 
 ### 1.0 视觉参考
 
-#### 1.0.1 当前 HTML 原型（v1.4 · Bento 暖橙）
+#### 1.0.1 当前 HTML 原型（v1.5 · Bento 暖橙）
 
-**主参考：** 高保真 Bento 暖橙稿 — 大圆角卡片、底部 Tab、暖橙主色 `#F06A2A`、Duolingo 式单题流。
+**主参考：** 高保真 Bento 暖橙稿 — 大圆角卡片、**悬浮胶囊底栏**、暖橙主色 `#F06A2A`、Duolingo 式单题流。
 
 **叠合保留：** 水彩马卡龙纸面 + **不规则横纹 SVG**（`paper-lines-*.svg`），与早期笔记本风一致。
 
@@ -42,7 +42,7 @@
 
 | 元素 | 原型实现 |
 | ---- | -------- |
-| 主按钮 / Tab | `.bt-btn-primary`、`.bt-tabbar` |
+| 主按钮 / Tab | `.bt-btn-primary`、`.bt-tabbar-float`（胶囊悬浮；贴底 `.bt-tabbar` 为备用） |
 | 选项 | `.bt-opt` 马卡龙渐变；对错绿/红渐变态 |
 | 解析 | `.bt-teacher-note` + 得意黑正文 |
 | Loading | `.bt-book-flip` CSS 翻书（替代笑脸/小课豆主视觉） |
@@ -341,7 +341,8 @@ v1.2 在阿衰漫画语法之上叠加 **Graphic Note / Bento**（马卡龙水�
 | `bt-notch-safe` / `bt-scroll--center` | 刘海占位；仅生成页垂直居中 |
 | `bt-stepper` / `bt-step` | 生成四步 |
 | `bt-book-flip` | 加载翻书动画 |
-| `bt-tabbar` / `bt-tab` | 底部导航（≤5） |
+| `bt-tabbar` / `bt-tabbar-float` / `bt-tab` | 底部导航（≤5）；悬浮条在 `phone-frame` 内、`phone-screen` 外 |
+| `--bt-screen-paper-bg` | 屏内纸纹渐变 Token；有悬浮底栏时铺至整列机框 |
 | `bt-report-top` / `bt-metrics` | 通关报告顶区 |
 | `theme-bento` | 挂载于 `<body>` |
 
@@ -368,14 +369,18 @@ v1.2 在阿衰漫画语法之上叠加 **Graphic Note / Bento**（马卡龙水�
   ├─ ::before  paper-lines-page.svg（不规则横纹）+ 纸纹噪点
   └─ ::after   四角柔光斑
 
-.phone-screen（屏内）
-  ├─ 水彩 radial 渐变（粉/蓝/黄，按屏 3n 略变色相）
-  ├─ paper-lines-screen.svg 平铺（浅色不规则横纹 + 弯河线）
+.phone-screen（屏内；无悬浮底栏时）
+  ├─ `--bt-screen-paper-bg`（水彩 radial + paper-lines-screen + 暖纸渐变）
   ├─ ::before  额外暖光斑
   └─ ::after   纸纹噪点（multiply）
+
+.phone-frame:has(.bt-tabbar-float)（有悬浮底栏）
+  ├─ 整列应用 `--bt-screen-paper-bg`（底栏留白区与内容区同色）
+  ├─ .phone-screen 背景透明（避免双色条带）
+  └─ nav.bt-tabbar-float 悬浮于纸纹底之上
 ```
 
-- 各 `screen-item` 对横纹层使用 **不同 `background-position`**，避免多屏纹路完全对齐。
+- 各 `screen-item` 通过 CSS 变量覆盖 `--bt-screen-paper-bg-color` / `background-position`，避免多屏纹路完全对齐。
 - 修改横纹疏密/弯曲度：编辑 SVG 源文件，勿改方格 CSS。
 
 ---
@@ -465,7 +470,7 @@ v1.2 在阿衰漫画语法之上叠加 **Graphic Note / Bento**（马卡龙水�
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
-| v1.5.0 | 2026-05-26 | 布局顶对齐；克制进度条；无金币/XP 示意；铅笔/圆章勾图标 |
+| v1.5.0 | 2026-05-26 | 悬浮胶囊底栏；`--bt-screen-paper-bg` 底区连续；布局/图标/进度条；无金币/XP |
 | v1.4.0 | 2026-05-26 | Bento 暖橙为当前 HTML；`bt-*` 组件；翻书 Loading；无顶栏金币；文楷+得意黑 |
 | v1.3.0 | 2026-05-26 | §1.2 阿衰转译扩充；§2 市面参考分节；§7.2 混合文案对照表 |
 | v1.2.1 | 2026-05-26 | UX 增强层：焦点环、最小触控、减少动效、页脚色点替代 emoji 图标 |
