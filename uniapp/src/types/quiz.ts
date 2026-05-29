@@ -27,6 +27,20 @@ export interface GenerateQuizResponse {
   questions: Question[]
 }
 
+export type QuizJobStatus = 'pending' | 'running' | 'completed' | 'failed'
+
+export interface GenerateQuizJobResponse {
+  job_id: string
+  status: 'pending'
+}
+
+export interface QuizJobStatusResponse {
+  job_id: string
+  status: QuizJobStatus
+  result?: GenerateQuizResponse
+  error?: string
+}
+
 export interface QuizReportRequest {
   quiz_id: string
   topic: string

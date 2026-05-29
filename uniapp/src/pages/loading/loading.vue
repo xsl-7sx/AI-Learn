@@ -74,6 +74,7 @@ const currentStepIndex = computed(() => {
 const stepText = computed(() => {
   if (progress.value >= 100) return '生成完成，即将进入闯关…'
   if (progress.value >= 90) return '快好了，再等等…'
+  if (progress.value >= 70) return 'AI 正在整理题目…'
   return stepTexts[currentStepIndex.value]
 })
 

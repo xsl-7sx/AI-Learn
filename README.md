@@ -32,18 +32,20 @@ npx serve prototypes
 
 ### 后端
 
-默认使用 **智谱 GLM-4.5-air**（OpenAI 兼容接口）。在 `backend/.env` 配置：
+默认使用 **DeepSeek**（OpenAI 兼容接口 + JSON Mode）。在 `backend/.env` 配置：
 
 ```env
-LLM_API_KEY=你的智谱APIKey
-LLM_MODEL=glm-4.5-air
-LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-LLM_CALL_TIMEOUT=120
-REQUEST_TOTAL_TIMEOUT=180
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=你的DeepSeekKey
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+LLM_JSON_MODE=true
 MOCK_LLM=false
 ```
 
-也可改用 DeepSeek（设置 `DEEPSEEK_API_KEY` 等，且不要设置 `LLM_API_KEY`）。
+也可改用智谱（`LLM_PROVIDER=zhipu` 并设置 `LLM_API_KEY` 等）。
+
+出题接口为**异步任务**：`POST /api/v1/quiz/generate` 立即返回 `job_id`，前端轮询 `GET /api/v1/quiz/jobs/{job_id}` 直至 `completed`。
 
 ```bash
 cd backend

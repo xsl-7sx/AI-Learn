@@ -25,13 +25,15 @@ async def generate_report(payload: QuizReportRequest) -> QuizReportResponse:
   score = sum(1 for answer in payload.answers if answer.correct)
   correct_rate = round(score / total, 2) if total else 0.0
 
-  if settings.mock_llm or not settings.resolved_api_key:
+  if settings.mock_llm:
     return QuizReportResponse(
       score=score,
       total=total,
       correct_rate=correct_rate,
       report=MOCK_REPORT,
     )
+  if not settings.resolved_api_key:
+    raise ValueError("LLM API key not configured")
 
   prompt = ChatPromptTemplate.from_messages(
     [

@@ -75,6 +75,18 @@ class GenerateQuizResponse(BaseModel):
         return self
 
 
+class GenerateQuizJobResponse(BaseModel):
+    job_id: str
+    status: Literal["pending"] = "pending"
+
+
+class QuizJobStatusResponse(BaseModel):
+    job_id: str
+    status: Literal["pending", "running", "completed", "failed"]
+    result: GenerateQuizResponse | None = None
+    error: str | None = None
+
+
 class UserAnswer(BaseModel):
     question_id: str
     selected: int | list[int]
