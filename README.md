@@ -45,7 +45,11 @@ MOCK_LLM=false
 
 也可改用智谱（`LLM_PROVIDER=zhipu` 并设置 `LLM_API_KEY` 等）。
 
-出题接口为**异步任务**：`POST /api/v1/quiz/generate` 立即返回 `job_id`，前端轮询 `GET /api/v1/quiz/jobs/{job_id}` 直至 `completed`。
+出题接口为**异步任务 + 流式 JSONL**：
+
+1. `POST /api/v1/quiz/generate` → `202` + `job_id`
+2. 轮询 `GET /api/v1/quiz/jobs/{job_id}`，`questions` 逐题递增
+3. **首题就绪**即进入答题页，其余题目后台继续拉取
 
 ```bash
 cd backend

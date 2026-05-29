@@ -29,8 +29,8 @@
 
 ```mermaid
 flowchart LR
-    index["index 输入 topic"] --> loading["loading 调 generate"]
-    loading --> quiz["quiz 本地判分 x10"]
+    index["index 输入 topic"] --> loading["loading 创建 job + 轮询"]
+    loading -->|"首题就绪"| quiz["quiz 边答边拉题"]
     quiz --> result["result 调 report"]
     result -->|"再来一局清 3 key"| index
 ```
@@ -56,15 +56,18 @@ flowchart TB
     end
     subgraph server [backend FastAPI]
         router["routers/quiz.py"]
-        chain_gen["QuizGenerationChain"]
+        chain_gen["QuizStreamGenerationChain"]
+        jobs["jobs/quiz_jobs 内存任务"]
         chain_rep["ReportGenerationChain"]
     end
     subgraph llm [DeepSeek API]
         ds["deepseek-chat"]
     end
     pages --> api_ts
-    api_ts -->|"POST /api/v1/quiz/generate"| router
+    api_ts -->|"POST /generate → 202"| router
+    api_ts -->|"GET /jobs/{id} 轮询"| router
     api_ts -->|"POST /api/v1/quiz/report"| router
+    router --> jobs
     router --> chain_gen
     router --> chain_rep
     chain_gen --> ds
@@ -281,7 +284,7 @@ npm run dev:mp-weixin
 | 风险 | 应对 |
 | ---- | ---- |
 | towxml 集成 > 1 天 | 启用 Markdown 分段 View，不阻塞 G4 |
-| generate 504 超时 | 心理学进度条 + 502 重试提示 |
+| 出题慢 / 轮询失败 | 首题就绪即跳转；心理学进度条；等待下一题时快轮询 |
 | 真机无法访问 localhost | `api.ts` BASE_URL 改局域网 IP |
 | JSON 解析失败 | OutputFixingParser 1 次；仍失败 502 |
 | 原型与 MVP 范围不一致 | 以方案 + UI 检查表为准 |

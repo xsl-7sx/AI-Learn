@@ -91,11 +91,17 @@ uniapp/src/
 
 | Key | 内容 | 写入时机 | 清除时机 |
 | --- | ---- | -------- | -------- |
-| `currentQuiz` | `{ quiz_id, topic, questions }` | loading 收到 generate 响应 | 再来一局 |
+| `currentQuiz` | `{ quiz_id, topic, questions, generating?, job_id? }` | 首题就绪 / 轮询增量更新 | 再来一局 |
 | `quizAnswers` | `UserAnswer[]` | 每答一题追加 | 再来一局 |
 | `quizProgress` | `{ index: number }` | 每题推进 | 再来一局 |
 
 ```typescript
+// utils/storage.ts — 新一局（首页点「开始闯关」）
+export function beginQuizSession(): void {
+  uni.removeStorageSync('quizAnswers')
+  uni.removeStorageSync('quizProgress')
+}
+
 // utils/storage.ts — 再来一局（禁止 clearStorage）
 export function clearQuizSession(): void {
   uni.removeStorageSync('currentQuiz')
@@ -191,18 +197,29 @@ export function checkAnswer(question: Question, selected: number | number[]): bo
 - 90% 后缓增至 ~98%，完成时跳至 100%
 - 阶段文案随进度切换（检索考点 → 出题校验 → 排版选项 → 准备闯关）
 
-**API 调用：**
+**API 调用（v1.1 流式 + 首题跳转）：**
 
 ```typescript
-// onLoad: 从上一页 storage 或 eventChannel 取 topic
-const res = await generateQuiz(topic)
-uni.setStorageSync('currentQuiz', res)
+// onLoad: 从上一页 storage 取 topic
+const job = await startQuizGeneration(topic)
+const first = await waitForFirstQuestion(job.job_id, { intervalMs: 600 })
+uni.setStorageSync('currentQuiz', {
+  quiz_id: first.quiz_id,
+  topic: first.topic,
+  questions: first.questions,
+  generating: first.status !== 'completed',
+  job_id: job.job_id,
+  total_expected: first.total_expected ?? 10,
+})
 uni.redirectTo({ url: '/pages/quiz/quiz' })
+// 后台继续 pollQuizJobUntilComplete，增量 merge questions
 ```
 
-**取消策略：** `onUnload` 设 `cancelled = true`；响应返回时若已 cancelled 则丢弃、不跳转。
+**取消策略：** `onUnload` 设 `cancelled = true`；首题返回后若已 cancelled 则不跳转。
 
 **失败：** Toast「生成失败，请重试」+ `navigateBack` 或 `reLaunch` 回首页。
+
+**注意：** 不向用户展示 `stream_preview` 原始 JSON。
 
 ### 8.3 答题页 `quiz`
 
@@ -223,6 +240,9 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 ```
 
 - 题干区、解析区使用 `scroll-view`，选项区与底部按钮固定
+- **FeedbackPanel：** 对错横幅 + 正确答案 + 解析；答错震动、答对音效
+- **选项字母：** `formatOptionLabel` 渲染 `A`/`B`…，选项文本用 `stripOptionPrefix` 去重前缀
+- **边答边生成：** 下一题未就绪时显示等待页；350ms 快轮询，新题就绪自动前进
 - Mock 数据须含**超长题干/解析**，小屏真机验证
 
 **不做：** 顶栏倒计时、灵韵惩罚（`.bt-spirit` 原型仅探索）
@@ -256,24 +276,29 @@ const report = await generateReport(payload)
 ```typescript
 const BASE_URL = 'http://127.0.0.1:8000'  // 真机改局域网 IP
 
-export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: `${BASE_URL}/api/v1/quiz/generate`,
-      method: 'POST',
-      data: { topic },
-      timeout: 60000,
-      success: (res) => {
-        if (res.statusCode !== 200) reject(new Error('生成失败'))
-        else resolve(res.data as GenerateQuizResponse)
-      },
-      fail: reject,
-    })
+export async function startQuizGeneration(topic: string): Promise<QuizJobCreateResponse> {
+  const res = await uni.request({
+    url: `${BASE_URL}/api/v1/quiz/generate`,
+    method: 'POST',
+    data: { topic },
+    timeout: 15000,
   })
+  if (res.statusCode !== 202) throw new Error('创建出题任务失败')
+  return res.data as QuizJobCreateResponse
+}
+
+export async function getQuizJob(jobId: string): Promise<QuizJobStatusResponse> { /* GET /jobs/{id} */ }
+
+export async function waitForFirstQuestion(jobId: string, opts?: { intervalMs?: number }) {
+  // 轮询直至 ready && questions.length >= 1
+}
+
+export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) => void) {
+  // 轮询直至 completed / failed，默认 interval 600ms
 }
 ```
 
-`generateReport` 同理，`timeout: 30000`。
+`generateReport` 仍为 `POST /report`，`timeout: 30000`。
 
 ---
 

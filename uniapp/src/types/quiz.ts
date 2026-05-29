@@ -13,6 +13,9 @@ export interface QuizSession {
   quiz_id: string
   topic: string
   questions: Question[]
+  generating?: boolean
+  job_id?: string
+  total_expected?: number
 }
 
 export interface UserAnswer {
@@ -37,6 +40,12 @@ export interface GenerateQuizJobResponse {
 export interface QuizJobStatusResponse {
   job_id: string
   status: QuizJobStatus
+  quiz_id?: string
+  topic?: string
+  questions: Question[]
+  total_expected: number
+  ready: boolean
+  stream_preview?: string
   result?: GenerateQuizResponse
   error?: string
 }

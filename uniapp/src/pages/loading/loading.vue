@@ -2,7 +2,7 @@
   <view class="page bt-screen">
     <view class="loading-header" :style="headerStyle">
       <text class="bt-greeting">AI 正在出题…</text>
-      <text class="bt-title-lg">等等，我去翻翻笔记…</text>
+      <text class="bt-title-lg">{{ headline }}</text>
     </view>
 
     <view class="loading-body">
@@ -12,9 +12,10 @@
             <AppIcon name="book-open" :size="80" color="#ea580c" />
           </view>
           <view class="bt-progress-line">
-            <view :style="{ width: `${progress}%` }" />
+            <view class="bt-progress-fill" :style="{ width: `${progress}%` }" />
           </view>
           <text class="bt-caption">{{ stepText }}</text>
+          <text v-if="typingHint" class="typing-hint">{{ typingHint }}</text>
         </view>
 
         <view class="bt-stepper">
@@ -23,14 +24,16 @@
             :key="step"
             :class="['bt-step', stepClass(index)]"
           >
-          <view class="bt-step-num">
-            <text class="bt-step-num-text">{{ index + 1 }}</text>
-          </view>
-          <text class="bt-step-label">{{ step }}</text>
+            <view class="bt-step-num">
+              <text class="bt-step-num-text">{{ index + 1 }}</text>
+            </view>
+            <text class="bt-step-label">{{ step }}</text>
           </view>
         </view>
 
-        <text class="bt-subtitle">AI 自动搭配单选、多选、判断三种题型</text>
+        <text class="bt-subtitle">
+          {{ readyCount > 0 ? `已就绪 ${readyCount}/${totalExpected} 题，首题可先开练` : 'AI 自动搭配单选、多选、判断三种题型' }}
+        </text>
         <view class="loading-cancel" @tap="cancel">取消</view>
       </view>
     </view>
@@ -46,25 +49,34 @@ import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import mockQuiz from '@/mock/quiz.json'
 import { USE_MOCK } from '@/config'
-import { generateQuiz, showApiError } from '@/services/api'
+import { showApiError, waitForFirstQuestion } from '@/services/api'
 import { getLayoutMetrics } from '@/utils/layout'
-import { clearPendingTopic, getPendingTopic, setCurrentQuiz } from '@/utils/storage'
+import { clearPendingTopic, beginQuizSession, getPendingTopic } from '@/utils/storage'
 import type { GenerateQuizResponse } from '@/types/quiz'
 
 const progress = ref(0)
 const cancelled = ref(false)
+const readyCount = ref(0)
+const totalExpected = ref(10)
+const hasStreamActivity = ref(false)
 const steps = ['检索考点', '出题校验', '排版选项', '准备闯关']
 const stepTexts = ['正在检索考点…', '正在出题校验…', '正在排版选项…', '准备进入闯关…']
+
+let timer: ReturnType<typeof setInterval> | null = null
 
 const layoutMetrics = ref(getLayoutMetrics())
 const headerStyle = computed(() => ({
   paddingTop: `${layoutMetrics.value.headerPaddingTop + 12}px`,
 }))
 
-let timer: ReturnType<typeof setInterval> | null = null
+const headline = computed(() => {
+  if (readyCount.value > 0) return '第一题好了，准备开练！'
+  return '等等，我去翻翻笔记…'
+})
 
 const currentStepIndex = computed(() => {
   if (progress.value >= 100) return 3
+  if (readyCount.value > 0) return 3
   if (progress.value >= 75) return 3
   if (progress.value >= 50) return 2
   if (progress.value >= 25) return 1
@@ -73,13 +85,26 @@ const currentStepIndex = computed(() => {
 
 const stepText = computed(() => {
   if (progress.value >= 100) return '生成完成，即将进入闯关…'
+  if (readyCount.value > 0) return `第 ${readyCount.value} 题已生成，正在准备闯关…`
   if (progress.value >= 90) return '快好了，再等等…'
-  if (progress.value >= 70) return 'AI 正在整理题目…'
+  if (hasStreamActivity.value) return 'AI 正在逐字出题…'
   return stepTexts[currentStepIndex.value]
+})
+
+const typingHint = computed(() => {
+  if (readyCount.value > 0) return ''
+  if (!hasStreamActivity.value) return ''
+  if (progress.value < 50) return '正在构思题干和选项…'
+  if (progress.value < 80) return '正在撰写解析…'
+  return '马上就好…'
 })
 
 function stepClass(index: number) {
   if (progress.value >= 100) return index === 3 ? 'is-active' : 'is-done'
+  if (readyCount.value > 0) {
+    if (index < 3) return 'is-done'
+    return index === 3 ? 'is-active' : 'is-pending'
+  }
   if (index < currentStepIndex.value) return 'is-done'
   if (index === currentStepIndex.value) return 'is-active'
   return 'is-pending'
@@ -87,14 +112,33 @@ function stepClass(index: number) {
 
 function startProgress() {
   timer = setInterval(() => {
+    if (cancelled.value || progress.value >= 100) return
     if (progress.value < 40) {
-      progress.value = Math.min(90, progress.value + 8 + Math.random() * 6)
-    } else if (progress.value < 90) {
-      progress.value = Math.min(90, progress.value + 2 + Math.random() * 3)
-    } else if (progress.value < 98) {
-      progress.value = Math.min(98, progress.value + 0.4 + Math.random() * 0.4)
+      progress.value = Math.min(88, progress.value + 6 + Math.random() * 6)
+    } else if (progress.value < 88) {
+      progress.value = Math.min(88, progress.value + 2 + Math.random() * 3)
+    } else if (progress.value < 96) {
+      progress.value = Math.min(96, progress.value + 0.5 + Math.random() * 0.5)
     }
-  }, 700)
+  }, 650)
+}
+
+function stopProgress() {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+}
+
+function applyStreamStatus(status: { questions: { length: number }; total_expected: number; stream_preview?: string }) {
+  hasStreamActivity.value = true
+  readyCount.value = status.questions.length
+  totalExpected.value = status.total_expected
+  const streamTarget = 12 + (readyCount.value / Math.max(status.total_expected, 1)) * 78
+  progress.value = Math.max(progress.value, Math.min(96, streamTarget))
+  if (readyCount.value > 0) {
+    progress.value = Math.max(progress.value, 92)
+  }
 }
 
 async function loadQuiz() {
@@ -106,20 +150,28 @@ async function loadQuiz() {
   }
 
   try {
-    const result = USE_MOCK
-      ? (mockQuiz as GenerateQuizResponse)
-      : await generateQuiz(topic)
+    if (USE_MOCK) {
+      const result = mockQuiz as GenerateQuizResponse
+      beginQuizSession({ ...result, topic: result.topic || topic })
+      clearPendingTopic()
+      if (!cancelled.value) {
+        uni.redirectTo({ url: '/pages/quiz/quiz' })
+      }
+      return
+    }
 
+    const session = await waitForFirstQuestion(topic, applyStreamStatus)
     if (cancelled.value) return
 
     progress.value = 100
-    setCurrentQuiz({ ...result, topic: result.topic || topic })
+    stopProgress()
+    beginQuizSession({ ...session, topic: session.topic || topic })
     clearPendingTopic()
     setTimeout(() => {
       if (!cancelled.value) {
         uni.redirectTo({ url: '/pages/quiz/quiz' })
       }
-    }, 400)
+    }, 300)
   } catch (error) {
     if (cancelled.value) return
     showApiError(error, '生成失败，请重试')
@@ -141,7 +193,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   cancelled.value = true
-  if (timer) clearInterval(timer)
+  stopProgress()
 })
 
 onUnload(() => {
@@ -211,6 +263,31 @@ onUnload(() => {
   animation: book-float 2.4s ease-in-out infinite;
 }
 
+.bt-progress-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.bt-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #f06a2a 0%, #ffb07c 50%, #f06a2a 100%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.6s ease-in-out infinite;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes progress-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 @keyframes book-float {
   0%,
   100% {
@@ -227,6 +304,26 @@ onUnload(() => {
   margin-top: 24rpx;
   font-size: 28rpx;
   color: #374151;
+}
+
+.typing-hint {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #9ca3af;
+  animation: hint-fade 2.4s ease-in-out infinite;
+}
+
+@keyframes hint-fade {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .bt-stepper {
@@ -279,6 +376,20 @@ onUnload(() => {
 .bt-step.is-active .bt-step-num {
   background: #ea580c;
   box-shadow: 0 4rpx 16rpx rgba(234, 88, 12, 0.28);
+  animation: step-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes step-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4rpx 16rpx rgba(234, 88, 12, 0.28);
+  }
+
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 6rpx 20rpx rgba(234, 88, 12, 0.38);
+  }
 }
 
 .bt-step.is-active .bt-step-num-text {

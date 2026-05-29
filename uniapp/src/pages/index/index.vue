@@ -178,7 +178,7 @@ import { USE_MOCK } from '@/config'
 import { TOPIC_BATCHES } from '@/utils/topics'
 import { TONE_ICON_COLORS } from '@/utils/icons'
 import { getLayoutMetrics, layoutMetricsToStyle } from '@/utils/layout'
-import { getCurrentQuiz, getQuizProgress, setCurrentQuiz, setPendingTopic } from '@/utils/storage'
+import { beginQuizSession, getCurrentQuiz, getQuizProgress, setPendingTopic } from '@/utils/storage'
 import type { GenerateQuizResponse } from '@/types/quiz'
 
 const topic = ref('')
@@ -222,7 +222,7 @@ function startQuiz() {
 }
 
 function startMock() {
-  setCurrentQuiz(mockQuiz as GenerateQuizResponse)
+  beginQuizSession(mockQuiz as GenerateQuizResponse)
   uni.redirectTo({ url: '/pages/quiz/quiz' })
 }
 

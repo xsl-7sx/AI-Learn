@@ -14,7 +14,7 @@ def _make_questions(topic: str) -> list[Question]:
       stem=f"关于「{topic}」，下列哪项描述最准确？",
       options=["选项 A", "选项 B", "选项 C", "选项 D"],
       answer=1,
-      explanation="这是单选题解析示例。",
+      explanation="这是单选题解析示例：先抓住题干关键词，再排除明显不符的选项。"
     ),
     Question(
       id="q2",
@@ -22,7 +22,7 @@ def _make_questions(topic: str) -> list[Question]:
       stem=f"以下哪些与「{topic}」直接相关？",
       options=["概念一", "概念二", "概念三", "概念四"],
       answer=[0, 2],
-      explanation="这是多选题解析示例。",
+      explanation="多选题要看全：漏选或多选都会错，把每个选项和题干逐一对照。"
     ),
     Question(
       id="q3",
@@ -30,7 +30,7 @@ def _make_questions(topic: str) -> list[Question]:
       stem=f"「{topic}」只需要记住定义，不需要理解应用场景。",
       options=["正确", "错误"],
       answer=1,
-      explanation="理解应用场景有助于真正掌握知识。",
+      explanation="只背定义不够，得能说出一两个真实应用场景，才算真懂。"
     ),
     *[
       Question(

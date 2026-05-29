@@ -83,6 +83,12 @@ class GenerateQuizJobResponse(BaseModel):
 class QuizJobStatusResponse(BaseModel):
     job_id: str
     status: Literal["pending", "running", "completed", "failed"]
+    quiz_id: str | None = None
+    topic: str | None = None
+    questions: list[Question] = Field(default_factory=list)
+    total_expected: int = 10
+    ready: bool = False
+    stream_preview: str = ""
     result: GenerateQuizResponse | None = None
     error: str | None = None
 

@@ -33,13 +33,23 @@ export function getQuizAnswers(): UserAnswer[] {
   return (uni.getStorageSync(ANSWERS_KEY) as UserAnswer[]) || []
 }
 
-export function setQuizProgress(index: number): void {
-  uni.setStorageSync(PROGRESS_KEY, { index })
+export function setQuizProgress(index: number, quizId?: string): void {
+  uni.setStorageSync(PROGRESS_KEY, { index, quiz_id: quizId })
 }
 
-export function getQuizProgress(): number {
-  const progress = uni.getStorageSync(PROGRESS_KEY) as { index?: number } | null
+export function getQuizProgress(quizId?: string): number {
+  const progress = uni.getStorageSync(PROGRESS_KEY) as { index?: number; quiz_id?: string } | null
+  if (quizId && progress?.quiz_id && progress.quiz_id !== quizId) {
+    return 0
+  }
   return progress?.index ?? 0
+}
+
+/** 新开一局：写入题库并重置答题进度与作答记录 */
+export function beginQuizSession(session: QuizSession): void {
+  setCurrentQuiz(session)
+  setQuizAnswers([])
+  setQuizProgress(0, session.quiz_id)
 }
 
 export function clearQuizSession(): void {

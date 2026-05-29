@@ -6,9 +6,10 @@ from datetime import datetime, timedelta
 from typing import Literal
 from uuid import uuid4
 
-from app.schemas.quiz import GenerateQuizResponse
+from app.schemas.quiz import GenerateQuizResponse, Question
 
 JobStatus = Literal["pending", "running", "completed", "failed"]
+EXPECTED_QUESTION_COUNT = 10
 
 
 @dataclass
@@ -16,6 +17,10 @@ class QuizJob:
   job_id: str
   topic: str
   status: JobStatus = "pending"
+  quiz_id: str | None = None
+  questions: list[Question] = field(default_factory=list)
+  stream_preview: str = ""
+  expected_total: int = EXPECTED_QUESTION_COUNT
   result: GenerateQuizResponse | None = None
   error: str | None = None
   created_at: datetime = field(default_factory=datetime.now)
@@ -61,12 +66,33 @@ class QuizJobStore:
         return None
       return job
 
-  async def mark_running(self, job_id: str) -> QuizJob | None:
+  async def mark_running(self, job_id: str, *, quiz_id: str) -> QuizJob | None:
     async with self._lock:
       job = self._jobs.get(job_id)
       if job is None:
         return None
       job.status = "running"
+      job.quiz_id = quiz_id
+      job.updated_at = datetime.now()
+      return job
+
+  async def set_preview(self, job_id: str, preview: str) -> QuizJob | None:
+    async with self._lock:
+      job = self._jobs.get(job_id)
+      if job is None:
+        return None
+      job.stream_preview = preview
+      job.updated_at = datetime.now()
+      return job
+
+  async def append_question(self, job_id: str, question: Question) -> QuizJob | None:
+    async with self._lock:
+      job = self._jobs.get(job_id)
+      if job is None:
+        return None
+      if any(existing.id == question.id for existing in job.questions):
+        return job
+      job.questions.append(question)
       job.updated_at = datetime.now()
       return job
 
@@ -76,6 +102,8 @@ class QuizJobStore:
       if job is None:
         return None
       job.status = "completed"
+      job.quiz_id = result.quiz_id
+      job.questions = result.questions
       job.result = result
       job.error = None
       job.updated_at = datetime.now()
