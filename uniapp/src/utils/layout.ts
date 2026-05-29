@@ -93,8 +93,8 @@ export function getLayoutMetrics(): LayoutMetrics {
   const headerMinHeight =
     menu.bottom > 0 ? menu.bottom + 20 : statusBarHeight + navBarHeight + 20
 
-  // 顶栏与主标题之间的间距（px）
-  const scrollPaddingTop = 20
+  // 顶栏与主标题之间的间距（px），偏紧以拉近主标题与问候语
+  const scrollPaddingTop = 0
 
   const pagePaddingPx = rpxToPx(64, windowWidth)
   const topicGapPx = rpxToPx(40, windowWidth)

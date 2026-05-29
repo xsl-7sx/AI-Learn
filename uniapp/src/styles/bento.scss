@@ -172,3 +172,22 @@ button {
   background: #fef2f2;
   color: #b91c1c;
 }
+
+/* 小程序自定义组件宿主固定到底部并适配安全区 */
+float-tabbar {
+  position: fixed;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 0;
+  z-index: 100;
+  display: block;
+  max-width: calc(100vw - 64rpx);
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  pointer-events: none;
+}
+
+float-tabbar .bt-tabbar-float {
+  margin-bottom: 16rpx;
+  pointer-events: auto;
+}

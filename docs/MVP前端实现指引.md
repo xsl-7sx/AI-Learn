@@ -7,6 +7,7 @@
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版：页面、组件、storage、UI 映射、交互检查表 |
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI 落地；layout 多机型顶栏适配；文档同步仓库结构 |
+| v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、安全区底栏、间距与横滑优化 |
 
 ---
 
@@ -60,6 +61,8 @@ uniapp/src/
 │   ├── quiz/quiz.vue
 │   └── result/result.vue
 ├── components/
+│   ├── AppIcon.vue           # Lucide SVG data URI 图标
+│   ├── FloatTabbar.vue       # 悬浮胶囊底栏（闯关 / 题库 / 勋章）
 │   ├── QuestionCard.vue      # 题干展示
 │   ├── OptionList.vue        # 选项 / 判断按钮
 │   ├── FeedbackPanel.vue     # 对错反馈 + 解析
@@ -69,8 +72,10 @@ uniapp/src/
 ├── utils/
 │   ├── scoring.ts            # 本地判分
 │   ├── storage.ts            # 三 key 读写封装
-│   ├── topics.ts             # 热门主题批次
-│   └── layout.ts             # 顶栏/胶囊安全区适配
+│   ├── topics.ts             # 热门主题批次（含 IconName）
+│   ├── icons.ts              # Lucide 图标注册表
+│   ├── fonts.ts              # 装饰性手写字体按需加载
+│   └── layout.ts             # 顶栏/胶囊安全区与主题卡宽度
 ├── types/
 │   └── quiz.ts               # snake_case 类型
 ├── styles/
@@ -151,18 +156,21 @@ export function checkAnswer(question: Question, selected: number | number[]): bo
 
 **已实现（对齐 [`prototypes/ui.html`](../prototypes/ui.html) 参考首页）：**
 
-- 顶栏：问候语 + 副标题；微信环境为胶囊预留右侧安全区（`utils/layout.ts`）
-- 主标题 + 橙色下划线
-- 输入卡片：多行输入、快捷主题 pill、「换一换」、双行主按钮
-- 热门主题：横滑 5 张卡片（一屏约 3 张），点击填入 topic
+- 顶栏：品牌「知练」+ 问候语；微信环境为胶囊预留右侧安全区（`utils/layout.ts`）；连续学习火焰与日历图标
+- 主标题 + 橙色下划线；主标题与问候语垂直间距压缩（`scrollPaddingTop: 0`，约上移 24px）
+- 输入卡片：多行输入（内边距约 18px）、Lucide 铅笔图标、快捷主题横滑 pill + 右侧渐变遮罩、「换一换」与标签保持 ≥12px 间距
+- 主 CTA：橙渐变双行按钮（`view` 实现，避免小程序 `button` 覆盖文字色）
+- 热门主题：横滑 5 张卡片（一屏约 3 张），统一图标底块 + 两行标题省略；点击填入 topic
 - 未完成关卡卡片 + 「继续」；底栏 `FloatTabbar`（闯关 / 题库 / 勋章，后两者 MVP 置灰）
+- 图标：`AppIcon` + `utils/icons.ts`（Lucide ISC，SVG data URI，无外链字体文件）
+- 底栏安全区：`float-tabbar` 宿主 `position: fixed` + `env(safe-area-inset-bottom)`；`scroll-view` 底部 `bottom-spacer` ≥100px 避免内容被底栏遮挡
 
 **MVP 必做（逻辑不变）：**
 
 - topic 非空校验 → `loading` → API / Mock
 - `TOPIC_BATCHES` + `shuffleTopics` 换批；`pickTopic` 写输入框
 
-**不做：** 模式选择、URL 解析、底栏真实切换
+**不做：** 模式选择、URL 解析、底栏真实切换、全屏山水背景图（`home-bg.png` 仅资源预留，当前使用 `bt-screen` 渐变）
 
 ### 8.2 生成页 `loading`
 
@@ -280,6 +288,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 | ------ | ------------ |
 | `.ref-input-card` / `.ref-btn-generate` | 首页 `home-input-card` / `home-btn-generate` |
 | `ui-ref-home` 顶栏与主题卡 | `pages/index/index.vue` + `FloatTabbar.vue` |
+| Lucide 线框图标 | `components/AppIcon.vue` + `utils/icons.ts` |
 | `.bt-book-flip` | loading 翻书动画 |
 | `.bt-opt` | OptionList 选项 |
 | `.bt-judge-btn` | 判断题按钮 |
@@ -357,3 +366,4 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版前端实现指引 |
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI、layout 适配、目录与 UI 映射更新 |
+| v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、底栏安全区、间距与横滑优化 |

@@ -50,15 +50,27 @@
         <view class="home-suggest-row">
           <view class="home-suggest-label">
             <text>试试这些</text>
-            <AppIcon name="play" :size="20" color="#9ca3af" />
+            <AppIcon name="play" :size="16" color="#9ca3af" />
           </view>
-          <view
-            v-for="item in quickTopics"
-            :key="item.title"
-            class="home-pill"
-            @tap="pickTopic(item.title)"
-          >
-            {{ item.title }}
+          <view class="home-suggest-pills-wrap">
+            <scroll-view
+              class="home-suggest-pills-scroll"
+              scroll-x
+              :show-scrollbar="false"
+              :enhanced="true"
+            >
+              <view class="home-suggest-pills-track">
+                <view
+                  v-for="item in quickTopics"
+                  :key="item.title"
+                  class="home-pill"
+                  @tap="pickTopic(item.title)"
+                >
+                  {{ item.title }}
+                </view>
+              </view>
+            </scroll-view>
+            <view class="home-suggest-fade" />
           </view>
           <view class="home-shuffle" @tap="shuffleTopics">
             <AppIcon name="refresh-cw" :size="24" color="#9ca3af" />
@@ -106,7 +118,7 @@
               <view :class="['home-topic-icon', `home-topic-icon--${item.tone}`]">
                 <AppIcon
                   :name="item.icon || 'layers'"
-                  :size="36"
+                  :size="32"
                   :color="topicIconColor(item.tone)"
                 />
               </view>
@@ -356,7 +368,7 @@ function continueQuiz() {
 }
 
 .home-hero {
-  margin-top: 8rpx;
+  margin-top: 0;
   margin-bottom: 36rpx;
 }
 
@@ -406,7 +418,7 @@ function continueQuiz() {
 .home-textarea {
   width: 100%;
   min-height: 180rpx;
-  padding: 24rpx 56rpx 24rpx 24rpx;
+  padding: 36rpx 80rpx 36rpx 36rpx;
   background: linear-gradient(135deg, #fffbf7 0%, #fff7ed 100%);
   border-radius: 24rpx;
   border: 1rpx solid rgba(251, 146, 60, 0.18);
@@ -415,18 +427,20 @@ function continueQuiz() {
   font-weight: 400;
   line-height: 1.65;
   color: #374151;
+  box-sizing: border-box;
 }
 
 .home-pencil {
   position: absolute;
-  right: 16rpx;
-  bottom: 16rpx;
+  right: 24rpx;
+  bottom: 24rpx;
 }
 
 .home-suggest-label {
   display: inline-flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 4rpx;
+  height: 48rpx;
   font-family: var(--font-body);
   font-size: 24rpx;
   color: #9ca3af;
@@ -436,15 +450,16 @@ function continueQuiz() {
 .home-pill {
   display: inline-flex;
   align-items: center;
-  padding: 8rpx 14rpx;
+  padding: 8rpx 12rpx;
   border-radius: 999rpx;
   background: #fff7ed;
   color: #c2410c;
   font-family: var(--font-body);
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 500;
   border: 1rpx solid #fed7aa;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .home-shuffle {
@@ -452,7 +467,8 @@ function continueQuiz() {
   align-items: center;
   gap: 6rpx;
   flex-shrink: 0;
-  margin-left: auto;
+  margin-left: 24rpx;
+  padding-left: 4rpx;
   font-family: var(--font-body);
   font-size: 24rpx;
   color: #9ca3af;
@@ -460,10 +476,38 @@ function continueQuiz() {
 
 .home-suggest-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 12rpx 16rpx;
+  gap: 12rpx;
   margin-bottom: 32rpx;
+}
+
+.home-suggest-pills-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.home-suggest-pills-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.home-suggest-pills-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  padding-right: 16rpx;
+}
+
+.home-suggest-fade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40rpx;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.96) 100%);
+  pointer-events: none;
 }
 
 .btn-main-row {
@@ -550,7 +594,7 @@ function continueQuiz() {
 
 .home-topic-row {
   width: 100%;
-  height: 300rpx;
+  height: 320rpx;
   white-space: nowrap;
 }
 
@@ -584,7 +628,7 @@ function continueQuiz() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
+  flex-shrink: 0;
   margin-bottom: 14rpx;
 }
 
@@ -595,15 +639,18 @@ function continueQuiz() {
 
 .home-topic-title {
   font-family: var(--font-display);
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: 700;
   color: #1f2937;
-  line-height: 1.4;
+  line-height: 1.45;
   margin-bottom: 8rpx;
+  min-height: 70rpx;
   overflow: hidden;
+  word-break: break-word;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .home-topic-desc {
@@ -743,7 +790,7 @@ function continueQuiz() {
 }
 
 .bottom-spacer {
-  height: 48rpx;
+  height: calc(200rpx + env(safe-area-inset-bottom));
 }
 </style>
 
