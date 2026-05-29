@@ -223,16 +223,18 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 cp .env.example .env            # 填入 DEEPSEEK_API_KEY
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # 终端 2：前端（Sprint 2 起）
 cd uniapp
 npm install
+cp .env.development.example .env.development   # 真机：填入电脑局域网 IP
 npm run dev:mp-weixin
 
 # 微信开发者工具
 # → 导入 uniapp/dist/dev/mp-weixin
 # → 详情 → 本地设置 → 勾选「不校验合法域名、web-view...」
+# → 真机预览：手机与电脑同一 Wi-Fi；访问 http://<IP>:8000/health 自检
 ```
 
 ### 联调检查清单
@@ -241,7 +243,8 @@ npm run dev:mp-weixin
 - [ ] `/docs` 中 generate curl 通过
 - [ ] 微信工具导入编译产物目录
 - [ ] 勾选「不校验合法域名」
-- [ ] `api.ts` 中 `BASE_URL` 正确；真机改用局域网 IP
+- [ ] `uniapp/.env.development` 中 `VITE_API_BASE_URL` 为电脑局域网 IP（真机必填）
+- [ ] 后端使用 `--host 0.0.0.0`
 
 ---
 
@@ -285,7 +288,7 @@ npm run dev:mp-weixin
 | ---- | ---- |
 | towxml 集成 > 1 天 | 启用 Markdown 分段 View，不阻塞 G4 |
 | 出题慢 / 轮询失败 | 首题就绪即跳转；心理学进度条；等待下一题时快轮询 |
-| 真机无法访问 localhost | `api.ts` BASE_URL 改局域网 IP |
+| 真机无法访问 localhost | 配置 `uniapp/.env.development` 的 `VITE_API_BASE_URL`；后端 `--host 0.0.0.0`；同一 Wi-Fi |
 | JSON 解析失败 | OutputFixingParser 1 次；仍失败 502 |
 | 原型与 MVP 范围不一致 | 以方案 + UI 检查表为准 |
 | degit 网络失败 | 改用 `npm create uni@latest` |

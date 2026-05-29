@@ -133,33 +133,54 @@
         </scroll-view>
       </view>
 
-      <view class="home-section-hd home-section-hd--gap">
+      <view v-if="incompleteQuizzes.length" class="home-section-hd home-section-hd--gap">
         <text>未完成关卡</text>
         <view class="link">
-          <text>查看全部</text>
-          <AppIcon name="chevron-right" :size="24" color="#9ca3af" />
+          <text>{{ incompleteQuizzes.length }} 个进行中</text>
         </view>
       </view>
-      <view class="home-level-card" @tap="continueQuiz">
-        <view class="home-level-main">
-          <view class="home-level-cover">
-            <AppIcon name="book-open" :size="48" color="#ea580c" />
-          </view>
-          <view class="home-level-body">
-            <view class="home-level-title-row">
-              <text class="home-level-title">RAG 基础概念入门</text>
-              <text class="home-level-tag">第 3 关</text>
+      <view v-if="displayedIncompleteQuizzes.length" class="home-level-list">
+        <view
+          v-for="item in displayedIncompleteQuizzes"
+          :key="item.quizId"
+          class="home-level-card"
+          @tap="continueQuiz(item.quizId)"
+        >
+          <view class="home-level-main">
+            <view class="home-level-cover">
+              <AppIcon name="book-open" :size="48" color="#ea580c" />
             </view>
-            <text class="home-level-desc">检索增强生成入门：理解检索、增强、生成如何协同。</text>
-            <view class="home-level-progress-row">
-              <view class="home-progress-bar">
-                <view class="home-progress-fill" style="width: 60%" />
+            <view class="home-level-body">
+              <view class="home-level-title-row">
+                <text class="home-level-title">{{ item.topic }}</text>
+                <text class="home-level-tag">第 {{ item.resumeIndex + 1 }} 关</text>
               </view>
-              <text class="home-level-progress-txt">进度 6/10</text>
+              <text class="home-level-desc">上次闯到这里，点击继续答题</text>
+              <view class="home-level-progress-row">
+                <view class="home-progress-bar">
+                  <view
+                    class="home-progress-fill"
+                    :style="{ width: `${getIncompleteProgressPercent(item)}%` }"
+                  />
+                </view>
+                <text class="home-level-progress-txt">
+                  进度 {{ item.completedCount }}/{{ item.totalCount }}
+                </text>
+              </view>
             </view>
           </view>
+          <view class="home-level-continue" @tap.stop="continueQuiz(item.quizId)">继续</view>
         </view>
-        <view class="home-level-continue" @tap.stop="continueQuiz">继续</view>
+      </view>
+      <view
+        v-if="hiddenIncompleteCount > 0"
+        class="home-level-expand"
+        @tap="toggleIncompleteExpanded"
+      >
+        <text>{{ incompleteExpanded ? '收起' : `展开其余 ${hiddenIncompleteCount} 个` }}</text>
+        <view :class="['home-level-expand__icon', { 'is-expanded': incompleteExpanded }]">
+          <AppIcon name="chevron-right" :size="24" color="#9ca3af" />
+        </view>
       </view>
 
       <view class="bottom-spacer" />
@@ -171,6 +192,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import mockQuiz from '@/mock/quiz.json'
@@ -178,7 +200,16 @@ import { USE_MOCK } from '@/config'
 import { TOPIC_BATCHES } from '@/utils/topics'
 import { TONE_ICON_COLORS } from '@/utils/icons'
 import { getLayoutMetrics, layoutMetricsToStyle } from '@/utils/layout'
-import { beginQuizSession, getCurrentQuiz, getQuizProgress, setPendingTopic } from '@/utils/storage'
+import {
+  activateQuiz,
+  beginQuizSession,
+  getCurrentQuiz,
+  getIncompleteProgressPercent,
+  getIncompleteQuizzes,
+  getQuizProgress,
+  setPendingTopic,
+  type IncompleteQuizSummary,
+} from '@/utils/storage'
 import type { GenerateQuizResponse } from '@/types/quiz'
 
 const topic = ref('')
@@ -187,14 +218,40 @@ const currentTopics = computed(() => TOPIC_BATCHES[batchIndex.value])
 const quickTopics = computed(() => currentTopics.value.slice(0, 2))
 const layoutMetrics = ref(getLayoutMetrics())
 const layoutStyle = computed(() => layoutMetricsToStyle(layoutMetrics.value))
+const incompleteQuizzes = ref<IncompleteQuizSummary[]>(getIncompleteQuizzes())
+const incompleteExpanded = ref(false)
+const INCOMPLETE_DISPLAY_LIMIT = 2
 
 const canSubmit = computed(() => topic.value.trim().length >= 2)
+const hiddenIncompleteCount = computed(() =>
+  Math.max(0, incompleteQuizzes.value.length - INCOMPLETE_DISPLAY_LIMIT),
+)
+const displayedIncompleteQuizzes = computed(() => {
+  if (incompleteExpanded.value) return incompleteQuizzes.value
+  return incompleteQuizzes.value.slice(0, INCOMPLETE_DISPLAY_LIMIT)
+})
+
+function toggleIncompleteExpanded() {
+  incompleteExpanded.value = !incompleteExpanded.value
+}
+
+function refreshIncompleteQuizzes() {
+  incompleteQuizzes.value = getIncompleteQuizzes()
+  if (incompleteQuizzes.value.length <= INCOMPLETE_DISPLAY_LIMIT) {
+    incompleteExpanded.value = false
+  }
+}
 
 function refreshLayout() {
   layoutMetrics.value = getLayoutMetrics()
 }
 
-onMounted(refreshLayout)
+onMounted(() => {
+  refreshLayout()
+  refreshIncompleteQuizzes()
+})
+
+onShow(refreshIncompleteQuizzes)
 
 function shuffleTopics() {
   batchIndex.value = (batchIndex.value + 1) % TOPIC_BATCHES.length
@@ -226,14 +283,20 @@ function startMock() {
   uni.redirectTo({ url: '/pages/quiz/quiz' })
 }
 
-function continueQuiz() {
-  const session = getCurrentQuiz()
-  if (!session) {
-    uni.showToast({ title: '暂无未完成关卡', icon: 'none' })
+function continueQuiz(quizId: string) {
+  if (!activateQuiz(quizId)) {
+    uni.showToast({ title: '关卡不存在或已失效', icon: 'none' })
+    refreshIncompleteQuizzes()
     return
   }
-  const index = getQuizProgress()
-  if (index >= session.questions.length) {
+  const session = getCurrentQuiz()
+  if (!session) {
+    refreshIncompleteQuizzes()
+    return
+  }
+  const index = getQuizProgress(quizId)
+  const total = session.total_expected || session.questions.length || 10
+  if (index >= total) {
     uni.navigateTo({ url: '/pages/result/result' })
     return
   }
@@ -675,6 +738,42 @@ function continueQuiz() {
   font-size: 22rpx;
   color: #ea580c;
   font-weight: 600;
+}
+
+.home-level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  width: 100%;
+}
+
+.home-level-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  width: 100%;
+  margin-top: 16rpx;
+  padding: 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid #e8e2d9;
+  color: #6b7280;
+  font-size: 26rpx;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.home-level-expand__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+.home-level-expand__icon.is-expanded {
+  transform: rotate(-90deg);
 }
 
 .home-level-card {

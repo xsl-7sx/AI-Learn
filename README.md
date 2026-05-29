@@ -57,15 +57,19 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env   # 填入 DEEPSEEK_API_KEY
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 pytest tests/ -v
 ```
+
+真机预览时后端必须加 `--host 0.0.0.0`，否则手机连不上电脑。
 
 ### 小程序前端（官方脚手架）
 
 ```bash
 cd uniapp
 npm install
+cp .env.development.example .env.development   # Windows: copy .env.development.example .env.development
+# 编辑 .env.development，把 VITE_API_BASE_URL 改成你电脑的局域网 IP
 npm run dev:mp-weixin
 ```
 
@@ -77,6 +81,14 @@ npm run dev:mp-weixin
 | 构建产物 | `uniapp/dist/build/mp-weixin` | 先执行 `npm run build:mp-weixin` |
 | 仓库根目录 | `AI-Learn/`（根目录） | 已配置 `project.config.json` 的 `miniprogramRoot` 指向构建目录；改代码后需重新编译 |
 
-勾选「不校验合法域名」。联调时修改 `uniapp/src/config.ts` 中 `BASE_URL`；真机请改局域网 IP。
+勾选「不校验合法域名」。
+
+**真机联调：** `127.0.0.1` 在手机上指向手机自身，会报 `ERR_CONNECTION_REFUSED`。在 `uniapp/.env.development` 配置：
+
+```env
+VITE_API_BASE_URL=http://192.168.x.x:8000
+```
+
+查电脑 IP：Windows 运行 `ipconfig`，手机与电脑需在同一 Wi-Fi。
 
 `npm install` 后会自动将 `towxml` 复制到 `src/wxcomponents/towxml`。

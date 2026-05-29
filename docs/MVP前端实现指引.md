@@ -9,6 +9,7 @@
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI 落地；layout 多机型顶栏适配；文档同步仓库结构 |
 | v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、安全区底栏、间距与横滑优化 |
 | v1.3.0 | 2026-05-29 | 生成页 UI 精修：垂直居中布局、四步指示器、取消按钮与底栏安全区 |
+| v1.4.0 | 2026-05-29 | 答题退出 Sheet、多关卡存档、首页未完成列表、真机 `.env` 联调 |
 
 ---
 
@@ -87,30 +88,30 @@ uniapp/src/
 
 ---
 
-## 四、Storage 三 Key
+## 四、Storage（多关卡存档）
 
 | Key | 内容 | 写入时机 | 清除时机 |
 | --- | ---- | -------- | -------- |
-| `currentQuiz` | `{ quiz_id, topic, questions, generating?, job_id? }` | 首题就绪 / 轮询增量更新 | 再来一局 |
-| `quizAnswers` | `UserAnswer[]` | 每答一题追加 | 再来一局 |
-| `quizProgress` | `{ index: number }` | 每题推进 | 再来一局 |
+| `quizArchive` | `SavedQuizRecord[]`（session + answers + progressIndex + updatedAt） | 答题中增量更新；保存并退出 | 放弃本关 / 再来一局（仅删当前关） |
+| `activeQuizId` | 当前正在答的 `quiz_id` | 进入答题 / 新开一局 / 点「继续」 | 放弃本关或清除当前关 |
+
+旧版单 key（`currentQuiz` / `quizAnswers` / `quizProgress`）首次读取时自动迁移进 `quizArchive`。
 
 ```typescript
-// utils/storage.ts — 新一局（首页点「开始闯关」）
-export function beginQuizSession(): void {
-  uni.removeStorageSync('quizAnswers')
-  uni.removeStorageSync('quizProgress')
-}
+// 新开一局
+export function beginQuizSession(session: QuizSession): void
 
-// utils/storage.ts — 再来一局（禁止 clearStorage）
-export function clearQuizSession(): void {
-  uni.removeStorageSync('currentQuiz')
-  uni.removeStorageSync('quizAnswers')
-  uni.removeStorageSync('quizProgress')
-}
+// 首页未完成列表（按 updatedAt 倒序）
+export function getIncompleteQuizzes(): IncompleteQuizSummary[]
+
+// 点「继续」前激活对应关卡
+export function activateQuiz(quizId: string): boolean
+
+// 再来一局 / 放弃本关（仅清除指定 quiz_id）
+export function clearQuizSession(quizId?: string): void
 ```
 
-> **quiz 页 `onShow`：** 必须从 storage 恢复 `quizProgress` 与 `quizAnswers`，防止误触返回丢进度。
+> **quiz 页 `onShow`：** 从 `activeQuizId` 对应记录恢复进度与作答；**保存并退出**只更新 archive，不删其他未完成关卡。
 
 ---
 
@@ -168,7 +169,7 @@ export function checkAnswer(question: Question, selected: number | number[]): bo
 - 输入卡片：多行输入（内边距约 18px）、Lucide 铅笔图标、快捷主题横滑 pill + 右侧渐变遮罩、「换一换」与标签保持 ≥12px 间距
 - 主 CTA：橙渐变双行按钮（`view` 实现，避免小程序 `button` 覆盖文字色）
 - 热门主题：横滑 5 张卡片（一屏约 3 张），统一图标底块 + 两行标题省略；点击填入 topic
-- 未完成关卡卡片 + 「继续」；底栏 `FloatTabbar`（闯关 / 题库 / 勋章，后两者 MVP 置灰）
+- 未完成关卡：**默认展示最近 2 条**，超出部分点「展开其余 N 个」内联展开；每条可「继续」对应 `quiz_id`
 - 图标：`AppIcon` + `utils/icons.ts`（Lucide ISC，SVG data URI，无外链字体文件）
 - 底栏安全区：`float-tabbar` 宿主 `position: fixed` + `env(safe-area-inset-bottom)`；`scroll-view` 底部 `bottom-spacer` ≥100px 避免内容被底栏遮挡
 
@@ -227,11 +228,9 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 
 ```
 ┌─────────────────────────┐
-│ 顶栏：题号 pill          │
+│ 顶栏：✕（左）+ 题号 pill │
 ├─────────────────────────┤
-│ scroll-view（题干）      │
-├─────────────────────────┤
-│ 选项区（固定）           │
+│ scroll-view（题干+选项） │
 ├─────────────────────────┤
 │ FeedbackPanel（解析）    │
 ├─────────────────────────┤
@@ -239,11 +238,12 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 └─────────────────────────┘
 ```
 
-- 题干区、解析区使用 `scroll-view`，选项区与底部按钮固定
-- **FeedbackPanel：** 对错横幅 + 正确答案 + 解析；答错震动、答对音效
-- **选项字母：** `formatOptionLabel` 渲染 `A`/`B`…，选项文本用 `stripOptionPrefix` 去重前缀
-- **边答边生成：** 下一题未就绪时显示等待页；350ms 快轮询，新题就绪自动前进
-- Mock 数据须含**超长题干/解析**，小屏真机验证
+- 顶栏左上角 **✕** 打开退出确认 Sheet（避开微信胶囊）
+- **退出 Sheet：** 继续答题 / 保存并退出 / 放弃本关；对齐原型屏 ③′
+- 题干与选项同在 `scroll-view` 内；真机须 `height: 0` + `flex: 1` + `enhanced`
+- **FeedbackPanel：** 对错横幅 + 解析；答错震动、答对音效
+- **边答边生成：** 仅在本题已作答且下一题未就绪时进入等待页（避免首题误进等待）
+- 微信小程序**左滑返回无法可靠拦截**（`onBackPress` / `page-container` 真机会挡触摸）；退出以顶栏 ✕ 为准
 
 **不做：** 顶栏倒计时、灵韵惩罚（`.bt-spirit` 原型仅探索）
 
@@ -271,10 +271,23 @@ const report = await generateReport(payload)
 
 ---
 
-## 九、API 封装（`services/api.ts`）
+## 九、API 与真机联调
+
+**`config.ts`：** 从 `import.meta.env.VITE_API_BASE_URL` 读取；未配置时默认 `http://127.0.0.1:8000`（仅模拟器可用）。
+
+```bash
+cd uniapp
+cp .env.development.example .env.development
+# 编辑 VITE_API_BASE_URL=http://<电脑局域网IP>:8000
+npm run dev:mp-weixin
+```
+
+后端须监听所有网卡：`uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`。手机与电脑同一 Wi-Fi；微信工具勾选「不校验合法域名」。自检：手机浏览器访问 `http://<IP>:8000/health`。
+
+## 十、API 封装（`services/api.ts`）
 
 ```typescript
-const BASE_URL = 'http://127.0.0.1:8000'  // 真机改局域网 IP
+import { BASE_URL } from '@/config'
 
 export async function startQuizGeneration(topic: string): Promise<QuizJobCreateResponse> {
   const res = await uni.request({
@@ -302,7 +315,7 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 
 ---
 
-## 十、UI：Bento Token 映射
+## 十一、UI：Bento Token 映射
 
 从 [`prototypes/bento-theme.css`](../prototypes/bento-theme.css) 提取至 `styles/bento.scss`：
 
@@ -335,7 +348,7 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 
 ---
 
-## 十一、Mock 数据要求（Sprint 2）
+## 十二、Mock 数据要求（Sprint 2）
 
 `mock/quiz.json` 须包含：
 
@@ -349,7 +362,7 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 
 ---
 
-## 十二、towxml 集成（Sprint 4）
+## 十三、towxml 集成（Sprint 4）
 
 1. `npm install towxml`
 2. 将 towxml 组件复制到 `uniapp/src/wxcomponents/towxml/`（按官方 uni-app 指引）
@@ -360,7 +373,7 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 
 ---
 
-## 十三、MVP 屏与方案对照检查表
+## 十四、MVP 屏与方案对照检查表
 
 | 检查项 | 屏 | 通过标准 |
 | ------ | -- | -------- |
@@ -379,7 +392,7 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 
 ---
 
-## 十四、G0 / G2 验收清单
+## 十五、G0 / G2 验收清单
 
 **G0：**
 
@@ -391,7 +404,9 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 - [ ] Mock 10 题走完
 - [ ] 三题型 UI 与判分正确
 - [ ] 答对音效 + 答错震动
-- [ ] 返回再进 quiz 进度恢复
+- [ ] 保存并退出后首页「未完成关卡」可续玩（支持多条，默认展示 2 条可展开）
+- [ ] 答题页 ✕ 打开退出 Sheet；真机可正常点选选项
+- [ ] 真机 `VITE_API_BASE_URL` 联调通过
 - [ ] result 展示静态报告文本
 
 ---
@@ -404,3 +419,4 @@ export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) =
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI、layout 适配、目录与 UI 映射更新 |
 | v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、底栏安全区、间距与横滑优化 |
 | v1.3.0 | 2026-05-29 | 生成页 UI 精修：垂直居中、四步指示器、取消按钮与底栏安全区 |
+| v1.4.0 | 2026-05-29 | 答题退出 Sheet、多关卡存档、未完成列表展开、真机 `.env` 联调 |

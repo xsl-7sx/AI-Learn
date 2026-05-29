@@ -31,6 +31,7 @@ export type IconName =
   | 'calendar'
   | 'circle-check'
   | 'circle-x'
+  | 'x'
 
 const ICON_PATHS: Record<IconName, string> = {
   user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
@@ -72,6 +73,7 @@ const ICON_PATHS: Record<IconName, string> = {
     '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
   'circle-check': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
   'circle-x': '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
 }
 
 export const TONE_ICON_COLORS: Record<string, string> = {

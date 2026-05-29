@@ -17,6 +17,16 @@ export class ApiError extends Error {
   }
 }
 
+function parseRequestFail(errMsg: string): string {
+  if (/ERR_CONNECTION_REFUSED|CONNECTION_REFUSED|-102|connect fail/i.test(errMsg)) {
+    return '无法连接后端，请配置局域网 IP'
+  }
+  if (/timeout|timed out/i.test(errMsg)) {
+    return '请求超时，请稍后重试'
+  }
+  return '网络连接失败'
+}
+
 function parseErrorMessage(data: unknown, statusCode: number): string {
   if (typeof data === 'object' && data !== null && 'detail' in data) {
     const detail = (data as { detail?: unknown }).detail
@@ -49,7 +59,7 @@ function request<T>(
         resolve(res.data as T)
       },
       fail: (error) => {
-        reject(new ApiError(error.errMsg || '网络连接失败', 0))
+        reject(new ApiError(parseRequestFail(error.errMsg || ''), 0))
       },
     })
   })
@@ -160,6 +170,9 @@ export function generateReport(payload: QuizReportRequest): Promise<ReportRespon
 }
 
 export function showApiError(error: unknown, fallback = '请求失败，请重试'): void {
-  const message = error instanceof ApiError ? error.message : fallback
-  uni.showToast({ title: message, icon: 'none', duration: 2500 })
+  let message = error instanceof ApiError ? error.message : fallback
+  if (message.includes('无法连接后端')) {
+    message = '无法连接后端：请在 uniapp/.env.development 配置 VITE_API_BASE_URL 为电脑局域网 IP'
+  }
+  uni.showToast({ title: message, icon: 'none', duration: 3000 })
 }

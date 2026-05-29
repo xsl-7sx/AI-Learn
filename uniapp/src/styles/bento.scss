@@ -193,3 +193,131 @@ float-tabbar .bt-tabbar-float {
   margin-bottom: 16rpx;
   pointer-events: auto;
 }
+
+.bt-quiz-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16rpx;
+  width: 100%;
+  min-height: 72rpx;
+}
+
+.bt-quiz-header__close {
+  justify-self: start;
+}
+
+.bt-quiz-header__center {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12rpx;
+  justify-self: center;
+  max-width: 100%;
+}
+
+.bt-quiz-header__spacer {
+  justify-self: end;
+  width: 72rpx;
+  height: 72rpx;
+  flex-shrink: 0;
+}
+
+.bt-icon-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(31, 41, 55, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bt-exit-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bt-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.48);
+}
+
+.bt-sheet {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 16rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+  background: #fffdf9;
+  border-radius: 44rpx 44rpx 0 0;
+  box-shadow: 0 -16rpx 64rpx rgba(28, 25, 23, 0.14);
+  border-top: 1rpx solid rgba(232, 226, 217, 0.65);
+  animation: bt-sheet-enter 0.26s ease-out;
+}
+
+@keyframes bt-sheet-enter {
+  from {
+    transform: translateY(100%);
+    opacity: 0.65;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bt-sheet__handle {
+  width: 72rpx;
+  height: 8rpx;
+  margin: 0 auto 32rpx;
+  border-radius: 999rpx;
+  background: #d6d3d1;
+}
+
+.bt-sheet__title {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+}
+
+.bt-sheet__desc {
+  display: block;
+  margin-bottom: 28rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  color: #6b7280;
+  text-align: center;
+}
+
+.bt-sheet__progress {
+  margin-bottom: 40rpx;
+}
+
+.bt-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.bt-link-danger {
+  display: block;
+  width: 100%;
+  min-height: 88rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #dc2626;
+  text-align: center;
+  line-height: 1.4;
+}

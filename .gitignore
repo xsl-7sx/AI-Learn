@@ -22,6 +22,8 @@ prototypes/.claude/
 .env.*
 !.env.example
 !**/.env.example
+!.env.development.example
+!**/.env.development.example
 *.pem
 credentials.json
 
