@@ -4,12 +4,14 @@ Thumbs.db
 *.swp
 *.swo
 *~
+*.lnk
 
 # IDE / agent
 .cursor/
 .vscode/
 .idea/
 *.local.json
+project.private.config.json
 prototypes/.claude/
 
 # Test / automation artifacts
