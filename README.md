@@ -11,6 +11,7 @@
 | 静态原型 | [`prototypes/index.html`](prototypes/index.html)（Bento 暖橙 · `bento-theme.css`） |
 | **网页 UI 展示稿** | [`prototypes/ui.html`](prototypes/ui.html)（`ui-ref-home.css` · 与 01 屏① 同步） |
 | 设计文档 | [`docs/UI设计文档索引.md`](docs/UI设计文档索引.md) |
+| **MVP 开发文档** | [`docs/文档总索引.md`](docs/文档总索引.md) → [开发实施指南](docs/MVP开发实施指南.md) |
 
 ## 本地预览原型
 
@@ -23,5 +24,6 @@ npx serve prototypes
 ## 仓库说明
 
 - `prototypes/` — HTML 高保真 gallery（MVP / 扩展 / 报告）；脚本 `loading-steps.js`、`quiz-feedback-demo.js`
-- `docs/` — 需求、方案、UI Design System 与页面说明
+- `docs/` — 需求、方案、UI Design System、**MVP 开发实施指南**（文档先行，代码未启动）
+- `backend/`、`uniapp/` — **待 Sprint 1–2 创建**（见开发文档）
 - 历史文档文件名仍含「交互式AI闯关学习」，内容为项目早期称谓；**对外品牌统一为知练**
