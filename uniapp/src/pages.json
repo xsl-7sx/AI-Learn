@@ -1,0 +1,41 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "知练"
+      }
+    },
+    {
+      "path": "pages/loading/loading",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "生成中"
+      }
+    },
+    {
+      "path": "pages/quiz/quiz",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "闯关"
+      }
+    },
+    {
+      "path": "pages/result/result",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "结算",
+        "usingComponents": {
+          "towxml": "/wxcomponents/towxml/towxml"
+        }
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "知练",
+    "navigationStyle": "custom",
+    "backgroundColor": "#FFFDF8"
+  }
+}

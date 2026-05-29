@@ -6,6 +6,7 @@
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版：页面、组件、storage、UI 映射、交互检查表 |
+| v1.1.0 | 2026-05-29 | 首页参考稿 UI 落地；layout 多机型顶栏适配；文档同步仓库结构 |
 
 ---
 
@@ -67,7 +68,9 @@ uniapp/src/
 │   └── api.ts                # generateQuiz / generateReport
 ├── utils/
 │   ├── scoring.ts            # 本地判分
-│   └── storage.ts            # 三 key 读写封装
+│   ├── storage.ts            # 三 key 读写封装
+│   ├── topics.ts             # 热门主题批次
+│   └── layout.ts             # 顶栏/胶囊安全区适配
 ├── types/
 │   └── quiz.ts               # snake_case 类型
 ├── styles/
@@ -146,19 +149,20 @@ export function checkAnswer(question: Question, selected: number | number[]): bo
 
 ### 8.1 首页 `index`
 
-**MVP 必做：**
+**已实现（对齐 [`prototypes/ui.html`](../prototypes/ui.html) 参考首页）：**
 
-- `textarea` 或 compose 输入区
-- 「开始生成题目」主按钮
-- topic 非空校验
+- 顶栏：问候语 + 副标题；微信环境为胶囊预留右侧安全区（`utils/layout.ts`）
+- 主标题 + 橙色下划线
+- 输入卡片：多行输入、快捷主题 pill、「换一换」、双行主按钮
+- 热门主题：横滑 5 张卡片（一屏约 3 张），点击填入 topic
+- 未完成关卡卡片 + 「继续」；底栏 `FloatTabbar`（闯关 / 题库 / 勋章，后两者 MVP 置灰）
 
-**可 Phase 1.5 补齐（原型已有）：**
+**MVP 必做（逻辑不变）：**
 
-- 顶栏问候语、连胜角标
-- 热门主题横滑（`ref-home-topics.js` 逻辑）
-- 「继续未完成」卡片
+- topic 非空校验 → `loading` → API / Mock
+- `TOPIC_BATCHES` + `shuffleTopics` 换批；`pickTopic` 写输入框
 
-**不做：** 模式选择、URL 解析、底栏 Tab 切换
+**不做：** 模式选择、URL 解析、底栏真实切换
 
 ### 8.2 生成页 `loading`
 
@@ -274,7 +278,8 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 
 | 原型类 | uni-app 实现 |
 | ------ | ------------ |
-| `.ref-input-card` / `.ref-btn-generate` | 首页输入区 |
+| `.ref-input-card` / `.ref-btn-generate` | 首页 `home-input-card` / `home-btn-generate` |
+| `ui-ref-home` 顶栏与主题卡 | `pages/index/index.vue` + `FloatTabbar.vue` |
 | `.bt-book-flip` | loading 翻书动画 |
 | `.bt-opt` | OptionList 选项 |
 | `.bt-judge-btn` | 判断题按钮 |
@@ -351,3 +356,4 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版前端实现指引 |
+| v1.1.0 | 2026-05-29 | 首页参考稿 UI、layout 适配、目录与 UI 映射更新 |

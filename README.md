@@ -23,7 +23,54 @@ npx serve prototypes
 
 ## 仓库说明
 
-- `prototypes/` — HTML 高保真 gallery（MVP / 扩展 / 报告）；脚本 `loading-steps.js`、`quiz-feedback-demo.js`
-- `docs/` — 需求、方案、UI Design System、**MVP 开发实施指南**（文档先行，代码未启动）
-- `backend/`、`uniapp/` — **待 Sprint 1–2 创建**（见开发文档）
-- 历史文档文件名仍含「交互式AI闯关学习」，内容为项目早期称谓；**对外品牌统一为知练**
+- `prototypes/` — HTML 高保真 gallery（MVP / 扩展 / 报告）
+- `docs/` — 需求、方案、UI Design System、MVP 开发实施指南
+- `backend/` — FastAPI + LangChain 后端（见 `backend/.env.example`）
+- `uniapp/` — **官方** `dcloudio/uni-preset-vue#vite-ts` 脚手架（Vue 3 + TS + Vite）
+
+## 本地开发
+
+### 后端
+
+默认使用 **智谱 GLM-4.5-air**（OpenAI 兼容接口）。在 `backend/.env` 配置：
+
+```env
+LLM_API_KEY=你的智谱APIKey
+LLM_MODEL=glm-4.5-air
+LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+LLM_CALL_TIMEOUT=120
+REQUEST_TOTAL_TIMEOUT=180
+MOCK_LLM=false
+```
+
+也可改用 DeepSeek（设置 `DEEPSEEK_API_KEY` 等，且不要设置 `LLM_API_KEY`）。
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env   # 填入 DEEPSEEK_API_KEY
+uvicorn app.main:app --reload --port 8000
+pytest tests/ -v
+```
+
+### 小程序前端（官方脚手架）
+
+```bash
+cd uniapp
+npm install
+npm run dev:mp-weixin
+```
+
+微信开发者工具有两种导入方式：
+
+| 方式 | 路径 | 说明 |
+| ---- | ---- | ---- |
+| 推荐（热更新） | `uniapp/dist/dev/mp-weixin` | 先执行 `npm run dev:mp-weixin` |
+| 构建产物 | `uniapp/dist/build/mp-weixin` | 先执行 `npm run build:mp-weixin` |
+| 仓库根目录 | `AI-Learn/`（根目录） | 已配置 `project.config.json` 的 `miniprogramRoot` 指向构建目录；改代码后需重新编译 |
+
+勾选「不校验合法域名」。联调时修改 `uniapp/src/config.ts` 中 `BASE_URL`；真机请改局域网 IP。
+
+`npm install` 后会自动将 `towxml` 复制到 `src/wxcomponents/towxml`。
