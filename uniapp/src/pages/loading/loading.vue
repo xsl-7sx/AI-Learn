@@ -6,7 +6,9 @@
       <text class="bt-title-lg">等等，我去翻翻笔记…</text>
 
       <view class="bt-card">
-        <view class="bt-book-flip">📖</view>
+        <view class="bt-book-flip">
+          <AppIcon name="book-open" :size="80" color="#ea580c" />
+        </view>
         <view class="bt-progress-line">
           <view :style="{ width: `${progress}%` }" />
         </view>
@@ -34,6 +36,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { onUnload } from '@dcloudio/uni-app'
+import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import mockQuiz from '@/mock/quiz.json'
 import { USE_MOCK } from '@/config'

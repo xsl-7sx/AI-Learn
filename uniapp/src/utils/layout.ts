@@ -19,6 +19,7 @@ export interface LayoutMetrics {
   headerMinHeight: number
   scrollPaddingTop: number
   topicCardWidth: string
+  menuButtonHeight: number
   windowWidth: number
   isMpWeixin: boolean
 }
@@ -75,6 +76,7 @@ export function getLayoutMetrics(): LayoutMetrics {
         : 48
 
   const isMpWeixin = menu.width > 0
+  const menuButtonHeight = menu.height > 0 ? menu.height : platform === 'ios' ? 32 : 32
 
   // 顶栏顶部：不低于状态栏，并与胶囊顶对齐
   const headerPaddingTop =
@@ -89,10 +91,10 @@ export function getLayoutMetrics(): LayoutMetrics {
       : rpxToPx(32, windowWidth)
 
   const headerMinHeight =
-    menu.bottom > 0 ? menu.bottom + 12 : statusBarHeight + navBarHeight + 12
+    menu.bottom > 0 ? menu.bottom + 20 : statusBarHeight + navBarHeight + 20
 
   // 顶栏与主标题之间的间距（px）
-  const scrollPaddingTop = 8
+  const scrollPaddingTop = 20
 
   const pagePaddingPx = rpxToPx(64, windowWidth)
   const topicGapPx = rpxToPx(40, windowWidth)
@@ -107,6 +109,7 @@ export function getLayoutMetrics(): LayoutMetrics {
     headerMinHeight,
     scrollPaddingTop,
     topicCardWidth,
+    menuButtonHeight,
     windowWidth,
     isMpWeixin,
   }
@@ -117,7 +120,14 @@ export function layoutMetricsToStyle(metrics: LayoutMetrics) {
     header: {
       paddingTop: `${metrics.headerPaddingTop}px`,
       paddingRight: `${metrics.headerPaddingRight}px`,
+      paddingBottom: '12px',
       minHeight: `${metrics.headerMinHeight}px`,
+    },
+    topbarInner: {
+      height: `${metrics.menuButtonHeight}px`,
+    },
+    streak: {
+      height: `${metrics.menuButtonHeight}px`,
     },
     scroll: {
       paddingTop: `${metrics.scrollPaddingTop}px`,

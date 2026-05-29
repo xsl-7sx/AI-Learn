@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { onLaunch } from '@dcloudio/uni-app'
+import { loadDisplayFont } from '@/utils/fonts'
 
-onLaunch(() => {})
+onLaunch(() => {
+  loadDisplayFont()
+})
 </script>
 
 <style lang="scss">
