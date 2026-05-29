@@ -183,8 +183,10 @@ float-tabbar {
   display: block;
   max-width: calc(100vw - 64rpx);
   margin: 0 auto;
+  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
   pointer-events: none;
+  box-sizing: border-box;
 }
 
 float-tabbar .bt-tabbar-float {
