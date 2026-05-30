@@ -38,6 +38,8 @@
     "build:quickapp-webview-huawei": "uni build -p quickapp-webview-huawei",
     "build:quickapp-webview-union": "uni build -p quickapp-webview-union",
     "type-check": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "postinstall": "node scripts/copy-towxml.mjs"
   },
   "dependencies": {
@@ -72,6 +74,7 @@
     "sass": "^1.100.0",
     "typescript": "^4.9.4",
     "vite": "5.2.8",
+    "vitest": "^4.1.7",
     "vue-tsc": "^1.0.24"
   }
 }

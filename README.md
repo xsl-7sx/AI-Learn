@@ -63,6 +63,8 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 pytest tests/ -v
 ```
 
+**MVP TDD 验收（Mock LLM）：** 见 [MVP-TDD验收.md](./MVP-TDD验收.md)；前端在 `uniapp/` 执行 `npm test`。
+
 真机预览时后端必须加 `--host 0.0.0.0`，否则手机连不上电脑。
 
 ### 小程序前端（官方脚手架）
