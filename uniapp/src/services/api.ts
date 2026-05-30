@@ -1,4 +1,4 @@
-import { BASE_URL } from '@/config'
+import { BASE_URL, buildApiHeaders } from '@/config'
 import type {
   GenerateQuizJobResponse,
   GenerateQuizResponse,
@@ -18,6 +18,12 @@ export class ApiError extends Error {
 }
 
 function parseRequestFail(errMsg: string): string {
+  if (/url not in domain list|不在.*合法域名|domain list/i.test(errMsg)) {
+    return '域名校验拦截：请在微信开发者工具勾选「不校验合法域名」后重新预览'
+  }
+  if (/unreachable|ERR_ADDRESS_UNREACHABLE|-109/i.test(errMsg)) {
+    return '无法访问局域网 IP：手机请连同一 WiFi 并暂时关闭 5G/蜂窝数据'
+  }
   if (/ERR_CONNECTION_REFUSED|CONNECTION_REFUSED|-102|connect fail/i.test(errMsg)) {
     return '无法连接后端，请配置局域网 IP'
   }
@@ -49,7 +55,7 @@ function request<T>(
     uni.request({
       url: `${BASE_URL}${url}`,
       method,
-      header: method === 'POST' ? { 'Content-Type': 'application/json' } : undefined,
+      header: buildApiHeaders(method),
       data: method === 'POST' ? data : undefined,
       timeout,
       success: (res) => {
@@ -79,6 +85,7 @@ export function getQuizJob(jobId: string): Promise<QuizJobStatusResponse> {
 }
 
 const STREAM_POLL_MS = 800
+const FIRST_QUESTION_POLL_MS = 400
 /** 与后端 REQUEST_TOTAL_TIMEOUT(180s) 对齐，留一点余量 */
 const POLL_MAX_ATTEMPTS = 240
 
@@ -99,6 +106,7 @@ function toSession(status: QuizJobStatusResponse, topic: string): QuizSession {
     generating: status.status !== 'completed',
     job_id: status.job_id,
     total_expected: status.total_expected,
+    stream_preview: status.stream_preview,
   }
 }
 
@@ -124,7 +132,7 @@ export async function waitForFirstQuestion(
       return toSession(status, topic)
     }
 
-    await sleep(STREAM_POLL_MS)
+    await sleep(FIRST_QUESTION_POLL_MS)
   }
 
   throw new ApiError('请求超时，请稍后重试', 504)

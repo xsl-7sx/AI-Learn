@@ -16,6 +16,7 @@ export interface QuizSession {
   generating?: boolean
   job_id?: string
   total_expected?: number
+  stream_preview?: string
 }
 
 export interface UserAnswer {

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from datetime import datetime
 from uuid import uuid4
 
@@ -43,10 +44,16 @@ async def _run_quiz_job(job_id: str, topic: str) -> None:
   quiz_id = f"q_{datetime.now().strftime('%Y%m%d')}_{uuid4().hex[:8]}"
   await quiz_job_store.mark_running(job_id, quiz_id=quiz_id)
 
+  job_started_at = time.perf_counter()
+  first_question_ms: float | None = None
+
   async def on_preview(preview: str) -> None:
     await quiz_job_store.set_preview(job_id, preview)
 
   async def on_question(question: Question) -> None:
+    nonlocal first_question_ms
+    if first_question_ms is None:
+      first_question_ms = (time.perf_counter() - job_started_at) * 1000
     await quiz_job_store.append_question(job_id, question)
 
   try:
@@ -60,6 +67,13 @@ async def _run_quiz_job(job_id: str, topic: str) -> None:
       timeout=settings.request_total_timeout,
     )
     await quiz_job_store.mark_completed(job_id, result)
+    logger.info(
+      "quiz job %s done in %.0fms (first question %.0fms, %d questions)",
+      job_id,
+      (time.perf_counter() - job_started_at) * 1000,
+      first_question_ms or 0,
+      len(result.questions),
+    )
   except asyncio.TimeoutError:
     await quiz_job_store.mark_failed(job_id, "request timeout")
   except QuizGenerationError as exc:

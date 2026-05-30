@@ -7,6 +7,19 @@ function resolveBaseUrl(): string {
 
 export const BASE_URL = resolveBaseUrl()
 
+/** localtunnel 域名需附加此头，否则微信 request 会拿到拦截页 */
+export function buildApiHeaders(method: 'GET' | 'POST'): Record<string, string> {
+  const headers: Record<string, string> = {}
+  if (method === 'POST') headers['Content-Type'] = 'application/json'
+  if (/loca\.lt/i.test(BASE_URL)) headers['Bypass-Tunnel-Reminder'] = 'true'
+  return headers
+}
+
+/** 是否为 HTTPS 隧道地址（真机可不依赖同一 WiFi） */
+export function isTunnelApiUrl(url = BASE_URL): boolean {
+  return /^https:\/\//i.test(url) && !/^https:\/\/192\.168\./i.test(url)
+}
+
 /** 开发调试：跳过 AI 请求，直接使用 mock 题库 */
 export const USE_MOCK = false
 

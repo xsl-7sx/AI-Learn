@@ -14,10 +14,16 @@ from app.chains.llm import get_llm
 from app.chains.mock_data import build_mock_quiz
 from app.chains.quiz_generation import QuizGenerationError
 from app.config import settings
-from app.prompts.quiz_stream_generation import QUIZ_STREAM_SYSTEM, QUIZ_STREAM_USER
+from app.prompts.quiz_stream_generation import (
+  QUIZ_STREAM_SYSTEM,
+  QUIZ_STREAM_USER,
+  QUIZ_TOPUP_SYSTEM,
+  QUIZ_TOPUP_USER,
+)
 from app.schemas.quiz import GenerateQuizResponse, Question
 
 EXPECTED_QUESTION_COUNT = 10
+MAX_TOPUP_ATTEMPTS = 2
 OnQuestion = Callable[[Question], Awaitable[None]]
 OnPreview = Callable[[str], Awaitable[None]]
 
@@ -119,6 +125,132 @@ def _preview_tail(text: str, *, limit: int = 120) -> str:
   return f"…{compact[-limit:]}"
 
 
+def _question_sort_key(question: Question) -> int:
+  match = re.fullmatch(r"q(\d+)", question.id)
+  return int(match.group(1)) if match else 999
+
+
+def _missing_question_ids(collected: list[Question]) -> list[str]:
+  existing = {question.id for question in collected}
+  return [f"q{index}" for index in range(1, EXPECTED_QUESTION_COUNT + 1) if f"q{index}" not in existing]
+
+
+def _sort_questions_by_id(questions: list[Question]) -> list[Question]:
+  return sorted(questions, key=_question_sort_key)
+
+
+def _existing_summary(collected: list[Question]) -> str:
+  if not collected:
+    return "（无）"
+  lines = []
+  for question in sorted(collected, key=_question_sort_key):
+    stem = re.sub(r"\s+", " ", question.stem).strip()
+    if len(stem) > 48:
+      stem = f"{stem[:48]}…"
+    lines.append(f"- {question.id}: {stem}")
+  return "\n".join(lines)
+
+
+def _salvage_questions_from_text(text: str, seen_ids: set[str]) -> list[Question]:
+  found: list[Question] = []
+  decoder = json.JSONDecoder()
+  idx = 0
+  while idx < len(text):
+    start = text.find("{", idx)
+    if start == -1:
+      break
+    try:
+      obj, end = decoder.raw_decode(text[start:])
+      question = Question.model_validate(obj)
+    except (json.JSONDecodeError, ValueError):
+      idx = start + 1
+      continue
+    if question.id in seen_ids:
+      idx = start + end
+      continue
+    found.append(question)
+    idx = start + end
+  return found
+
+
+async def _consume_question_stream(
+  topic: str,
+  *,
+  system_prompt: str,
+  user_prompt: str,
+  seen_ids: set[str],
+  on_question: OnQuestion,
+  on_preview: OnPreview,
+) -> list[Question]:
+  parser = PydanticOutputParser(pydantic_object=Question)
+  prompt = ChatPromptTemplate.from_messages(
+    [
+      ("system", system_prompt),
+      ("human", user_prompt),
+    ]
+  )
+  chain = prompt | get_llm(json_mode=False)
+  stream_parser = QuestionStreamParser()
+  stream_parser._seen_ids = set(seen_ids)
+  preview_text = ""
+  found: list[Question] = []
+
+  async def emit_question(question: Question) -> None:
+    if question.id in seen_ids:
+      return
+    found.append(question)
+    await on_question(question)
+
+  async for chunk in chain.astream(
+    {
+      "topic": topic,
+      "format_instructions": parser.get_format_instructions(),
+    }
+  ):
+    text = _chunk_text(chunk)
+    if not text:
+      continue
+    preview_text += text
+    await on_preview(_preview_tail(preview_text))
+    for question in stream_parser.feed(text):
+      await emit_question(question)
+
+  for question in stream_parser.flush():
+    await emit_question(question)
+
+  for question in _salvage_questions_from_text(preview_text, seen_ids):
+    await emit_question(question)
+
+  return found
+
+
+async def _stream_topup_questions(
+  topic: str,
+  collected: list[Question],
+  missing_ids: list[str],
+  *,
+  on_question: OnQuestion,
+  on_preview: OnPreview,
+) -> list[Question]:
+  if not missing_ids:
+    return []
+
+  seen_ids = {question.id for question in collected}
+  await on_preview(f"正在补全缺失题目（{len(missing_ids)} 题）…")
+  return await _consume_question_stream(
+    topic,
+    system_prompt=QUIZ_TOPUP_SYSTEM,
+    user_prompt=QUIZ_TOPUP_USER.format(
+      topic=topic,
+      existing_summary=_existing_summary(collected),
+      missing_ids=", ".join(missing_ids),
+    ),
+    seen_ids=seen_ids,
+    on_question=on_question,
+    on_preview=on_preview,
+  )
+
+
 async def stream_generate_quiz(
   topic: str,
   *,
@@ -135,43 +267,46 @@ async def stream_generate_quiz(
     raise QuizGenerationError("LLM API key not configured")
 
   collected: list[Question] = []
+  seen_ids: set[str] = set()
 
   async def collect_question(question: Question) -> None:
+    if question.id in seen_ids:
+      return
+    seen_ids.add(question.id)
     collected.append(question)
     await on_question(question)
 
-  parser = PydanticOutputParser(pydantic_object=Question)
-  prompt = ChatPromptTemplate.from_messages(
-    [
-      ("system", QUIZ_STREAM_SYSTEM),
-      ("human", QUIZ_STREAM_USER),
-    ]
+  await on_preview("正在生成题目…")
+  await _consume_question_stream(
+    topic,
+    system_prompt=QUIZ_STREAM_SYSTEM,
+    user_prompt=QUIZ_STREAM_USER.format(topic=topic),
+    seen_ids=seen_ids,
+    on_question=collect_question,
+    on_preview=on_preview,
   )
-  chain = prompt | get_llm(json_mode=False)
-  stream_parser = QuestionStreamParser()
-  preview_text = ""
 
-  async for chunk in chain.astream(
-    {
-      "topic": topic,
-      "format_instructions": parser.get_format_instructions(),
-    }
-  ):
-    text = _chunk_text(chunk)
-    if not text:
-      continue
-    preview_text += text
-    await on_preview(_preview_tail(preview_text))
-    for question in stream_parser.feed(text):
-      await collect_question(question)
+  topup_attempts = 0
+  while len(collected) < EXPECTED_QUESTION_COUNT and topup_attempts < MAX_TOPUP_ATTEMPTS:
+    missing_ids = _missing_question_ids(collected)
+    if not missing_ids:
+      break
+    topup_attempts += 1
+    await _stream_topup_questions(
+      topic,
+      collected,
+      missing_ids,
+      on_question=collect_question,
+      on_preview=on_preview,
+    )
+    if len(collected) >= EXPECTED_QUESTION_COUNT:
+      break
 
-  for question in stream_parser.flush():
-    await collect_question(question)
+  ordered = _sort_questions_by_id(collected)
+  if len(ordered) != EXPECTED_QUESTION_COUNT:
+    raise QuizGenerationError(f"expected {EXPECTED_QUESTION_COUNT} questions, got {len(ordered)}")
 
-  if len(collected) != EXPECTED_QUESTION_COUNT:
-    raise QuizGenerationError(f"expected {EXPECTED_QUESTION_COUNT} questions, got {len(collected)}")
-
-  return GenerateQuizResponse(quiz_id=resolved_quiz_id, topic=topic, questions=collected)
+  return GenerateQuizResponse(quiz_id=resolved_quiz_id, topic=topic, questions=ordered)
 
 
 async def _stream_mock_quiz(

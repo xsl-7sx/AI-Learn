@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -30,12 +31,18 @@ class QuizJob:
   updated_at: datetime = field(default_factory=datetime.now)
 
 
+PREVIEW_PERSIST_INTERVAL_S = 0.4
+
+
 class QuizJobStore:
   def __init__(self, *, ttl_seconds: int = 3600, max_jobs: int = 200) -> None:
     self._jobs: dict[str, QuizJob] = {}
     self._lock = asyncio.Lock()
     self._ttl = timedelta(seconds=ttl_seconds)
     self._max_jobs = max_jobs
+    self._preview_last_persist: dict[str, float] = {}
+    self._preview_persist_count = 0
+    self._preview_skip_count = 0
 
   def _new_job_id(self) -> str:
     return f"job_{datetime.now().strftime('%Y%m%d')}_{uuid4().hex[:10]}"
@@ -164,8 +171,22 @@ class QuizJobStore:
         return None
       job.stream_preview = preview
       job.updated_at = datetime.now()
-      self._persist(job)
+      now = time.monotonic()
+      last = self._preview_last_persist.get(job_id, 0.0)
+      if now - last >= PREVIEW_PERSIST_INTERVAL_S:
+        self._persist(job)
+        self._preview_last_persist[job_id] = now
+        self._preview_persist_count += 1
+      else:
+        self._preview_skip_count += 1
       return job
+
+  def reset_preview_stats(self) -> None:
+    self._preview_persist_count = 0
+    self._preview_skip_count = 0
+
+  def preview_stats(self) -> tuple[int, int]:
+    return self._preview_persist_count, self._preview_skip_count
 
   async def append_question(self, job_id: str, question: Question) -> QuizJob | None:
     async with self._lock:
