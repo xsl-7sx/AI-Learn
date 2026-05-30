@@ -1,0 +1,35 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.lnk
+
+# IDE / agent
+.cursor/
+.vscode/
+.idea/
+*.local.json
+project.private.config.json
+prototypes/.claude/
+
+# Test / automation artifacts
+.playwright-mcp/
+
+# Secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+!.env.development.example
+!**/.env.development.example
+*.pem
+credentials.json
+
+backend/.venv/
+backend/.env
+backend/**/__pycache__/
+backend/.pytest_cache/
+uniapp/node_modules/
+uniapp/dist/

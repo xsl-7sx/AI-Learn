@@ -7,6 +7,10 @@
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版：页面、组件、storage、UI 映射、交互检查表 |
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI 落地；layout 多机型顶栏适配；文档同步仓库结构 |
+| v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、安全区底栏、间距与横滑优化 |
+| v1.3.0 | 2026-05-29 | 生成页 UI 精修：垂直居中布局、四步指示器、取消按钮与底栏安全区 |
+| v1.4.0 | 2026-05-29 | 答题退出 Sheet、多关卡存档、首页未完成列表、真机 `.env` 联调 |
+| v1.5.0 | 2026-05-30 | 结算页 Bento 卡片：成绩环、知识点面板与 AI 复盘分离；结构化 JSON 复盘；边答边生成容错 |
 
 ---
 
@@ -60,17 +64,28 @@ uniapp/src/
 │   ├── quiz/quiz.vue
 │   └── result/result.vue
 ├── components/
+│   ├── AppIcon.vue           # Lucide SVG data URI 图标
+│   ├── FloatTabbar.vue       # 悬浮胶囊底栏（闯关 / 题库 / 勋章）
 │   ├── QuestionCard.vue      # 题干展示
 │   ├── OptionList.vue        # 选项 / 判断按钮
 │   ├── FeedbackPanel.vue     # 对错反馈 + 解析
-│   └── ReportView.vue        # Markdown 渲染（towxml 或备选 B）
+│   ├── BentoEnergyPool.vue   # 结算页成绩环 + 知识点快捷入口
+│   ├── BentoKnowledgePanel.vue  # 知识点掌握情况（独立折叠卡片）
+│   ├── BentoReportCards.vue  # AI 复盘报告（独立折叠卡片）
+│   └── ReportView.vue        # Markdown 兜底（JSON 解析失败时）
 ├── services/
 │   └── api.ts                # generateQuiz / generateReport
 ├── utils/
 │   ├── scoring.ts            # 本地判分
 │   ├── storage.ts            # 三 key 读写封装
-│   ├── topics.ts             # 热门主题批次
-│   └── layout.ts             # 顶栏/胶囊安全区适配
+│   ├── structuredReport.ts   # 解析 AI 复盘 JSON（容忍前后缀说明文字）
+│   ├── reportText.ts         # 复盘文本清洗
+│   ├── accuracyTag.ts        # 正确率标签与鼓励语
+│   ├── feedbackSound.ts      # 答对/答错音效
+│   ├── topics.ts             # 热门主题批次（含 IconName）
+│   ├── icons.ts              # Lucide 图标注册表
+│   ├── fonts.ts              # 装饰性手写字体按需加载
+│   └── layout.ts             # 顶栏/胶囊安全区与主题卡宽度
 ├── types/
 │   └── quiz.ts               # snake_case 类型
 ├── styles/
@@ -81,24 +96,30 @@ uniapp/src/
 
 ---
 
-## 四、Storage 三 Key
+## 四、Storage（多关卡存档）
 
 | Key | 内容 | 写入时机 | 清除时机 |
 | --- | ---- | -------- | -------- |
-| `currentQuiz` | `{ quiz_id, topic, questions }` | loading 收到 generate 响应 | 再来一局 |
-| `quizAnswers` | `UserAnswer[]` | 每答一题追加 | 再来一局 |
-| `quizProgress` | `{ index: number }` | 每题推进 | 再来一局 |
+| `quizArchive` | `SavedQuizRecord[]`（session + answers + progressIndex + updatedAt） | 答题中增量更新；保存并退出 | 放弃本关 / 再来一局（仅删当前关） |
+| `activeQuizId` | 当前正在答的 `quiz_id` | 进入答题 / 新开一局 / 点「继续」 | 放弃本关或清除当前关 |
+
+旧版单 key（`currentQuiz` / `quizAnswers` / `quizProgress`）首次读取时自动迁移进 `quizArchive`。
 
 ```typescript
-// utils/storage.ts — 再来一局（禁止 clearStorage）
-export function clearQuizSession(): void {
-  uni.removeStorageSync('currentQuiz')
-  uni.removeStorageSync('quizAnswers')
-  uni.removeStorageSync('quizProgress')
-}
+// 新开一局
+export function beginQuizSession(session: QuizSession): void
+
+// 首页未完成列表（按 updatedAt 倒序）
+export function getIncompleteQuizzes(): IncompleteQuizSummary[]
+
+// 点「继续」前激活对应关卡
+export function activateQuiz(quizId: string): boolean
+
+// 再来一局 / 放弃本关（仅清除指定 quiz_id）
+export function clearQuizSession(quizId?: string): void
 ```
 
-> **quiz 页 `onShow`：** 必须从 storage 恢复 `quizProgress` 与 `quizAnswers`，防止误触返回丢进度。
+> **quiz 页 `onShow`：** 从 `activeQuizId` 对应记录恢复进度与作答；**保存并退出**只更新 archive，不删其他未完成关卡。
 
 ---
 
@@ -151,39 +172,63 @@ export function checkAnswer(question: Question, selected: number | number[]): bo
 
 **已实现（对齐 [`prototypes/ui.html`](../prototypes/ui.html) 参考首页）：**
 
-- 顶栏：问候语 + 副标题；微信环境为胶囊预留右侧安全区（`utils/layout.ts`）
-- 主标题 + 橙色下划线
-- 输入卡片：多行输入、快捷主题 pill、「换一换」、双行主按钮
-- 热门主题：横滑 5 张卡片（一屏约 3 张），点击填入 topic
-- 未完成关卡卡片 + 「继续」；底栏 `FloatTabbar`（闯关 / 题库 / 勋章，后两者 MVP 置灰）
+- 顶栏：品牌「知练」+ 问候语；微信环境为胶囊预留右侧安全区（`utils/layout.ts`）；连续学习火焰与日历图标
+- 主标题 + 橙色下划线；主标题与问候语垂直间距压缩（`scrollPaddingTop: 0`，约上移 24px）
+- 输入卡片：多行输入（内边距约 18px）、Lucide 铅笔图标、快捷主题横滑 pill + 右侧渐变遮罩、「换一换」与标签保持 ≥12px 间距
+- 主 CTA：橙渐变双行按钮（`view` 实现，避免小程序 `button` 覆盖文字色）
+- 热门主题：横滑 5 张卡片（一屏约 3 张），统一图标底块 + 两行标题省略；点击填入 topic
+- 未完成关卡：**默认展示最近 2 条**，超出部分点「展开其余 N 个」内联展开；每条可「继续」对应 `quiz_id`
+- 图标：`AppIcon` + `utils/icons.ts`（Lucide ISC，SVG data URI，无外链字体文件）
+- 底栏安全区：`float-tabbar` 宿主 `position: fixed` + `env(safe-area-inset-bottom)`；`scroll-view` 底部 `bottom-spacer` ≥100px 避免内容被底栏遮挡
 
 **MVP 必做（逻辑不变）：**
 
 - topic 非空校验 → `loading` → API / Mock
 - `TOPIC_BATCHES` + `shuffleTopics` 换批；`pickTopic` 写输入框
 
-**不做：** 模式选择、URL 解析、底栏真实切换
+**不做：** 模式选择、URL 解析、底栏真实切换、全屏山水背景图（`home-bg.png` 仅资源预留，当前使用 `bt-screen` 渐变）
 
 ### 8.2 生成页 `loading`
+
+**已实现（UI）：**
+
+- 顶栏标题区固定在上部（`loading-header` + `layout.ts` 胶囊适配）
+- 核心区块（进度卡片 + 四步指示器 + 副文案 + 取消）在顶栏与底栏之间**垂直居中**（`loading-body` / `loading-main`）
+- 进度卡片：书本 `AppIcon` 微动效、心理学进度条、阶段文案（90% 后显示「快好了，再等等…」并缓爬至 98%）
+- 四步指示器：每列 `width: 25%` 等分；已完成 / 进行中 / 未开始三色区分；圆圈内数字独立 `<text>` + flex 光学居中
+- 取消：全宽胶囊按钮（`2rpx` 边框、白底），与副文案保持 ≥40rpx 间距
+- 底栏：`FloatTabbar` 保留；宿主节点 `env(safe-area-inset-bottom)` 适配全面屏 Home 条
 
 **心理学进度条：**
 
 - 0–5s：快速增至 ~40%
 - 之后慢速递增，最高 ~90%（不等 API 才到 100%）
-- 文案每 3s 轮播（参考 `loading-steps.js` 四步）
+- 90% 后缓增至 ~98%，完成时跳至 100%
+- 阶段文案随进度切换（检索考点 → 出题校验 → 排版选项 → 准备闯关）
 
-**API 调用：**
+**API 调用（v1.1 流式 + 首题跳转）：**
 
 ```typescript
-// onLoad: 从上一页 storage 或 eventChannel 取 topic
-const res = await generateQuiz(topic)
-uni.setStorageSync('currentQuiz', res)
+// onLoad: 从上一页 storage 取 topic
+const job = await startQuizGeneration(topic)
+const first = await waitForFirstQuestion(job.job_id, { intervalMs: 600 })
+uni.setStorageSync('currentQuiz', {
+  quiz_id: first.quiz_id,
+  topic: first.topic,
+  questions: first.questions,
+  generating: first.status !== 'completed',
+  job_id: job.job_id,
+  total_expected: first.total_expected ?? 10,
+})
 uni.redirectTo({ url: '/pages/quiz/quiz' })
+// 后台继续 pollQuizJobUntilComplete，增量 merge questions
 ```
 
-**取消策略：** `onUnload` 设 `cancelled = true`；响应返回时若已 cancelled 则丢弃、不跳转。
+**取消策略：** `onUnload` 设 `cancelled = true`；首题返回后若已 cancelled 则不跳转。
 
 **失败：** Toast「生成失败，请重试」+ `navigateBack` 或 `reLaunch` 回首页。
+
+**注意：** 不向用户展示 `stream_preview` 原始 JSON。
 
 ### 8.3 答题页 `quiz`
 
@@ -191,11 +236,9 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 
 ```
 ┌─────────────────────────┐
-│ 顶栏：题号 pill          │
+│ 顶栏：✕（左）+ 题号 pill │
 ├─────────────────────────┤
-│ scroll-view（题干）      │
-├─────────────────────────┤
-│ 选项区（固定）           │
+│ scroll-view（题干+选项） │
 ├─────────────────────────┤
 │ FeedbackPanel（解析）    │
 ├─────────────────────────┤
@@ -203,18 +246,27 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 └─────────────────────────┘
 ```
 
-- 题干区、解析区使用 `scroll-view`，选项区与底部按钮固定
-- Mock 数据须含**超长题干/解析**，小屏真机验证
+- 顶栏左上角 **✕** 打开退出确认 Sheet（避开微信胶囊）
+- **退出 Sheet：** 继续答题 / 保存并退出 / 放弃本关；对齐原型屏 ③′
+- 题干与选项同在 `scroll-view` 内；真机须 `height: 0` + `flex: 1` + `enhanced`
+- **FeedbackPanel：** 对错横幅 + 解析；答错震动、答对音效
+- **边答边生成：** 仅在本题已作答且下一题未就绪时进入等待页（避免首题误进等待）
+- 微信小程序**左滑返回无法可靠拦截**（`onBackPress` / `page-container` 真机会挡触摸）；退出以顶栏 ✕ 为准
 
 **不做：** 顶栏倒计时、灵韵惩罚（`.bt-spirit` 原型仅探索）
 
 ### 8.4 结算页 `result`
 
-**两阶段 UX（方案 §6.9）：**
+**三区块 UX（v1.5）：**
 
-1. **立即：** 从 `quizAnswers` 计算并展示本地正确率、得分环
-2. **异步：** 报告区 skeleton +「AI 正在生成复盘报告…」
-3. **完成：** 渲染 Markdown 报告
+1. **立即：** `BentoEnergyPool` 展示正确率环、鼓励语、答对/总题数
+2. **知识点掌握情况：** `BentoKnowledgePanel` 独立卡片，**默认收起**；本地从题目 `explanation`/题干生成要点（错题优先）；成绩卡底部行点击可展开并滚到该区块
+3. **AI 复盘报告：** `BentoReportCards` 独立卡片，**默认收起**；含整体表现、易错题分析、复习建议
+
+**两阶段数据流：**
+
+1. 进入页即写入本地 `StructuredMiniReport`（含知识点要点），`loading=false` 后两卡片入口可见
+2. 异步 `POST /report` 返回 JSON 字符串 → `parseStructuredReport()` 解析；成功则更新 AI 字段，**空字段不覆盖已有本地摘要**
 
 ```typescript
 const payload = {
@@ -223,7 +275,8 @@ const payload = {
   questions: session.questions,
   answers: getQuizAnswers(),
 }
-const report = await generateReport(payload)
+const res = await generateReport(payload)
+applyReportPayload(res.report) // 解析 JSON；失败保留本地卡片
 ```
 
 **再来一局：** 调用 `clearQuizSession()` → `reLaunch` 到 index
@@ -232,33 +285,51 @@ const report = await generateReport(payload)
 
 ---
 
-## 九、API 封装（`services/api.ts`）
+## 九、API 与真机联调
+
+**`config.ts`：** 从 `import.meta.env.VITE_API_BASE_URL` 读取；未配置时默认 `http://127.0.0.1:8000`（仅模拟器可用）。
+
+```bash
+cd uniapp
+cp .env.development.example .env.development
+# 编辑 VITE_API_BASE_URL=http://<电脑局域网IP>:8000
+npm run dev:mp-weixin
+```
+
+后端须监听所有网卡：`uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`。手机与电脑同一 Wi-Fi；微信工具勾选「不校验合法域名」。自检：手机浏览器访问 `http://<IP>:8000/health`。
+
+## 十、API 封装（`services/api.ts`）
 
 ```typescript
-const BASE_URL = 'http://127.0.0.1:8000'  // 真机改局域网 IP
+import { BASE_URL } from '@/config'
 
-export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: `${BASE_URL}/api/v1/quiz/generate`,
-      method: 'POST',
-      data: { topic },
-      timeout: 60000,
-      success: (res) => {
-        if (res.statusCode !== 200) reject(new Error('生成失败'))
-        else resolve(res.data as GenerateQuizResponse)
-      },
-      fail: reject,
-    })
+export async function startQuizGeneration(topic: string): Promise<QuizJobCreateResponse> {
+  const res = await uni.request({
+    url: `${BASE_URL}/api/v1/quiz/generate`,
+    method: 'POST',
+    data: { topic },
+    timeout: 15000,
   })
+  if (res.statusCode !== 202) throw new Error('创建出题任务失败')
+  return res.data as QuizJobCreateResponse
+}
+
+export async function getQuizJob(jobId: string): Promise<QuizJobStatusResponse> { /* GET /jobs/{id} */ }
+
+export async function waitForFirstQuestion(jobId: string, opts?: { intervalMs?: number }) {
+  // 轮询直至 ready && questions.length >= 1
+}
+
+export async function pollQuizJobUntilComplete(jobId: string, onUpdate?: (job) => void) {
+  // 轮询直至 completed / failed，默认 interval 600ms
 }
 ```
 
-`generateReport` 同理，`timeout: 30000`。
+`generateReport` 仍为 `POST /report`，`timeout: 30000`。
 
 ---
 
-## 十、UI：Bento Token 映射
+## 十一、UI：Bento Token 映射
 
 从 [`prototypes/bento-theme.css`](../prototypes/bento-theme.css) 提取至 `styles/bento.scss`：
 
@@ -280,6 +351,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 | ------ | ------------ |
 | `.ref-input-card` / `.ref-btn-generate` | 首页 `home-input-card` / `home-btn-generate` |
 | `ui-ref-home` 顶栏与主题卡 | `pages/index/index.vue` + `FloatTabbar.vue` |
+| Lucide 线框图标 | `components/AppIcon.vue` + `utils/icons.ts` |
 | `.bt-book-flip` | loading 翻书动画 |
 | `.bt-opt` | OptionList 选项 |
 | `.bt-judge-btn` | 判断题按钮 |
@@ -290,7 +362,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 
 ---
 
-## 十一、Mock 数据要求（Sprint 2）
+## 十二、Mock 数据要求（Sprint 2）
 
 `mock/quiz.json` 须包含：
 
@@ -304,7 +376,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 
 ---
 
-## 十二、towxml 集成（Sprint 4）
+## 十三、towxml 集成（Sprint 4）
 
 1. `npm install towxml`
 2. 将 towxml 组件复制到 `uniapp/src/wxcomponents/towxml/`（按官方 uni-app 指引）
@@ -315,7 +387,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 
 ---
 
-## 十三、MVP 屏与方案对照检查表
+## 十四、MVP 屏与方案对照检查表
 
 | 检查项 | 屏 | 通过标准 |
 | ------ | -- | -------- |
@@ -334,7 +406,7 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 
 ---
 
-## 十四、G0 / G2 验收清单
+## 十五、G0 / G2 验收清单
 
 **G0：**
 
@@ -346,7 +418,9 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 - [ ] Mock 10 题走完
 - [ ] 三题型 UI 与判分正确
 - [ ] 答对音效 + 答错震动
-- [ ] 返回再进 quiz 进度恢复
+- [ ] 保存并退出后首页「未完成关卡」可续玩（支持多条，默认展示 2 条可展开）
+- [ ] 答题页 ✕ 打开退出 Sheet；真机可正常点选选项
+- [ ] 真机 `VITE_API_BASE_URL` 联调通过
 - [ ] result 展示静态报告文本
 
 ---
@@ -357,3 +431,6 @@ export function generateQuiz(topic: string): Promise<GenerateQuizResponse> {
 | ---- | ---- | ---- |
 | v1.0.0 | 2026-05-29 | 初版前端实现指引 |
 | v1.1.0 | 2026-05-29 | 首页参考稿 UI、layout 适配、目录与 UI 映射更新 |
+| v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、底栏安全区、间距与横滑优化 |
+| v1.3.0 | 2026-05-29 | 生成页 UI 精修：垂直居中、四步指示器、取消按钮与底栏安全区 |
+| v1.4.0 | 2026-05-29 | 答题退出 Sheet、多关卡存档、未完成列表展开、真机 `.env` 联调 |

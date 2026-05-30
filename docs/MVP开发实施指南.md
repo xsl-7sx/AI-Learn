@@ -29,8 +29,8 @@
 
 ```mermaid
 flowchart LR
-    index["index 输入 topic"] --> loading["loading 调 generate"]
-    loading --> quiz["quiz 本地判分 x10"]
+    index["index 输入 topic"] --> loading["loading 创建 job + 轮询"]
+    loading -->|"首题就绪"| quiz["quiz 边答边拉题"]
     quiz --> result["result 调 report"]
     result -->|"再来一局清 3 key"| index
 ```
@@ -40,7 +40,7 @@ flowchart LR
 - 本地环境可完整跑通上述闭环
 - 10 题支持 `single` / `multiple` / `judge` 三种题型
 - 每题答完即时反馈（绿 / 红 + 震动 + 解析 + 答对音效）
-- 结算页展示正确率与 AI Markdown 复盘报告
+- 结算页展示正确率、**知识点掌握情况**（本地即时）与 **AI 结构化复盘**（异步卡片）
 - 微信开发者工具体验版可内测
 
 ---
@@ -56,15 +56,18 @@ flowchart TB
     end
     subgraph server [backend FastAPI]
         router["routers/quiz.py"]
-        chain_gen["QuizGenerationChain"]
+        chain_gen["QuizStreamGenerationChain"]
+        jobs["jobs/quiz_jobs 内存任务"]
         chain_rep["ReportGenerationChain"]
     end
     subgraph llm [DeepSeek API]
         ds["deepseek-chat"]
     end
     pages --> api_ts
-    api_ts -->|"POST /api/v1/quiz/generate"| router
+    api_ts -->|"POST /generate → 202"| router
+    api_ts -->|"GET /jobs/{id} 轮询"| router
     api_ts -->|"POST /api/v1/quiz/report"| router
+    router --> jobs
     router --> chain_gen
     router --> chain_rep
     chain_gen --> ds
@@ -144,7 +147,7 @@ AI-Learn/
 | ---- | ---- |
 | 初始化 `backend/` | FastAPI + CORS + `/health` |
 | `QuizGenerationChain` | 输入 `{ topic }` → 10 题 JSON |
-| `ReportGenerationChain` | 输入答题记录 → Markdown 复盘 |
+| `ReportGenerationChain` | 输入答题记录 → 结构化 JSON 复盘（`学习复盘报告`） |
 | Pydantic Schema + 题型校验 | `tests/test_schemas.py` 通过 |
 | OpenAPI | `/docs` 可调试 |
 
@@ -200,9 +203,9 @@ npm run dev:mp-weixin
 
 | 任务 | 产出 |
 | ---- | ---- |
-| 对接 `/api/v1/quiz/report` | 真实复盘 |
-| towxml 或备选 B | Markdown 渲染 |
-| result skeleton 二次等待 UX | 不空白 |
+| 对接 `/api/v1/quiz/report` | 结构化 JSON 复盘 |
+| `BentoKnowledgePanel` + `BentoReportCards` | 知识点与 AI 报告分卡，默认收起 |
+| `structuredReport.ts` + `ReportView` 兜底 | JSON 卡片渲染；解析失败保留本地摘要 |
 | 再来一局删 3 个 storage key | 禁止 `clearStorage` |
 | Prompt 调优 + UI 对齐屏⑧ | 内测可用 |
 | 分享按钮置灰 | MVP 不做 |
@@ -220,16 +223,18 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 cp .env.example .env            # 填入 DEEPSEEK_API_KEY
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # 终端 2：前端（Sprint 2 起）
 cd uniapp
 npm install
+cp .env.development.example .env.development   # 真机：填入电脑局域网 IP
 npm run dev:mp-weixin
 
 # 微信开发者工具
 # → 导入 uniapp/dist/dev/mp-weixin
 # → 详情 → 本地设置 → 勾选「不校验合法域名、web-view...」
+# → 真机预览：手机与电脑同一 Wi-Fi；访问 http://<IP>:8000/health 自检
 ```
 
 ### 联调检查清单
@@ -238,7 +243,8 @@ npm run dev:mp-weixin
 - [ ] `/docs` 中 generate curl 通过
 - [ ] 微信工具导入编译产物目录
 - [ ] 勾选「不校验合法域名」
-- [ ] `api.ts` 中 `BASE_URL` 正确；真机改用局域网 IP
+- [ ] `uniapp/.env.development` 中 `VITE_API_BASE_URL` 为电脑局域网 IP（真机必填）
+- [ ] 后端使用 `--host 0.0.0.0`
 
 ---
 
@@ -281,8 +287,8 @@ npm run dev:mp-weixin
 | 风险 | 应对 |
 | ---- | ---- |
 | towxml 集成 > 1 天 | 启用 Markdown 分段 View，不阻塞 G4 |
-| generate 504 超时 | 心理学进度条 + 502 重试提示 |
-| 真机无法访问 localhost | `api.ts` BASE_URL 改局域网 IP |
+| 出题慢 / 轮询失败 | 首题就绪即跳转；心理学进度条；等待下一题时快轮询 |
+| 真机无法访问 localhost | 配置 `uniapp/.env.development` 的 `VITE_API_BASE_URL`；后端 `--host 0.0.0.0`；同一 Wi-Fi |
 | JSON 解析失败 | OutputFixingParser 1 次；仍失败 502 |
 | 原型与 MVP 范围不一致 | 以方案 + UI 检查表为准 |
 | degit 网络失败 | 改用 `npm create uni@latest` |

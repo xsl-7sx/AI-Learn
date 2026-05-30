@@ -5,7 +5,6 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-from fastapi import HTTPException
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -35,7 +34,10 @@ def _parse_quiz_payload(raw_text: str) -> GenerateQuizResponse:
   try:
     return parser.parse(cleaned)
   except Exception as first_error:
-    llm = get_llm()
+    if settings.resolved_json_mode:
+      raise QuizGenerationError("failed to parse quiz json") from first_error
+
+    llm = get_llm(json_mode=False)
     fix_prompt = (
       "下面是一段应输出为 JSON 的文本，但解析失败。"
       f"错误：{first_error}\n"
@@ -51,8 +53,10 @@ def _parse_quiz_payload(raw_text: str) -> GenerateQuizResponse:
 
 
 async def generate_quiz(topic: str) -> GenerateQuizResponse:
-  if settings.mock_llm or not settings.resolved_api_key:
+  if settings.use_mock_llm:
     return build_mock_quiz(topic)
+  if not settings.resolved_api_key:
+    raise QuizGenerationError("LLM API key not configured")
 
   parser = PydanticOutputParser(pydantic_object=GenerateQuizResponse)
   prompt = ChatPromptTemplate.from_messages(
@@ -76,7 +80,3 @@ async def generate_quiz(topic: str) -> GenerateQuizResponse:
       "topic": topic,
     }
   )
-
-
-def to_http_exception(exc: QuizGenerationError) -> HTTPException:
-  return HTTPException(status_code=502, detail=str(exc))

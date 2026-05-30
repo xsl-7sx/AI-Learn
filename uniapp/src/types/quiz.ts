@@ -13,6 +13,10 @@ export interface QuizSession {
   quiz_id: string
   topic: string
   questions: Question[]
+  generating?: boolean
+  job_id?: string
+  total_expected?: number
+  stream_preview?: string
 }
 
 export interface UserAnswer {
@@ -27,6 +31,26 @@ export interface GenerateQuizResponse {
   questions: Question[]
 }
 
+export type QuizJobStatus = 'pending' | 'running' | 'completed' | 'failed'
+
+export interface GenerateQuizJobResponse {
+  job_id: string
+  status: 'pending'
+}
+
+export interface QuizJobStatusResponse {
+  job_id: string
+  status: QuizJobStatus
+  quiz_id?: string
+  topic?: string
+  questions: Question[]
+  total_expected: number
+  ready: boolean
+  stream_preview?: string
+  result?: GenerateQuizResponse
+  error?: string
+}
+
 export interface QuizReportRequest {
   quiz_id: string
   topic: string
@@ -39,6 +63,13 @@ export interface ReportResponse {
   total: number
   correct_rate: number
   report: string
+}
+
+export interface StructuredMiniReport {
+  overview: string
+  corePoints: string[]
+  wrongAnalysis: string[]
+  reviewTips: string[]
 }
 
 export interface QuizProgress {

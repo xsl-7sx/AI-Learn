@@ -5,6 +5,8 @@
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.1.0 | 2026-05-29 | 异步任务 + JSONL 流式出题；增量 `questions` 轮询 |
+| v1.2.0 | 2026-05-30 | 复盘改为结构化 JSON；后端提取首个 `{...}` 对象并清洗 |
 | v1.0.0 | 2026-05-29 | 初版：接口、Schema、Prompt、LangChain 链路 |
 
 ---
@@ -14,10 +16,18 @@
 | 接口 | 方法 | 说明 | 建议超时 |
 | ---- | ---- | ---- | -------- |
 | `/health` | GET | 健康检查 | — |
-| `/api/v1/quiz/generate` | POST | 根据 topic 生成 10 题 | 60s |
+| `/api/v1/quiz/generate` | POST | 创建出题任务，立即返回 `job_id` | 15s |
+| `/api/v1/quiz/jobs/{job_id}` | GET | 轮询任务状态；`questions` 随流式生成递增 | 15s |
 | `/api/v1/quiz/report` | POST | 根据答题记录生成复盘 | 30s |
 
 **Base URL（本地）：** `http://127.0.0.1:8000`
+
+**出题流程（v1.1）：**
+
+1. `POST /generate` → `202` + `{ job_id, status: "pending" }`
+2. 后台 `astream` + JSONL 逐行解析，每完成一题即追加到 Job
+3. 前端轮询 `GET /jobs/{job_id}`；`ready=true` 且 `questions.length >= 1` 即可进入答题
+4. `status=completed` 时 `result` 含完整 10 题
 
 ---
 
@@ -33,10 +43,23 @@
 }
 ```
 
+**响应（202）：**
+
+```json
+{
+  "job_id": "job_20260529_abc123",
+  "status": "pending"
+}
+```
+
+### 2.2 GET `/api/v1/quiz/jobs/{job_id}`
+
 **响应（200）：**
 
 ```json
 {
+  "job_id": "job_20260529_abc123",
+  "status": "running",
   "quiz_id": "q_20260529_abc123",
   "topic": "光合作用",
   "questions": [
@@ -48,19 +71,33 @@
       "answer": 1,
       "explanation": "叶绿体含有叶绿素，是光合作用的主要场所。"
     }
-  ]
+  ],
+  "total_expected": 10,
+  "ready": true,
+  "stream_preview": "",
+  "result": null,
+  "error": null
 }
 ```
+
+| 字段 | 说明 |
+| ---- | ---- |
+| `status` | `pending` / `running` / `completed` / `failed` |
+| `questions` | 已解析题目列表，流式递增 |
+| `ready` | `questions.length > 0` |
+| `result` | 仅 `completed` 时有完整 `GenerateQuizResponse` |
+| `stream_preview` | 仅供调试，**前端不向用户展示** |
 
 **错误：**
 
 | 状态码 | 场景 |
 | ------ | ---- |
+| 404 | `job_id` 不存在或已过期 |
 | 422 | 请求体校验失败（topic 为空等） |
-| 502 | LLM 输出 JSON 解析失败（含 1 次 OutputFixingParser 后仍失败） |
-| 504 | 整请求超时（> 55s） |
+| 502 | 任务失败（JSON 解析失败、LLM 未配置等） |
+| 504 | 后台任务整请求超时 |
 
-### 2.2 POST `/api/v1/quiz/report`
+### 2.3 POST `/api/v1/quiz/report`
 
 **请求：**
 
@@ -86,9 +123,25 @@
   "score": 7,
   "total": 10,
   "correct_rate": 0.7,
-  "report": "## 整体表现\n\n正确率 70%，...\n\n## 复习建议\n\n1. ..."
+  "report": "{\"学习复盘报告\":{\"整体表现\":\"…\",\"核心知识点回顾\":[\"…\"],\"易错题分析\":[\"…\"]}}"
 }
 ```
+
+`report` 为 **JSON 字符串**（非 Markdown）。后端 `_sanitize_report_text` 会从 LLM 输出中提取首个完整 JSON 对象；前端 `parseStructuredReport` 同样容忍代码块包裹或前后说明文字。
+
+**JSON 结构：**
+
+```json
+{
+  "学习复盘报告": {
+    "整体表现": "一段话",
+    "核心知识点回顾": ["要点1", "要点2"],
+    "易错题分析": ["分析1", "分析2"]
+  }
+}
+```
+
+可选字段 `复习建议`（string[]）；前端映射为 `StructuredMiniReport`。
 
 ---
 
@@ -130,6 +183,9 @@ export interface QuizSession {
   quiz_id: string
   topic: string
   questions: Question[]
+  generating?: boolean
+  job_id?: string
+  total_expected?: number
 }
 
 export interface UserAnswer {
@@ -171,24 +227,27 @@ export interface ReportResponse {
 
 | 模块 | MVP | 说明 |
 | ---- | --- | ---- |
-| `ChatOpenAI`（DeepSeek） | ✅ | 大模型调用 |
+| `ChatOpenAI`（DeepSeek / 智谱） | ✅ | 大模型调用 |
 | `ChatPromptTemplate` | ✅ | Prompt 版本化 |
-| `PydanticOutputParser` | ✅ | 强制 JSON 结构 |
-| `OutputFixingParser` | ✅ | 解析失败自动修复，**最多 1 次** |
+| `astream` + JSONL 解析 | ✅ | 流式出题，逐题追加 Job |
+| `PydanticOutputParser` | ✅ | 单行题目 JSON 校验 |
+| `response_format: json_object` | ✅ | 非流式/复盘路径可选 |
+| `OutputFixingParser` | ⚠️ | 仅非 JSON Mode 流式失败时兜底 |
 | Tavily / Retriever | ❌ | Phase 2 RAG |
 | LangGraph / Vector DB | ❌ | Phase 2 |
 
-### 4.2 Chain 1：QuizGenerationChain
+### 4.2 Chain 1：QuizStreamGenerationChain
 
 - **输入：** `{ topic: string }`
-- **输出：** `{ quiz_id, topic, questions[10] }`
-- **quiz_id 生成：** 服务端生成，如 `q_{date}_{uuid8}`
+- **输出：** 后台任务增量写入 `questions[]`，完成后 `{ quiz_id, topic, questions[10] }`
+- **格式：** JSONL（每行一道题），`id` 为 `q1`…`q10`
+- **选项：** 文本**不带** `A.` / `B.` 前缀（前端单独渲染字母徽标）
 
-**JSON 解析失败重试：**
+**解析失败：**
 
-1. `PydanticOutputParser` 校验
-2. 失败 → `OutputFixingParser` 修复，最多 1 次
-3. 仍失败 → HTTP 502
+1. 单行 `Question` Pydantic 校验
+2. 完成后 `questions` 数量 ≠ 10 → 任务 `failed`
+3. HTTP 轮询侧看到 `status=failed` + `error`
 
 ### 4.3 Chain 2：ReportGenerationChain
 
@@ -200,15 +259,18 @@ export interface ReportResponse {
 
 | 约束 | 数值 |
 | ---- | ---- |
-| 单次 LLM 调用 | 通常 15–30s |
-| OutputFixingParser 重试 | 再加 15–30s |
-| 前端 `uni.request` timeout | 60s（微信硬上限） |
+| `POST /generate` | 立即 `202`，< 1s |
+| 首题就绪 | 通常 5–20s（视模型） |
+| 10 题全部完成 | 通常 15–90s |
+| 轮询间隔 | 前端 600ms（等待下一题时 350ms） |
+| 后台任务 `request_total_timeout` | 180s |
+| `POST /report` | 30s |
 
 **MVP 应对：**
 
-1. Prompt 强约束 + JSON mode（若 DeepSeek 支持）
-2. 单次 LLM `timeout=25s`，整请求 `timeout=55s`
-3. Fix 失败直接 502，由用户重试
+1. 首题就绪即跳转答题，后续题后台同步
+2. `beginQuizSession()` 重置 `quizProgress` / `quizAnswers`
+3. 轮询失败 Toast + 返回首页；任务 `failed` 显示 `error`
 
 ---
 
@@ -337,7 +399,8 @@ httpx>=0.27.0
 ## 九、G1 验收清单
 
 - [ ] `GET /health` → `{"status":"ok"}`
-- [ ] `POST /api/v1/quiz/generate` 返回 10 题，含三种题型
+- [ ] `POST /api/v1/quiz/generate` 返回 `202` + `job_id`
+- [ ] `GET /api/v1/quiz/jobs/{id}` 流式递增 `questions`，最终 `completed` 含 10 题
 - [ ] `POST /api/v1/quiz/report` 返回 Markdown 字符串
 - [ ] `/docs` OpenAPI 可浏览、可 Try it out
 - [ ] `pytest tests/` 全部通过
@@ -349,4 +412,5 @@ httpx>=0.27.0
 
 | 版本 | 日期 | 说明 |
 | ---- | ---- | ---- |
+| v1.1.0 | 2026-05-29 | 异步任务 + 流式 JSONL 出题；轮询契约 |
 | v1.0.0 | 2026-05-29 | 初版 API 与数据契约 |

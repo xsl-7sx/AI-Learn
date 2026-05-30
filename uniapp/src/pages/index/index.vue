@@ -1,18 +1,30 @@
 <template>
   <view class="page home bt-screen">
     <view class="home-topbar" :style="layoutStyle.header">
-      <view class="home-user">
-        <view class="home-avatar">👤</view>
-        <view class="home-user-text">
-          <text class="home-greet">你好，<text class="strong">小皮</text> 👋</text>
-          <text class="home-sub">今天也要元气满满哦！</text>
+      <view class="home-topbar-inner" :style="layoutStyle.topbarInner">
+        <view class="home-user">
+          <view :class="['home-avatar', { 'home-avatar--mp': layoutMetrics.isMpWeixin }]">
+            <AppIcon name="user" :size="layoutMetrics.isMpWeixin ? 32 : 40" color="#b45309" />
+          </view>
+          <view class="home-user-text">
+            <text class="home-brand">知练</text>
+            <text class="home-greet">你好，<text class="strong">小皮</text> 👋</text>
+          </view>
+        </view>
+        <view v-if="!layoutMetrics.isMpWeixin" class="home-topbar-actions">
+          <view class="home-streak">
+            <AppIcon name="flame" :size="28" color="#ea580c" />
+            <text class="strong">7</text>
+          </view>
+          <view class="home-icon-btn">
+            <AppIcon name="calendar" :size="36" color="#78716c" />
+          </view>
+        </view>
+        <view v-else class="home-streak home-streak--capsule" :style="layoutStyle.streak">
+          <AppIcon name="flame" :size="28" color="#ea580c" />
+          <text class="strong">7</text>
         </view>
       </view>
-      <view v-if="!layoutMetrics.isMpWeixin" class="home-topbar-actions">
-        <view class="home-streak">🔥 <text class="strong">7</text></view>
-        <view class="home-icon-btn">📅</view>
-      </view>
-      <view v-else class="home-streak home-streak--capsule">🔥 <text class="strong">7</text></view>
     </view>
 
     <scroll-view class="home-scroll" scroll-y :style="layoutStyle.scroll">
@@ -27,41 +39,65 @@
           <textarea
             v-model="topic"
             class="home-textarea"
+            placeholder-class="home-textarea-ph"
             placeholder="例如：我想搞懂 RAG：检索、增强、生成各解决什么问题"
             maxlength="500"
             :auto-height="true"
           />
-          <text class="home-pencil">✏️</text>
+          <AppIcon class="home-pencil" name="pencil" :size="32" color="#f06a2a" />
         </view>
 
         <view class="home-suggest-row">
-          <text class="home-suggest-label">试试这些</text>
-          <view class="home-suggest-pills">
-            <view
-              v-for="item in quickTopics"
-              :key="item.title"
-              class="home-pill"
-              @tap="pickTopic(item.title)"
+          <view class="home-suggest-label">
+            <text>试试这些</text>
+            <AppIcon name="play" :size="16" color="#9ca3af" />
+          </view>
+          <view class="home-suggest-pills-wrap">
+            <scroll-view
+              class="home-suggest-pills-scroll"
+              scroll-x
+              :show-scrollbar="false"
+              :enhanced="true"
             >
-              {{ item.title }}
-            </view>
+              <view class="home-suggest-pills-track">
+                <view
+                  v-for="item in quickTopics"
+                  :key="item.title"
+                  class="home-pill"
+                  @tap="pickTopic(item.title)"
+                >
+                  {{ item.title }}
+                </view>
+              </view>
+            </scroll-view>
+            <view class="home-suggest-fade" />
           </view>
           <view class="home-shuffle" @tap="shuffleTopics">
-            <text class="shuffle-icon">↻</text>
+            <AppIcon name="refresh-cw" :size="24" color="#9ca3af" />
             <text>换一换</text>
           </view>
         </view>
 
-        <button class="home-btn-generate" :disabled="!canSubmit" @tap="startQuiz">
-          <text class="btn-main">开始生成题目 →</text>
+        <view
+          class="home-btn-generate"
+          :class="{ 'is-disabled': !canSubmit }"
+          @tap="startQuiz"
+        >
+          <view class="btn-main-row">
+            <text class="btn-main">开始生成题目</text>
+            <AppIcon name="arrow-right" :size="30" color="#ffffff" />
+          </view>
           <text class="btn-sub">AI 为你生成专属题目</text>
-        </button>
+        </view>
         <button v-if="USE_MOCK" class="home-mock-btn" @tap="startMock">Mock 跳过 API</button>
       </view>
 
       <view class="home-section-hd">
         <text>热门主题</text>
-        <text class="link" @tap="shuffleTopics">换一批 ›</text>
+        <view class="link" @tap="shuffleTopics">
+          <text>换一批</text>
+          <AppIcon name="refresh-cw" :size="24" color="#9ca3af" />
+        </view>
       </view>
       <view class="home-topic-wrap">
         <scroll-view
@@ -80,38 +116,71 @@
               @tap="pickTopic(item.title)"
             >
               <view :class="['home-topic-icon', `home-topic-icon--${item.tone}`]">
-                {{ item.icon || '✦' }}
+                <AppIcon
+                  :name="item.icon || 'layers'"
+                  :size="32"
+                  :color="topicIconColor(item.tone)"
+                />
               </view>
               <text class="home-topic-title">{{ item.title }}</text>
               <text v-if="item.desc" class="home-topic-desc">{{ item.desc }}</text>
-              <text class="home-topic-heat">🔥 热度 {{ item.heat }}</text>
+              <view class="home-topic-heat">
+                <AppIcon name="flame" :size="22" color="#ea580c" />
+                <text>热度 {{ item.heat }}</text>
+              </view>
             </view>
           </view>
         </scroll-view>
       </view>
 
-      <view class="home-section-hd home-section-hd--gap">
+      <view v-if="incompleteQuizzes.length" class="home-section-hd home-section-hd--gap">
         <text>未完成关卡</text>
-        <text class="link">查看全部 ›</text>
+        <view class="link">
+          <text>{{ incompleteQuizzes.length }} 个进行中</text>
+        </view>
       </view>
-      <view class="home-level-card" @tap="continueQuiz">
-        <view class="home-level-main">
-          <view class="home-level-cover">📖</view>
-          <view class="home-level-body">
-            <view class="home-level-title-row">
-              <text class="home-level-title">RAG 基础概念入门</text>
-              <text class="home-level-tag">第 3 关</text>
+      <view v-if="displayedIncompleteQuizzes.length" class="home-level-list">
+        <view
+          v-for="item in displayedIncompleteQuizzes"
+          :key="item.quizId"
+          class="home-level-card"
+          @tap="continueQuiz(item.quizId)"
+        >
+          <view class="home-level-main">
+            <view class="home-level-cover">
+              <AppIcon name="book-open" :size="48" color="#ea580c" />
             </view>
-            <text class="home-level-desc">检索增强生成入门：理解检索、增强、生成如何协同。</text>
-            <view class="home-level-progress-row">
-              <view class="home-progress-bar">
-                <view class="home-progress-fill" style="width: 60%" />
+            <view class="home-level-body">
+              <view class="home-level-title-row">
+                <text class="home-level-title">{{ item.topic }}</text>
+                <text class="home-level-tag">第 {{ item.resumeIndex + 1 }} 关</text>
               </view>
-              <text class="home-level-progress-txt">进度 6/10</text>
+              <text class="home-level-desc">上次闯到这里，点击继续答题</text>
+              <view class="home-level-progress-row">
+                <view class="home-progress-bar">
+                  <view
+                    class="home-progress-fill"
+                    :style="{ width: `${getIncompleteProgressPercent(item)}%` }"
+                  />
+                </view>
+                <text class="home-level-progress-txt">
+                  进度 {{ item.completedCount }}/{{ item.totalCount }}
+                </text>
+              </view>
             </view>
           </view>
+          <view class="home-level-continue" @tap.stop="continueQuiz(item.quizId)">继续</view>
         </view>
-        <button class="home-level-continue" @tap.stop="continueQuiz">继续</button>
+      </view>
+      <view
+        v-if="hiddenIncompleteCount > 0"
+        class="home-level-expand"
+        @tap="toggleIncompleteExpanded"
+      >
+        <text>{{ incompleteExpanded ? '收起' : `展开其余 ${hiddenIncompleteCount} 个` }}</text>
+        <view :class="['home-level-expand__icon', { 'is-expanded': incompleteExpanded }]">
+          <AppIcon name="chevron-right" :size="24" color="#9ca3af" />
+        </view>
       </view>
 
       <view class="bottom-spacer" />
@@ -123,28 +192,66 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import mockQuiz from '@/mock/quiz.json'
 import { USE_MOCK } from '@/config'
 import { TOPIC_BATCHES } from '@/utils/topics'
+import { TONE_ICON_COLORS } from '@/utils/icons'
 import { getLayoutMetrics, layoutMetricsToStyle } from '@/utils/layout'
-import { getCurrentQuiz, getQuizProgress, setCurrentQuiz, setPendingTopic } from '@/utils/storage'
+import {
+  activateQuiz,
+  beginQuizSession,
+  getCurrentQuiz,
+  getIncompleteProgressPercent,
+  getIncompleteQuizzes,
+  getQuizProgress,
+  setPendingTopic,
+  type IncompleteQuizSummary,
+} from '@/utils/storage'
 import type { GenerateQuizResponse } from '@/types/quiz'
 
 const topic = ref('')
 const batchIndex = ref(0)
 const currentTopics = computed(() => TOPIC_BATCHES[batchIndex.value])
-const quickTopics = computed(() => currentTopics.value.slice(0, 3))
+const quickTopics = computed(() => currentTopics.value.slice(0, 2))
 const layoutMetrics = ref(getLayoutMetrics())
 const layoutStyle = computed(() => layoutMetricsToStyle(layoutMetrics.value))
+const incompleteQuizzes = ref<IncompleteQuizSummary[]>(getIncompleteQuizzes())
+const incompleteExpanded = ref(false)
+const INCOMPLETE_DISPLAY_LIMIT = 2
 
 const canSubmit = computed(() => topic.value.trim().length >= 2)
+const hiddenIncompleteCount = computed(() =>
+  Math.max(0, incompleteQuizzes.value.length - INCOMPLETE_DISPLAY_LIMIT),
+)
+const displayedIncompleteQuizzes = computed(() => {
+  if (incompleteExpanded.value) return incompleteQuizzes.value
+  return incompleteQuizzes.value.slice(0, INCOMPLETE_DISPLAY_LIMIT)
+})
+
+function toggleIncompleteExpanded() {
+  incompleteExpanded.value = !incompleteExpanded.value
+}
+
+function refreshIncompleteQuizzes() {
+  incompleteQuizzes.value = getIncompleteQuizzes()
+  if (incompleteQuizzes.value.length <= INCOMPLETE_DISPLAY_LIMIT) {
+    incompleteExpanded.value = false
+  }
+}
 
 function refreshLayout() {
   layoutMetrics.value = getLayoutMetrics()
 }
 
-onMounted(refreshLayout)
+onMounted(() => {
+  refreshLayout()
+  refreshIncompleteQuizzes()
+})
+
+onShow(refreshIncompleteQuizzes)
 
 function shuffleTopics() {
   batchIndex.value = (batchIndex.value + 1) % TOPIC_BATCHES.length
@@ -152,6 +259,10 @@ function shuffleTopics() {
 
 function pickTopic(title: string) {
   topic.value = title
+}
+
+function topicIconColor(tone: string) {
+  return TONE_ICON_COLORS[tone] || '#374151'
 }
 
 function goLoading() {
@@ -168,18 +279,24 @@ function startQuiz() {
 }
 
 function startMock() {
-  setCurrentQuiz(mockQuiz as GenerateQuizResponse)
+  beginQuizSession(mockQuiz as GenerateQuizResponse)
   uni.redirectTo({ url: '/pages/quiz/quiz' })
 }
 
-function continueQuiz() {
-  const session = getCurrentQuiz()
-  if (!session) {
-    uni.showToast({ title: '暂无未完成关卡', icon: 'none' })
+function continueQuiz(quizId: string) {
+  if (!activateQuiz(quizId)) {
+    uni.showToast({ title: '关卡不存在或已失效', icon: 'none' })
+    refreshIncompleteQuizzes()
     return
   }
-  const index = getQuizProgress()
-  if (index >= session.questions.length) {
+  const session = getCurrentQuiz()
+  if (!session) {
+    refreshIncompleteQuizzes()
+    return
+  }
+  const index = getQuizProgress(quizId)
+  const total = session.total_expected || session.questions.length || 10
+  if (index >= total) {
     uni.navigateTo({ url: '/pages/result/result' })
     return
   }
@@ -199,13 +316,17 @@ function continueQuiz() {
 }
 
 .home-topbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
   width: 100%;
   padding-left: 32rpx;
-  padding-bottom: 8rpx;
   box-sizing: border-box;
+}
+
+.home-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16rpx;
 }
 
 .home-user {
@@ -224,29 +345,38 @@ function continueQuiz() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36rpx;
   flex-shrink: 0;
   box-shadow: 0 6rpx 20rpx rgba(251, 191, 36, 0.35);
+}
+
+.home-avatar--mp {
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 28rpx;
 }
 
 .home-user-text {
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  gap: 4rpx;
   min-width: 0;
 }
 
-.home-greet {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #1c1917;
+.home-brand {
+  font-family: var(--font-body);
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #ea580c;
+  letter-spacing: 2rpx;
   line-height: 1.3;
 }
 
-.home-sub {
-  font-size: 24rpx;
-  color: #9ca3af;
-  line-height: 1.3;
+.home-greet {
+  font-family: var(--font-display);
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1c1917;
+  line-height: 1.35;
 }
 
 .strong {
@@ -262,16 +392,21 @@ function continueQuiz() {
 }
 
 .home-streak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
   background: #fff7ed;
   color: #ea580c;
-  padding: 10rpx 18rpx;
+  padding: 0 18rpx;
   border-radius: 999rpx;
   font-size: 24rpx;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .home-streak--capsule {
-  align-self: center;
+  padding: 0 16rpx;
 }
 
 .home-icon-btn {
@@ -296,38 +431,43 @@ function continueQuiz() {
 }
 
 .home-hero {
-  margin-bottom: 28rpx;
+  margin-top: 0;
+  margin-bottom: 36rpx;
 }
 
 .home-title {
   display: block;
+  font-family: var(--font-display);
   font-size: 52rpx;
   font-weight: 800;
   color: #1c1917;
-  line-height: 1.25;
+  line-height: 1.3;
   letter-spacing: 1rpx;
 }
 
 .home-title-line {
-  width: 120rpx;
-  height: 10rpx;
-  margin-top: 12rpx;
+  width: 80rpx;
+  height: 12rpx;
+  margin-top: 10rpx;
   border-radius: 999rpx;
   background: linear-gradient(90deg, #ff7e3d, #ffb07c);
 }
 
 .home-input-card {
   width: 100%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.96);
   border-radius: 32rpx;
   padding: 32rpx 28rpx;
-  box-shadow: 0 12rpx 48rpx rgba(31, 41, 55, 0.08);
+  box-shadow: 0 12rpx 40rpx rgba(68, 45, 32, 0.1);
   margin-bottom: 40rpx;
   overflow: hidden;
+  border: 1rpx solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
 }
 
 .home-input-label {
   display: block;
+  font-family: var(--font-body);
   font-size: 28rpx;
   color: #6b7280;
   margin-bottom: 20rpx;
@@ -341,51 +481,48 @@ function continueQuiz() {
 .home-textarea {
   width: 100%;
   min-height: 180rpx;
-  padding: 24rpx 56rpx 24rpx 24rpx;
-  background: #f5f4f2;
+  padding: 36rpx 80rpx 36rpx 36rpx;
+  background: linear-gradient(135deg, #fffbf7 0%, #fff7ed 100%);
   border-radius: 24rpx;
+  border: 1rpx solid rgba(251, 146, 60, 0.18);
+  font-family: var(--font-display);
   font-size: 28rpx;
+  font-weight: 400;
   line-height: 1.65;
   color: #374151;
+  box-sizing: border-box;
 }
 
 .home-pencil {
   position: absolute;
-  right: 20rpx;
-  bottom: 20rpx;
-  font-size: 28rpx;
-  opacity: 0.55;
-}
-
-.home-suggest-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 28rpx;
+  right: 24rpx;
+  bottom: 24rpx;
 }
 
 .home-suggest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  height: 48rpx;
+  font-family: var(--font-body);
   font-size: 24rpx;
   color: #9ca3af;
   flex-shrink: 0;
 }
 
-.home-suggest-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  flex: 1;
-  min-width: 0;
-}
-
 .home-pill {
-  padding: 10rpx 20rpx;
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 12rpx;
   border-radius: 999rpx;
   background: #fff7ed;
   color: #c2410c;
-  font-size: 24rpx;
+  font-family: var(--font-body);
+  font-size: 20rpx;
+  font-weight: 500;
   border: 1rpx solid #fed7aa;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .home-shuffle {
@@ -393,42 +530,86 @@ function continueQuiz() {
   align-items: center;
   gap: 6rpx;
   flex-shrink: 0;
+  margin-left: 24rpx;
+  padding-left: 4rpx;
+  font-family: var(--font-body);
   font-size: 24rpx;
   color: #9ca3af;
 }
 
-.shuffle-icon {
-  font-size: 28rpx;
+.home-suggest-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 32rpx;
+}
+
+.home-suggest-pills-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.home-suggest-pills-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.home-suggest-pills-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  padding-right: 16rpx;
+}
+
+.home-suggest-fade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40rpx;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.96) 100%);
+  pointer-events: none;
+}
+
+.btn-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
 }
 
 .home-btn-generate {
   width: 100%;
-  padding: 24rpx 0;
+  padding: 26rpx 0;
   border-radius: 999rpx;
-  background: linear-gradient(135deg, #ff7e3d 0%, #ff9f5a 100%);
-  color: #fff;
-  box-shadow: 0 12rpx 32rpx rgba(255, 126, 61, 0.38);
+  background: linear-gradient(180deg, #ff9f5a 0%, #f06a2a 52%, #e85a1a 100%);
+  box-shadow: 0 12rpx 32rpx rgba(232, 90, 26, 0.38);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
+  gap: 6rpx;
 }
 
-.home-btn-generate[disabled] {
+.home-btn-generate.is-disabled {
   opacity: 0.5;
   box-shadow: none;
 }
 
 .btn-main {
+  font-family: var(--font-body);
   font-size: 32rpx;
   font-weight: 700;
   line-height: 1.3;
+  color: #ffffff;
 }
 
 .btn-sub {
+  font-family: var(--font-body);
   font-size: 22rpx;
-  opacity: 0.9;
   line-height: 1.3;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .home-mock-btn {
@@ -447,7 +628,8 @@ function continueQuiz() {
   justify-content: space-between;
   gap: 16rpx;
   width: 100%;
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
+  font-family: var(--font-display);
   font-size: 32rpx;
   font-weight: 700;
   color: #1c1917;
@@ -458,6 +640,9 @@ function continueQuiz() {
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
   flex-shrink: 0;
   color: #9ca3af;
   font-size: 26rpx;
@@ -472,7 +657,7 @@ function continueQuiz() {
 
 .home-topic-row {
   width: 100%;
-  height: 300rpx;
+  height: 320rpx;
   white-space: nowrap;
 }
 
@@ -490,22 +675,24 @@ function continueQuiz() {
   flex-direction: column;
   flex-shrink: 0;
   min-height: 280rpx;
-  padding: 24rpx 20rpx;
+  padding: 22rpx 16rpx;
   border-radius: 24rpx;
-  background: #fff;
-  box-shadow: 0 8rpx 28rpx rgba(31, 41, 55, 0.07);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8rpx 24rpx rgba(68, 45, 32, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
   vertical-align: top;
+  box-sizing: border-box;
 }
 
 .home-topic-icon {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 18rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32rpx;
-  margin-bottom: 16rpx;
+  flex-shrink: 0;
+  margin-bottom: 14rpx;
 }
 
 .home-topic-icon--orange { background: #ffedd5; }
@@ -514,22 +701,28 @@ function continueQuiz() {
 .home-topic-icon--lavender { background: #ede9fe; }
 
 .home-topic-title {
-  font-size: 28rpx;
+  font-family: var(--font-display);
+  font-size: 24rpx;
   font-weight: 700;
   color: #1f2937;
-  line-height: 1.35;
+  line-height: 1.45;
   margin-bottom: 8rpx;
+  min-height: 70rpx;
   overflow: hidden;
+  word-break: break-word;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .home-topic-desc {
   flex: 1;
-  font-size: 22rpx;
+  font-family: var(--font-display);
+  font-size: 20rpx;
+  font-weight: 400;
   color: #9ca3af;
-  line-height: 1.45;
+  line-height: 1.5;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -537,22 +730,66 @@ function continueQuiz() {
 }
 
 .home-topic-heat {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   margin-top: 12rpx;
+  font-family: var(--font-body);
   font-size: 22rpx;
   color: #ea580c;
   font-weight: 600;
 }
 
-.home-level-card {
+.home-level-list {
   display: flex;
   flex-direction: column;
   gap: 20rpx;
   width: 100%;
+}
+
+.home-level-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  width: 100%;
+  margin-top: 16rpx;
+  padding: 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1rpx solid #e8e2d9;
+  color: #6b7280;
+  font-size: 26rpx;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.home-level-expand__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+
+.home-level-expand__icon.is-expanded {
+  transform: rotate(-90deg);
+}
+
+.home-level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  width: 100%;
+  max-width: 100%;
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
-  background: #fff;
-  box-shadow: 0 8rpx 32rpx rgba(31, 41, 55, 0.07);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8rpx 28rpx rgba(68, 45, 32, 0.08);
   overflow: hidden;
+  box-sizing: border-box;
+  border: 1rpx solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
 }
 
 .home-level-main {
@@ -589,18 +826,20 @@ function continueQuiz() {
 }
 
 .home-level-title {
+  font-family: var(--font-display);
   font-size: 28rpx;
   font-weight: 700;
   color: #1f2937;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .home-level-tag {
+  font-family: var(--font-body);
   font-size: 20rpx;
   color: #ea580c;
   background: #fff7ed;
   padding: 4rpx 12rpx;
-  border-radius: 999rpx;
+  border-radius: 8rpx;
 }
 
 .home-progress-bar {
@@ -619,7 +858,9 @@ function continueQuiz() {
 .home-level-desc {
   display: block;
   margin-bottom: 16rpx;
+  font-family: var(--font-display);
   font-size: 24rpx;
+  font-weight: 400;
   color: #6b7280;
   line-height: 1.5;
 }
@@ -631,25 +872,33 @@ function continueQuiz() {
 }
 
 .home-level-progress-txt {
+  font-family: var(--font-body);
   font-size: 24rpx;
   color: #6b7280;
 }
 
 .home-level-continue {
   align-self: flex-end;
-  margin: 0;
-  padding: 0 32rpx;
-  min-width: 120rpx;
-  height: 64rpx;
-  line-height: 64rpx;
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
   background: #fff0e8;
   color: #ff7e3d;
+  font-family: var(--font-body);
   font-size: 26rpx;
   font-weight: 600;
-  border-radius: 999rpx;
 }
 
 .bottom-spacer {
-  height: 48rpx;
+  height: calc(200rpx + env(safe-area-inset-bottom));
+}
+</style>
+
+<style lang="scss">
+.home-textarea-ph {
+  font-family: 'LXGW WenKai Screen', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  font-weight: 400;
+  color: #9ca3af;
+  line-height: 1.65;
 }
 </style>
