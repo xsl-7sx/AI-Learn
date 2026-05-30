@@ -48,7 +48,7 @@ import { onUnload } from '@dcloudio/uni-app'
 import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import mockQuiz from '@/mock/quiz.json'
-import { USE_MOCK } from '@/config'
+import { BASE_URL, USE_MOCK, isLocalhostApiUrl } from '@/config'
 import { showApiError, waitForFirstQuestion } from '@/services/api'
 import { getLayoutMetrics } from '@/utils/layout'
 import { clearPendingTopic, beginQuizSession, getPendingTopic } from '@/utils/storage'
@@ -187,6 +187,13 @@ function cancel() {
 
 onMounted(() => {
   layoutMetrics.value = getLayoutMetrics()
+  if (!USE_MOCK && isLocalhostApiUrl()) {
+    uni.showToast({
+      title: 'API 为 127.0.0.1，真机无法出题，请 npm run dev:mp-weixin 或重新 build',
+      icon: 'none',
+      duration: 4000,
+    })
+  }
   startProgress()
   loadQuiz()
 })

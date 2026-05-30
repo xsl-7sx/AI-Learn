@@ -1,3 +1,4 @@
+import json
 import time
 
 import pytest
@@ -53,7 +54,9 @@ def start_quiz(client: TestClient, topic: str) -> dict:
 def test_health(client: TestClient):
   response = client.get("/health")
   assert response.status_code == 200
-  assert response.json() == {"status": "ok"}
+  body = response.json()
+  assert body["status"] == "ok"
+  assert body["llm_mode"] in ("mock", "live")
 
 
 def test_generate_quiz_returns_ten_questions(client: TestClient):
@@ -88,7 +91,7 @@ def test_streaming_job_exposes_questions_incrementally(client: TestClient):
   assert len(result["questions"]) == 10
 
 
-def test_report_returns_markdown(client: TestClient):
+def test_report_returns_structured_json(client: TestClient):
   quiz = start_quiz(client, "TCP 三次握手")
   answers = [
     {
@@ -112,4 +115,8 @@ def test_report_returns_markdown(client: TestClient):
   assert data["total"] == 10
   assert data["score"] == 10
   assert data["correct_rate"] == 1.0
-  assert "##" in data["report"]
+  report = json.loads(data["report"])
+  mini = report["学习复盘报告"]
+  assert mini["整体表现"]
+  assert isinstance(mini["核心知识点回顾"], list)
+  assert isinstance(mini["易错题分析"], list)

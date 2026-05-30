@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from datetime import datetime
 from uuid import uuid4
 
@@ -54,22 +56,39 @@ def build_mock_quiz(topic: str) -> GenerateQuizResponse:
   )
 
 
-MOCK_REPORT = """## 整体表现
+def build_mock_report(
+  *,
+  topic: str,
+  score: int,
+  total: int,
+  wrong_stems: list[str],
+) -> str:
+  rate = round(score / total * 100) if total else 0
+  if rate >= 80:
+    overview = f"「{topic}」练测表现优秀，答对 {score}/{total} 题（{rate}%），核心概念掌握扎实。"
+  elif rate >= 50:
+    overview = f"「{topic}」练测完成，答对 {score}/{total} 题（{rate}%），基础已有，错题值得再巩固。"
+  else:
+    overview = f"「{topic}」练测完成，答对 {score}/{total} 题（{rate}%），别灰心，抓住错题就是进步。"
 
-本次练测完成度不错，已覆盖核心概念。
+  wrong_analysis = wrong_stems[:3] if wrong_stems else ["本次错题较少，继续保持审题习惯"]
 
-## 核心知识点回顾
+  payload = {
+    "学习复盘报告": {
+      "整体表现": overview,
+      "核心知识点回顾": [
+        f"回顾「{topic}」的定义与关键术语",
+        "把错题解析用自己的话复述一遍",
+      ],
+      "易错题分析": wrong_analysis,
+      "复习建议": [
+        "明天再做一组同类题巩固",
+        "多选题注意「全对才得分」",
+      ],
+    },
+  }
+  return json.dumps(payload, ensure_ascii=False)
 
-- 先回顾主题定义与关键术语
-- 再串联典型应用场景
 
-## 易错题分析
-
-- 多选题注意「全对才得分」
-- 判断题要区分绝对化表述
-
-## 复习建议
-
-1. 用 3 句话复述今天主题
-2. 明天再做一组同类题巩固
-"""
+# 兼容旧引用；新逻辑请用 build_mock_report
+MOCK_REPORT = build_mock_report(topic="示例主题", score=7, total=10, wrong_stems=["示例错题"])

@@ -21,7 +21,6 @@ EXPECTED_QUESTION_COUNT = 10
 OnQuestion = Callable[[Question], Awaitable[None]]
 OnPreview = Callable[[str], Awaitable[None]]
 
-
 class QuestionStreamParser:
   def __init__(self) -> None:
     self._buffer = ""
@@ -123,13 +122,14 @@ def _preview_tail(text: str, *, limit: int = 120) -> str:
 async def stream_generate_quiz(
   topic: str,
   *,
+  quiz_id: str | None = None,
   on_question: OnQuestion,
   on_preview: OnPreview,
 ) -> GenerateQuizResponse:
-  quiz_id = f"q_{datetime.now().strftime('%Y%m%d')}_{uuid4().hex[:8]}"
+  resolved_quiz_id = quiz_id or f"q_{datetime.now().strftime('%Y%m%d')}_{uuid4().hex[:8]}"
 
-  if settings.mock_llm:
-    return await _stream_mock_quiz(topic, quiz_id, on_question=on_question, on_preview=on_preview)
+  if settings.use_mock_llm:
+    return await _stream_mock_quiz(topic, resolved_quiz_id, on_question=on_question, on_preview=on_preview)
 
   if not settings.resolved_api_key:
     raise QuizGenerationError("LLM API key not configured")
@@ -171,7 +171,7 @@ async def stream_generate_quiz(
   if len(collected) != EXPECTED_QUESTION_COUNT:
     raise QuizGenerationError(f"expected {EXPECTED_QUESTION_COUNT} questions, got {len(collected)}")
 
-  return GenerateQuizResponse(quiz_id=quiz_id, topic=topic, questions=collected)
+  return GenerateQuizResponse(quiz_id=resolved_quiz_id, topic=topic, questions=collected)
 
 
 async def _stream_mock_quiz(

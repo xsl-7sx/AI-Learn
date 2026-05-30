@@ -54,3 +54,13 @@ export function formatAnswerSummary(question: Question): string {
   const options = question.options ?? []
   return indices.map((index) => formatOptionLabel(index, options[index])).join('；')
 }
+
+/** 正确率百分比（0–100 整数），避免非整除题数出现长小数 */
+export function formatCorrectRatePercent(score: number, total: number): number {
+  if (!total || total <= 0 || !Number.isFinite(score) || !Number.isFinite(total)) {
+    return 0
+  }
+  const percent = (score / total) * 100
+  if (!Number.isFinite(percent)) return 0
+  return Math.min(100, Math.max(0, Math.round(percent)))
+}

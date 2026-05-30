@@ -12,6 +12,7 @@ node_modules
 dist
 *.local
 .env.development
+.env.production
 .env.local
 
 # Editor directories and files

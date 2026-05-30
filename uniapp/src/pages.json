@@ -25,10 +25,7 @@
       "path": "pages/result/result",
       "style": {
         "navigationStyle": "custom",
-        "navigationBarTitleText": "结算",
-        "usingComponents": {
-          "towxml": "/wxcomponents/towxml/towxml"
-        }
+        "navigationBarTitleText": "结算"
       }
     }
   ],

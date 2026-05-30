@@ -53,7 +53,7 @@ def _parse_quiz_payload(raw_text: str) -> GenerateQuizResponse:
 
 
 async def generate_quiz(topic: str) -> GenerateQuizResponse:
-  if settings.mock_llm:
+  if settings.use_mock_llm:
     return build_mock_quiz(topic)
   if not settings.resolved_api_key:
     raise QuizGenerationError("LLM API key not configured")

@@ -51,7 +51,12 @@ async def _run_quiz_job(job_id: str, topic: str) -> None:
 
   try:
     result = await asyncio.wait_for(
-      stream_generate_quiz(topic, on_question=on_question, on_preview=on_preview),
+      stream_generate_quiz(
+        topic,
+        quiz_id=quiz_id,
+        on_question=on_question,
+        on_preview=on_preview,
+      ),
       timeout=settings.request_total_timeout,
     )
     await quiz_job_store.mark_completed(job_id, result)
@@ -87,7 +92,13 @@ async def create_report(payload: QuizReportRequest) -> QuizReportResponse:
   try:
     return await asyncio.wait_for(
       generate_report(payload),
-      timeout=30,
+      timeout=60,
     )
   except asyncio.TimeoutError as exc:
     raise HTTPException(status_code=504, detail="request timeout") from exc
+  except ValueError as exc:
+    logger.warning("report generation config error: %s", exc)
+    raise HTTPException(status_code=502, detail=str(exc)) from exc
+  except Exception as exc:
+    logger.exception("report generation failed")
+    raise HTTPException(status_code=502, detail="AI 复盘生成失败，请稍后重试") from exc

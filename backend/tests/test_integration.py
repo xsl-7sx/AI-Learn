@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -42,7 +44,8 @@ def test_full_quiz_flow(client: TestClient):
   assert body["total"] == 10
   assert body["score"] == 9
   assert body["correct_rate"] == 0.9
-  assert "整体表现" in body["report"] or "##" in body["report"]
+  report_payload = json.loads(body["report"])
+  assert report_payload["学习复盘报告"]["整体表现"]
 
 
 def test_async_generate_returns_job_immediately(client: TestClient):

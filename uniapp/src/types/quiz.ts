@@ -64,6 +64,13 @@ export interface ReportResponse {
   report: string
 }
 
+export interface StructuredMiniReport {
+  overview: string
+  corePoints: string[]
+  wrongAnalysis: string[]
+  reviewTips: string[]
+}
+
 export interface QuizProgress {
   index: number
 }

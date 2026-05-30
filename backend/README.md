@@ -51,8 +51,6 @@ MOCK_LLM=false
 2. 轮询 `GET /api/v1/quiz/jobs/{job_id}`，`questions` 逐题递增
 3. **首题就绪**即进入答题页，其余题目后台继续拉取
 
-复盘接口返回**结构化 JSON**（`学习复盘报告` 对象）；前端解析为卡片 UI，并在 AI 返回前用本地摘要兜底。
-
 ```bash
 cd backend
 python -m venv .venv
@@ -94,12 +92,3 @@ VITE_API_BASE_URL=http://192.168.x.x:8000
 查电脑 IP：Windows 运行 `ipconfig`，手机与电脑需在同一 Wi-Fi。
 
 `npm install` 后会自动将 `towxml` 复制到 `src/wxcomponents/towxml`。
-
-### 结算页结构（result）
-
-| 区块 | 组件 | 说明 |
-| ---- | ---- | ---- |
-| 成绩环 + 鼓励语 | `BentoEnergyPool` | 本地即时展示正确率；底部「知识点掌握情况」为快捷入口 |
-| 知识点掌握情况 | `BentoKnowledgePanel` | **独立卡片**，默认收起；由答题解析/题干即时生成，AI 返回后合并 |
-| AI 复盘报告 | `BentoReportCards` | **独立卡片**，默认收起；整体表现 / 易错题分析 / 复习建议 |
-| 兜底 | `ReportView` | 仅当 JSON 解析失败且无本地摘要时展示 Markdown |

@@ -40,7 +40,7 @@ flowchart LR
 - 本地环境可完整跑通上述闭环
 - 10 题支持 `single` / `multiple` / `judge` 三种题型
 - 每题答完即时反馈（绿 / 红 + 震动 + 解析 + 答对音效）
-- 结算页展示正确率与 AI Markdown 复盘报告
+- 结算页展示正确率、**知识点掌握情况**（本地即时）与 **AI 结构化复盘**（异步卡片）
 - 微信开发者工具体验版可内测
 
 ---
@@ -147,7 +147,7 @@ AI-Learn/
 | ---- | ---- |
 | 初始化 `backend/` | FastAPI + CORS + `/health` |
 | `QuizGenerationChain` | 输入 `{ topic }` → 10 题 JSON |
-| `ReportGenerationChain` | 输入答题记录 → Markdown 复盘 |
+| `ReportGenerationChain` | 输入答题记录 → 结构化 JSON 复盘（`学习复盘报告`） |
 | Pydantic Schema + 题型校验 | `tests/test_schemas.py` 通过 |
 | OpenAPI | `/docs` 可调试 |
 
@@ -203,9 +203,9 @@ npm run dev:mp-weixin
 
 | 任务 | 产出 |
 | ---- | ---- |
-| 对接 `/api/v1/quiz/report` | 真实复盘 |
-| towxml 或备选 B | Markdown 渲染 |
-| result skeleton 二次等待 UX | 不空白 |
+| 对接 `/api/v1/quiz/report` | 结构化 JSON 复盘 |
+| `BentoKnowledgePanel` + `BentoReportCards` | 知识点与 AI 报告分卡，默认收起 |
+| `structuredReport.ts` + `ReportView` 兜底 | JSON 卡片渲染；解析失败保留本地摘要 |
 | 再来一局删 3 个 storage key | 禁止 `clearStorage` |
 | Prompt 调优 + UI 对齐屏⑧ | 内测可用 |
 | 分享按钮置灰 | MVP 不做 |

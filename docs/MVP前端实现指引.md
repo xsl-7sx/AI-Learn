@@ -10,6 +10,7 @@
 | v1.2.0 | 2026-05-29 | 首页 UI 精修：Lucide 图标、安全区底栏、间距与横滑优化 |
 | v1.3.0 | 2026-05-29 | 生成页 UI 精修：垂直居中布局、四步指示器、取消按钮与底栏安全区 |
 | v1.4.0 | 2026-05-29 | 答题退出 Sheet、多关卡存档、首页未完成列表、真机 `.env` 联调 |
+| v1.5.0 | 2026-05-30 | 结算页 Bento 卡片：成绩环、知识点面板与 AI 复盘分离；结构化 JSON 复盘；边答边生成容错 |
 
 ---
 
@@ -68,12 +69,19 @@ uniapp/src/
 │   ├── QuestionCard.vue      # 题干展示
 │   ├── OptionList.vue        # 选项 / 判断按钮
 │   ├── FeedbackPanel.vue     # 对错反馈 + 解析
-│   └── ReportView.vue        # Markdown 渲染（towxml 或备选 B）
+│   ├── BentoEnergyPool.vue   # 结算页成绩环 + 知识点快捷入口
+│   ├── BentoKnowledgePanel.vue  # 知识点掌握情况（独立折叠卡片）
+│   ├── BentoReportCards.vue  # AI 复盘报告（独立折叠卡片）
+│   └── ReportView.vue        # Markdown 兜底（JSON 解析失败时）
 ├── services/
 │   └── api.ts                # generateQuiz / generateReport
 ├── utils/
 │   ├── scoring.ts            # 本地判分
 │   ├── storage.ts            # 三 key 读写封装
+│   ├── structuredReport.ts   # 解析 AI 复盘 JSON（容忍前后缀说明文字）
+│   ├── reportText.ts         # 复盘文本清洗
+│   ├── accuracyTag.ts        # 正确率标签与鼓励语
+│   ├── feedbackSound.ts      # 答对/答错音效
 │   ├── topics.ts             # 热门主题批次（含 IconName）
 │   ├── icons.ts              # Lucide 图标注册表
 │   ├── fonts.ts              # 装饰性手写字体按需加载
@@ -249,11 +257,16 @@ uni.redirectTo({ url: '/pages/quiz/quiz' })
 
 ### 8.4 结算页 `result`
 
-**两阶段 UX（方案 §6.9）：**
+**三区块 UX（v1.5）：**
 
-1. **立即：** 从 `quizAnswers` 计算并展示本地正确率、得分环
-2. **异步：** 报告区 skeleton +「AI 正在生成复盘报告…」
-3. **完成：** 渲染 Markdown 报告
+1. **立即：** `BentoEnergyPool` 展示正确率环、鼓励语、答对/总题数
+2. **知识点掌握情况：** `BentoKnowledgePanel` 独立卡片，**默认收起**；本地从题目 `explanation`/题干生成要点（错题优先）；成绩卡底部行点击可展开并滚到该区块
+3. **AI 复盘报告：** `BentoReportCards` 独立卡片，**默认收起**；含整体表现、易错题分析、复习建议
+
+**两阶段数据流：**
+
+1. 进入页即写入本地 `StructuredMiniReport`（含知识点要点），`loading=false` 后两卡片入口可见
+2. 异步 `POST /report` 返回 JSON 字符串 → `parseStructuredReport()` 解析；成功则更新 AI 字段，**空字段不覆盖已有本地摘要**
 
 ```typescript
 const payload = {
@@ -262,7 +275,8 @@ const payload = {
   questions: session.questions,
   answers: getQuizAnswers(),
 }
-const report = await generateReport(payload)
+const res = await generateReport(payload)
+applyReportPayload(res.report) // 解析 JSON；失败保留本地卡片
 ```
 
 **再来一局：** 调用 `clearQuizSession()` → `reLaunch` 到 index

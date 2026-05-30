@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.routers import quiz
 
 app = FastAPI(title="KnowPractice API", version="1.0.0")
@@ -18,4 +19,5 @@ app.include_router(quiz.router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
-  return {"status": "ok"}
+  mode = "mock" if settings.use_mock_llm else "live"
+  return {"status": "ok", "llm_mode": mode}

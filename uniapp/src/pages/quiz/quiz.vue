@@ -100,10 +100,19 @@
       <view class="waiting-book">
         <AppIcon name="book-open" :size="72" color="#ea580c" />
       </view>
-      <text class="waiting-title">下一题正在生成中…</text>
-      <text class="waiting-sub">已就绪 {{ session.questions.length }}/{{ totalQuestions }} 题</text>
+      <text class="waiting-title">{{ waitingError ? '题目生成遇到问题' : '下一题正在生成中…' }}</text>
+      <text class="waiting-sub">
+        {{ waitingError || `已就绪 ${session.questions.length}/${totalQuestions} 题` }}
+      </text>
       <view class="waiting-progress-line">
         <view class="waiting-progress-fill" :style="{ width: `${waitingProgressPercent}%` }" />
+      </view>
+      <view v-if="waitingError" class="waiting-actions">
+        <button v-if="canProceedToReport()" class="bt-btn-primary" @tap="goToReport">先查看复盘</button>
+        <button :class="canProceedToReport() ? 'bt-btn-secondary' : 'bt-btn-primary'" @tap="retryWaitingSync">
+          重试拉取
+        </button>
+        <button class="bt-btn-secondary" @tap="saveAndExit">保存并返回</button>
       </view>
     </view>
     <FloatTabbar />
@@ -133,10 +142,11 @@ import { onBackPress, onHide, onShow } from '@dcloudio/uni-app'
 import AppIcon from '@/components/AppIcon.vue'
 import FloatTabbar from '@/components/FloatTabbar.vue'
 import FeedbackPanel from '@/components/FeedbackPanel.vue'
-import { getQuizJob } from '@/services/api'
-import type { Question, QuizSession, UserAnswer } from '@/types/quiz'
+import { ApiError, getQuizJob } from '@/services/api'
+import type { Question, QuizJobStatus, QuizSession, UserAnswer } from '@/types/quiz'
 import { checkAnswer, getJudgeOptions, getTypeLabel, stripOptionPrefix } from '@/utils/scoring'
 import { getLayoutMetrics } from '@/utils/layout'
+import { destroyFeedbackSounds, playCorrectSound, playWrongSound } from '@/utils/feedbackSound'
 import {
   getCurrentQuiz,
   getQuizAnswers,
@@ -145,6 +155,7 @@ import {
   setCurrentQuiz,
   setQuizAnswers,
   setQuizProgress,
+  migrateQuizRecordId,
 } from '@/utils/storage'
 
 const letters = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -154,6 +165,7 @@ const selected = ref<number[]>([])
 const locked = ref(false)
 const lastCorrect = ref(false)
 const waitingNext = ref(false)
+const waitingError = ref('')
 const showExitSheet = ref(false)
 const scrollIntoView = ref('')
 const layoutMetrics = ref(getLayoutMetrics())
@@ -163,9 +175,11 @@ const topbarStyle = computed(() => ({
   paddingLeft: '36rpx',
   paddingBottom: '20rpx',
 }))
-let audio: UniApp.InnerAudioContext | null = null
 let syncTimer: ReturnType<typeof setInterval> | null = null
+let waitingStallTimer: ReturnType<typeof setInterval> | null = null
 let syncIntervalMs = 800
+let syncFailureCount = 0
+let lastReadyCount = 0
 
 const totalQuestions = computed(() => session.value?.total_expected || session.value?.questions.length || 10)
 const isGenerating = computed(() => Boolean(session.value?.generating))
@@ -173,10 +187,44 @@ const question = computed<Question | null>(() => session.value?.questions[curren
 const typeLabel = computed(() => (question.value ? getTypeLabel(question.value.type) : ''))
 const judgeOptions = computed(() => (question.value ? getJudgeOptions(question.value) : []))
 const isLast = computed(() => currentIndex.value >= totalQuestions.value - 1)
+const atLastLoadedQuestion = computed(() => {
+  if (!session.value) return false
+  return currentIndex.value >= session.value.questions.length - 1
+})
 const canSubmitMultiple = computed(() => selected.value.length > 0)
+
+function isQuestionAnswered(questionId: string): boolean {
+  return getQuizAnswers().some((a) => a.question_id === questionId)
+}
+
+function allLoadedQuestionsAnswered(): boolean {
+  if (!session.value?.questions.length) return false
+  return session.value.questions.every((q) => isQuestionAnswered(q.id))
+}
+
+function canProceedToReport(): boolean {
+  if (!session.value) return false
+  const loaded = session.value.questions.length
+  if (!loaded) return false
+  const expected = session.value.total_expected || loaded
+  const answered = getQuizAnswers().length
+
+  if (!allLoadedQuestionsAnswered()) {
+    if (answered >= expected && loaded >= expected) return true
+    const noMoreComing = !session.value.job_id && !session.value.generating
+    return noMoreComing && answered >= loaded
+  }
+
+  // 已加载题目全部答完
+  if (loaded >= expected) return true
+  if (!session.value.generating && !session.value.job_id) return true
+  return false
+}
+
 const nextButtonText = computed(() => {
   if (waitingNext.value) return '下一题生成中…'
-  return isLast.value ? '查看报告' : '下一题'
+  if (canProceedToReport() && atLastLoadedQuestion.value) return '查看报告'
+  return '下一题'
 })
 
 const completedCount = computed(() => getQuizAnswers().length)
@@ -255,8 +303,175 @@ function restoreState() {
   const maxIndex = Math.max(0, session.value.questions.length - 1)
   currentIndex.value = Math.min(Math.max(savedIndex, 0), maxIndex)
   selected.value = []
-  locked.value = false
+  const currentQ = session.value.questions[currentIndex.value]
+  locked.value = Boolean(currentQ && isQuestionAnswered(currentQ.id))
+  sanitizeSessionOnRestore()
   waitingNext.value = shouldShowWaitingNext()
+  if (waitingNext.value) {
+    startWaitingStallWatch()
+  }
+}
+
+function isJobGenerating(status: QuizJobStatus): boolean {
+  return status === 'pending' || status === 'running'
+}
+
+function clearWaitingStallWatch() {
+  if (waitingStallTimer) {
+    clearInterval(waitingStallTimer)
+    waitingStallTimer = null
+  }
+}
+
+function startWaitingStallWatch() {
+  clearWaitingStallWatch()
+  let stallTicks = 0
+  lastReadyCount = session.value?.questions.length ?? 0
+  waitingStallTimer = setInterval(() => {
+    if (!waitingNext.value || waitingError.value) {
+      clearWaitingStallWatch()
+      return
+    }
+    const currentLen = session.value?.questions.length ?? 0
+    if (currentLen > lastReadyCount) {
+      lastReadyCount = currentLen
+      stallTicks = 0
+      waitingError.value = ''
+      return
+    }
+    stallTicks += 1
+    if (stallTicks >= 18) {
+      waitingError.value = '生成时间较长，可点「重试拉取」或先保存返回'
+    }
+  }, 5000)
+}
+
+function markWaitingFailure(message: string) {
+  stopBackgroundSync()
+  if (session.value) {
+    const nextSession = { ...session.value, generating: false, job_id: undefined }
+    session.value = nextSession
+    setCurrentQuiz(nextSession)
+  }
+
+  if (canProceedToReport()) {
+    waitingNext.value = false
+    waitingError.value = ''
+    clearWaitingStallWatch()
+    return
+  }
+
+  waitingError.value = message
+}
+
+function sanitizeSessionOnRestore() {
+  if (!session.value) return
+  const expected = session.value.total_expected || 10
+  if (session.value.questions.length >= expected && (session.value.job_id || session.value.generating)) {
+    clearStaleJobState()
+  }
+}
+
+function goToReport() {
+  if (!canProceedToReport()) {
+    uni.showToast({ title: '请先答完已有题目', icon: 'none' })
+    return
+  }
+  stopBackgroundSync()
+  waitingNext.value = false
+  waitingError.value = ''
+  clearWaitingStallWatch()
+  uni.redirectTo({ url: '/pages/result/result' })
+}
+
+function getSyncErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) return '网络异常，无法拉取下一题'
+  if (error.statusCode === 404) {
+    return '生成任务已失效（后端可能已重启），请保存返回后重新开始'
+  }
+  return error.message || '网络异常，无法拉取下一题'
+}
+
+function isFatalSyncError(error: unknown): boolean {
+  return error instanceof ApiError && error.statusCode === 404
+}
+
+function clearStaleJobState() {
+  if (!session.value) return
+  const nextSession = { ...session.value, generating: false, job_id: undefined }
+  session.value = nextSession
+  setCurrentQuiz(nextSession)
+}
+
+/** job 404：静默清除过期 job；仅在等待页展示错误，不弹 toast 打断答题 */
+function handleJobNotFound(context: string) {
+  if (!session.value) return
+
+  const loaded = session.value.questions.length
+  const expected = session.value.total_expected || 10
+  const needMore = loaded < expected
+  const wasWaiting = waitingNext.value
+
+  clearStaleJobState()
+  stopBackgroundSync()
+
+  if (!needMore) {
+    waitingNext.value = false
+    waitingError.value = ''
+    return
+  }
+
+  if (wasWaiting) {
+    waitingNext.value = true
+    waitingError.value = '后续题目无法生成（后端已重启），请保存返回后重新开一局'
+  } else {
+    waitingNext.value = shouldShowWaitingNext()
+  }
+}
+
+async function validateStaleJobOnRestore() {
+  const jobId = session.value?.job_id
+  if (!jobId) return
+
+  const loaded = session.value?.questions.length ?? 0
+  const expected = session.value?.total_expected || 10
+  if (loaded >= expected) {
+    clearStaleJobState()
+    return
+  }
+
+  try {
+    await getQuizJob(jobId)
+  } catch (error) {
+    if (loaded <= 0 && !isFatalSyncError(error)) return
+    clearStaleJobState()
+    waitingNext.value = shouldShowWaitingNext()
+    waitingError.value = ''
+  }
+}
+
+function enterWaitingMode() {
+  waitingNext.value = true
+  waitingError.value = ''
+  syncFailureCount = 0
+  locked.value = false
+  syncIntervalMs = 350
+  startWaitingStallWatch()
+  restartBackgroundSync()
+  syncQuizJob()
+}
+
+function retryWaitingSync() {
+  if (!session.value?.job_id) {
+    handleJobNotFound('retryWaitingSync')
+    return
+  }
+  waitingError.value = ''
+  syncFailureCount = 0
+  lastReadyCount = session.value.questions.length
+  syncIntervalMs = 350
+  startWaitingStallWatch()
+  restartBackgroundSync()
 }
 
 function tryAdvanceToNextQuestion() {
@@ -269,23 +484,44 @@ function tryAdvanceToNextQuestion() {
     selected.value = []
     locked.value = false
     waitingNext.value = false
+    waitingError.value = ''
+    clearWaitingStallWatch()
     syncIntervalMs = 800
     restartBackgroundSync()
     return
   }
 
   waitingNext.value = shouldShowWaitingNext()
+  if (!waitingNext.value) {
+    clearWaitingStallWatch()
+  }
 }
 
 function mergeSession(status: Awaited<ReturnType<typeof getQuizJob>>) {
   if (!session.value) return
+
+  const preservedQuizId = session.value.quiz_id
+
+  if (status.status === 'failed') {
+    const nextSession: QuizSession = {
+      ...session.value,
+      questions: status.questions,
+      generating: false,
+      total_expected: status.total_expected,
+      job_id: status.job_id,
+    }
+    session.value = nextSession
+    setCurrentQuiz(nextSession)
+    markWaitingFailure(status.error || '最后一题生成失败，请重试')
+    return
+  }
 
   const nextSession: QuizSession = {
     ...session.value,
     quiz_id: status.quiz_id || session.value.quiz_id,
     topic: status.topic || session.value.topic,
     questions: status.questions,
-    generating: status.status !== 'completed',
+    generating: isJobGenerating(status.status),
     total_expected: status.total_expected,
     job_id: status.job_id,
   }
@@ -293,7 +529,21 @@ function mergeSession(status: Awaited<ReturnType<typeof getQuizJob>>) {
   if (status.status === 'completed' && status.result) {
     nextSession.questions = status.result.questions
     nextSession.generating = false
-    nextSession.quiz_id = status.result.quiz_id
+    nextSession.quiz_id = preservedQuizId || status.result.quiz_id
+  } else {
+    nextSession.quiz_id = preservedQuizId || status.quiz_id || session.value.quiz_id
+  }
+
+  const incomingQuizId = status.result?.quiz_id || status.quiz_id
+  if (incomingQuizId && preservedQuizId && incomingQuizId !== preservedQuizId) {
+    migrateQuizRecordId(preservedQuizId, incomingQuizId)
+    nextSession.quiz_id = incomingQuizId
+  }
+
+  if (status.questions.length > lastReadyCount) {
+    lastReadyCount = status.questions.length
+    waitingError.value = ''
+    syncFailureCount = 0
   }
 
   session.value = nextSession
@@ -302,6 +552,7 @@ function mergeSession(status: Awaited<ReturnType<typeof getQuizJob>>) {
 }
 
 function shouldSyncJob(): boolean {
+  if (waitingError.value) return false
   if (!session.value?.job_id) return false
   const expected = session.value.total_expected || 10
   if (session.value.generating) return true
@@ -312,7 +563,13 @@ function shouldSyncJob(): boolean {
 
 async function syncQuizJob() {
   const jobId = session.value?.job_id
-  if (!jobId || !shouldSyncJob()) {
+  if (!jobId) {
+    if (waitingNext.value) {
+      handleJobNotFound('syncQuizJob-noJobId')
+    }
+    return
+  }
+  if (!shouldSyncJob()) {
     if (!waitingNext.value && session.value && !session.value.generating) {
       stopBackgroundSync()
     }
@@ -325,8 +582,15 @@ async function syncQuizJob() {
     if (status.status === 'completed' || status.questions.length >= (status.total_expected || 10)) {
       syncIntervalMs = 800
     }
-  } catch {
-    // 后台同步失败时静默，下一轮继续
+  } catch (error) {
+    if (isFatalSyncError(error)) {
+      handleJobNotFound('syncQuizJob-404')
+      return
+    }
+    syncFailureCount += 1
+    if (syncFailureCount >= 5) {
+      markWaitingFailure(getSyncErrorMessage(error))
+    }
   }
 }
 
@@ -346,6 +610,7 @@ function stopBackgroundSync() {
     clearInterval(syncTimer)
     syncTimer = null
   }
+  clearWaitingStallWatch()
 }
 
 function optionClass(index: number) {
@@ -375,16 +640,12 @@ function judgeClass(index: number) {
   return classes
 }
 
-function playCorrectSound() {
-  if (!audio) {
-    audio = uni.createInnerAudioContext()
-    audio.src = '/static/audio/correct.wav'
-  }
-  audio.stop()
-  audio.play()
+function playCorrectSoundEffect() {
+  playCorrectSound()
 }
 
-function vibrateWrong() {
+function playWrongFeedback() {
+  playWrongSound()
   uni.vibrateShort({ type: 'medium' })
 }
 
@@ -413,8 +674,11 @@ function finalize(selectedValue: number | number[]) {
   lastCorrect.value = correct
   locked.value = true
   recordAnswer(selectedValue, correct)
-  if (correct) playCorrectSound()
-  else vibrateWrong()
+  if (session.value && atLastLoadedQuestion.value && canProceedToReport()) {
+    setQuizProgress(currentIndex.value, session.value.quiz_id)
+  }
+  if (correct) playCorrectSoundEffect()
+  else playWrongFeedback()
   scrollToFeedback()
 }
 
@@ -440,22 +704,28 @@ function submitMultiple() {
 function goNext() {
   if (!session.value || waitingNext.value) return
 
-  if (isLast.value) {
-    if (session.value.generating || session.value.questions.length < totalQuestions.value) {
-      uni.showToast({ title: '题目还在生成，请稍候', icon: 'none' })
+  if (canProceedToReport() && atLastLoadedQuestion.value) {
+    goToReport()
+    return
+  }
+
+  if (atLastLoadedQuestion.value) {
+    if (session.value.generating || session.value.job_id) {
+      enterWaitingMode()
       return
     }
-    uni.redirectTo({ url: '/pages/result/result' })
+    const expected = session.value.total_expected || 10
+    if (session.value.questions.length < expected) {
+      uni.showToast({ title: '后续题目无法加载，请保存返回后重新开一局', icon: 'none' })
+      return
+    }
+    uni.showToast({ title: '题目还在生成，请稍候', icon: 'none' })
     return
   }
 
   const nextIndex = currentIndex.value + 1
   if (nextIndex >= session.value.questions.length) {
-    waitingNext.value = true
-    locked.value = false
-    syncIntervalMs = 350
-    restartBackgroundSync()
-    syncQuizJob()
+    enterWaitingMode()
     return
   }
 
@@ -468,10 +738,12 @@ function goNext() {
 onShow(() => {
   layoutMetrics.value = getLayoutMetrics()
   restoreState()
-  if (waitingNext.value) {
-    syncIntervalMs = 350
-  }
-  startBackgroundSync()
+  void validateStaleJobOnRestore().finally(() => {
+    if (waitingNext.value) {
+      syncIntervalMs = 350
+    }
+    startBackgroundSync()
+  })
 })
 
 onBackPress(() => {
@@ -492,6 +764,7 @@ onHide(() => {
 
 onUnmounted(() => {
   stopBackgroundSync()
+  destroyFeedbackSounds()
 })
 </script>
 
@@ -655,5 +928,15 @@ onUnmounted(() => {
 .waiting-sub {
   font-size: 26rpx;
   color: #6b7280;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.waiting-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 12rpx;
 }
 </style>

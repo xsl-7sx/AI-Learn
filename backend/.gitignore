@@ -29,9 +29,7 @@ credentials.json
 
 backend/.venv/
 backend/.env
-backend/data/
 backend/**/__pycache__/
 backend/.pytest_cache/
-debug-fc7f8e.log
 uniapp/node_modules/
 uniapp/dist/

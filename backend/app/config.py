@@ -31,6 +31,14 @@ class Settings(BaseSettings):
   request_total_timeout: int = 180
   mock_llm: bool = False
 
+  _PLACEHOLDER_KEYS = frozenset({"", "mock-key", "sk-xxxxxxxx"})
+
+  def _is_placeholder_api_key(self, key: str) -> bool:
+    if not key or key in self._PLACEHOLDER_KEYS:
+      return True
+    lowered = key.lower()
+    return lowered.startswith("your-") or lowered.startswith("sk-your")
+
   @property
   def resolved_api_key(self) -> str:
     if self.llm_provider == "deepseek":
@@ -38,6 +46,14 @@ class Settings(BaseSettings):
     if self.llm_provider == "zhipu":
       return self.llm_api_key
     return self.llm_api_key or self.deepseek_api_key
+
+  @property
+  def use_mock_llm(self) -> bool:
+    """有真实 API Key 时强制走真实 LLM，避免 MOCK_LLM=true 误开占位题库。"""
+    key = self.resolved_api_key
+    if key and not self._is_placeholder_api_key(key):
+      return False
+    return self.mock_llm
 
   @property
   def resolved_model(self) -> str:
@@ -65,7 +81,7 @@ class Settings(BaseSettings):
 
   @property
   def resolved_json_mode(self) -> bool:
-    if self.mock_llm or not self.resolved_api_key:
+    if self.use_mock_llm or not self.resolved_api_key:
       return False
     return self.llm_json_mode
 

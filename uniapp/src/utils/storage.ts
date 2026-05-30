@@ -106,6 +106,24 @@ export function setActiveQuizId(quizId: string): void {
   uni.setStorageSync(ACTIVE_QUIZ_ID_KEY, quizId)
 }
 
+/** job 完成时若 quiz_id 变化，合并答题记录，避免进度断档 */
+export function migrateQuizRecordId(fromId: string, toId: string): void {
+  if (!fromId || !toId || fromId === toId) return
+  const from = getRecord(fromId)
+  if (!from) return
+  const to = getRecord(toId)
+  removeRecord(fromId)
+  upsertRecord({
+    session: { ...from.session, quiz_id: toId },
+    answers: to?.answers?.length ? to.answers : from.answers,
+    progressIndex: Math.max(from.progressIndex, to?.progressIndex ?? 0),
+    updatedAt: Date.now(),
+  })
+  if (getActiveQuizId() === fromId) {
+    setActiveQuizId(toId)
+  }
+}
+
 export function activateQuiz(quizId: string): boolean {
   const record = getRecord(quizId)
   if (!record) return false

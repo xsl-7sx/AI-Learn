@@ -33,6 +33,7 @@ function parseErrorMessage(data: unknown, statusCode: number): string {
     if (typeof detail === 'string') return detail
   }
   if (statusCode === 502) return 'AI 生成失败，请重试'
+  if (statusCode === 500) return 'AI 复盘生成失败，请稍后重试'
   if (statusCode === 504) return '请求超时，请稍后重试'
   if (statusCode === 404) return '生成任务不存在，请重试'
   return '网络异常，请检查后端服务'
@@ -77,8 +78,9 @@ export function getQuizJob(jobId: string): Promise<QuizJobStatusResponse> {
   return request<QuizJobStatusResponse>(`/api/v1/quiz/jobs/${jobId}`, 'GET', null, 15000)
 }
 
-const STREAM_POLL_MS = 600
-const POLL_MAX_ATTEMPTS = 150
+const STREAM_POLL_MS = 800
+/** 与后端 REQUEST_TOTAL_TIMEOUT(180s) 对齐，留一点余量 */
+const POLL_MAX_ATTEMPTS = 240
 
 function toSession(status: QuizJobStatusResponse, topic: string): QuizSession {
   if (status.result) {
@@ -166,7 +168,7 @@ export async function generateQuiz(
 }
 
 export function generateReport(payload: QuizReportRequest): Promise<ReportResponse> {
-  return request<ReportResponse>('/api/v1/quiz/report', 'POST', payload, 30000)
+  return request<ReportResponse>('/api/v1/quiz/report', 'POST', payload, 60000)
 }
 
 export function showApiError(error: unknown, fallback = '请求失败，请重试'): void {
